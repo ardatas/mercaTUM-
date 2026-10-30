@@ -1,0 +1,35 @@
+# Project brief
+
+Build a deployed buyer-side AI workspace. A user asks a question or imports a repository for a code task, selects a demo AI capacity listing, approves a small BSV payment, and receives an actual answer or downloadable code changes.
+
+The coordinator agent requests paid execution through a tool call. Payment approval suspends the run; a verified payment resumes it. External agents can submit the same tasks through MCP and send the human to the browser for approval.
+
+## Scope
+
+| Part | Required behavior |
+|---|---|
+| Buyer experience | Chat and code modes, task history, payment approval, streamed activity, results and receipts. Exact UI supplied separately. |
+| Capacity listing | One clearly labelled demo provider. The operator's API key powers real execution; availability/quota labels are simulated. |
+| Code task | Import a public GitHub repository at a resolved commit; review selected context; produce and apply validated changes to the snapshot; download a real diff. |
+| Payment | Real sats from the buyer's standard wallet to a separate operator-owned provider wallet, with explicit approval. |
+| Agent | Real model-generated purchase request, durable pause/resume and actual paid model execution. |
+| MCP | Authenticated task submission/status/result tools over the same business services as the browser. Human approval stays in the browser/wallet. |
+| Deployment | Public HTTPS app, server-only secrets, persistent job and provider-wallet storage, observable live execution. |
+
+## Boundaries
+
+Mock the rental marketplace, not the paid task or on-chain payment. Offline tests may use a mock chain and model fixtures; the deployed demonstration must use real services. Do not collect another person's subscription credentials, session cookies or consumer account access.
+
+Buyer assets remain in their wallet until they approve a direct payment. The provider then owns its received revenue. There are no deposited buyer balances or platform-controlled user wallets.
+
+Use a **fixed upfront quote for bounded work**, as defined in [payment policy](contracts.md#fixed-price-purchases). Operator-funded planning checks the selected context and task against the offered budget before payment. The quote states the intended deliverable, execution limits and exact service price in sats; network fees and the maximum total debit are shown separately. The provider absorbs its underlying cost variation within that scope.
+
+If the budget is exhausted, preserve valid progress and stop. More work is a new linked task with a new quote and explicit payment approval. Technical failure recovery uses the original paid entitlement; it cannot silently become an extension charge. Automatic refunds are outside scope and must not be advertised.
+
+Excluded: seller onboarding, real subscription resale, bidding, multiple model adapters, Jev routing, custom training, tokens, escrow, yield, AMMs, arbitrary shell execution, private-repository OAuth and automatic Git pushes. These do not help the smallest deployed flow qualify. The product is payment infrastructure for AI services; it need not claim a lending or exchange protocol.
+
+## Done
+
+From the deployed site, a buyer submits a chat task and a public-repository code task, approves real BSV spending, gets actual model results and can inspect payment receipts/WhatsOnChain. Reloading or reconnecting preserves progress. Demonstrate MCP submission reaching the same approval flow. Record Q1–Q5 evidence under [workflow](../.ai/WORKFLOW.md).
+
+Technical choices: [architecture](architecture.md), [contracts](contracts.md), [BSV flow](bsv-flow.md), [AI flow](ai-flow.md). Visual input: [design slots](design-inputs.md).
