@@ -1,0 +1,34 @@
+# Local dependencies and generated output
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+*.tsbuildinfo
+
+# Credentials and wallet state (including the bundled starter)
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.key
+*.pem
+*.p12
+*.pfx
+*.keystore
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+data/
+wallet-data/
+
+# Machine files and logs
+.DS_Store
+*.log
+npm-debug.log*
+.workspaces/
+.uploads/
+artifacts/
