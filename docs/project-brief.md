@@ -50,4 +50,6 @@ Task history supports deleting individual entries from recent tasks and history 
 
 Payment recovery follow-up: unclaimed approvals return to quote review; lost signing responses can recover the original transaction through standard wallet history and server ancestry verification. Missing evidence, cancellation refusals and ambiguous signatures remain protected with specific guidance.
 
+Wallet code now loads with the initial page so an open tab does not fetch a removed wallet chunk after deployment. Chrome mainnet connection is observed after allowing browser local-app access; connection failures explain the permission and retry step. The recovery backend is deployed. Mainnet qualification remains pending human purchase and native-wallet approvals within the authorized aggregate5,000-sat test budget.
+
 Purchase review shows the saved catalog model/effort alongside the actual quoted executor when they differ. Approval defaults to a5,000-sat maximum total debit (or the service price if higher); this is a user-editable cap, not a fee estimate or prepaid balance. Full purchase terms remain expandable and consent remains unchecked. Marketplace capacity uses explicitly labeled demo token counts; scores use sourced Artificial Analysis Intelligence Index v5.0 snapshots for each card's first model and published variant.

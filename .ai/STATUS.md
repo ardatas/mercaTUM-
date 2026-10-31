@@ -2,6 +2,8 @@
 
 Updated: 31 October 2026. Vercel frontend and persistent backend deployed; native-wallet validation pending.
 
+- Wallet module-loading failure fixed at `fee3286`: wallet code loads with the initial page, preventing stale lazy-chunk failures after deployment. Typecheck/build and174 tests PASS; all8 offers/13 models/67 effort combinations exercised in live Chrome. Native Chrome WalletClient connection to BSV Desktop mainnet observed after granting local-app access. `28669db` adds permission/retry guidance. Mainnet test budget is5,000 sats total including fees; first100-sat chat quote prepared with500-sat test cap, awaiting human approval. No test debit yet.
+
 - Brand marks enlarged to68px left/44px right; model badges and headings enlarged in marketplace and chat. Desktop five-column and320px checks PASS; deployed at `2bfdd63` and live sizes verified.
 - Chat input now spans the same width as responses in both resting and expanded states; local browser measures matching868px widths. Typecheck/build PASS; deployed at `c9bae2e` and live width verified.
 - Purchase review and marketplace update deployed at `ef58633`: saved chat model/effort plus actual Gemini executor, compact terms,5,000-sat default cap, sourced AA Index v5.0 scores and demo token capacity. Typecheck/build and106 integrated tests PASS; desktop/320px checks PASS. Public browser verifies sourced benchmarks, token capacity and selected-model composer; served bundle includes the5,000-sat review. Actual execution remains Gemini.
@@ -13,7 +15,7 @@ Updated: 31 October 2026. Vercel frontend and persistent backend deployed; nativ
 - Single task history deletion implemented: per-item menus in recent tasks/history, confirmation, persistent owner-scoped removal and selected-chat reset. Receipts and task recovery links retained; active work continues. Typecheck/build and94 tests pass; browser cancellation, selected-chat deletion, reload, other-chat preservation and error handling observed. Deployed at `32be4d2`; live deletion and reload verified using a disposable chat.
 
 
-- Payment recovery follow-up implemented in an isolated checkout: prepare before wallet claim, release unclaimed approvals, recover the original signed transaction from history, hydrate bounded ancestry, and display specific blockers. Local validation recorded in verification; backend rollout pending.
+- Payment recovery follow-up deployed: prepare before wallet claim, release unclaimed approvals, recover the original signed transaction from history, hydrate bounded ancestry, and display specific blockers. Backend image `dc1e55404bea93e2e710ed2e1b13881bc3ccf623f6437f74a9f14b9cb31a62a7` passed health/readiness. Live paid recovery remains pending.
 - Chat background now stays mounted during pending, streaming and completed responses; local browser confirms all three states. Typecheck/build pass; deployed at `7af0b12`, with background verified in an existing live chat.
 - Supplied red mascot logo replaces the sidebar and header marks and supplies the browser/touch icon. Typecheck/build pass; deployed at `d460d7d` and both logo images verified loaded in the public browser.
 - Capability profile panel removed at user request; capacity summary now spans the dashboard row. Offer scores retained. Typecheck/build pass; deployed at `39e2925` and verified in the public browser.

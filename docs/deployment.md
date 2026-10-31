@@ -105,6 +105,8 @@ Safari standard-wallet connection is observed. Qualification still needs the aut
 
 ## Local development
 
+Latest recovery backend rollout (31 October2026): `europe-west3-docker.pkg.dev/gen-lang-client-0426046080/mercatum/app@sha256:dc1e55404bea93e2e710ed2e1b13881bc3ccf623f6437f74a9f14b9cb31a62a7`, built from`fee3286`; health/readiness PASS including model/wallet/payments readiness. Previous rollback digest:`7de492e5a07967d35ef06db34490b49f348af73dc613d33e3cc6736e9b496584`. Persistent storage preserved; no destructive migration.
+
 Run `npm run build && npm start`, then open `http://localhost:3000`. The command loads ignored `.env`; ignored `data/` holds private persistent state. `.env.example` lists server configuration. Keep local keys and task data out of Git and browser assets.
 
 ### Current mainnet validation state
