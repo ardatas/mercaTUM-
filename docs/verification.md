@@ -302,3 +302,10 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 - Typecheck/build PASS. Local browser confirms both sidebar New task controls open Marketplace and choosing Claude opens a fresh chat.
 
 - Deployed `a2bf44e`; Vercel `CuPqX4Nm5ygiEudb4o86i4Wb4rL4` SUCCESS. Served bundle `index-CekV2wdR.js` contains the marketplace handler. Local interaction checks passed. Live UI interaction verification remains PENDING: browser clicks produced no transition and Safari reported the Mac is locked. Concurrent history changes remain unstaged and excluded from this deployment.
+
+## Taller branded wallet button — 31 October 2026
+
+- Clean starting revision `a7e5248`. Same implementation-session preflight remains valid: unchanged lock/dependencies, Node24.21.0/npm11.19.0; app94 tests/typecheck/build and sponsor38 tests/typecheck PASS above. Presentation-only T5 change owned by coordinator; wallet/payment behavior unchanged.
+- Source: official BSV website wordmark, https://bsvblockchain.org/wp-content/uploads/2025/10/logo-bsvb.svg (retrieved31 October2026). Store the unmodified logo locally, with a white CSS treatment for contrast on the dark button; increase sidebar button minimum height to72px.
+
+- Typecheck/build/diff check PASS. Browser observed72px button height at desktop (191px button width) and mobile drawer (236px width); BSV SVG loaded in both. No wallet operation triggered. Frontend-only change; backend rollout unnecessary.
