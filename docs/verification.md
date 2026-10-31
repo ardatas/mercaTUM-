@@ -329,3 +329,5 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 - UI fixtures check unstarted approval returning to quote review and specific lost-signature/missing-evidence guidance. Existing cancellation refusal and timeout tests now assert actionable blocking errors. No live wallet spending performed.
 
 - Wallet authentication and history reads are bounded to30 seconds. A regression confirms a late authentication reply cannot proceed to a wallet claim or draft after timeout. Local browser confirmed unused approval returns to quote review, missing evidence displays an explicit error, and lost signatures show same-transaction recovery guidance. Screenshot: ignored `artifacts/payment-recovery.png`.
+
+- Final integration: rebased onto `b71130d`, preserving task deletion, marketplace navigation and branding changes. Application typecheck,101 tests across10 files, production build, formatting and diff checks PASS. Recovery screenshot is an offline fixture; no live wallet transaction or backend rollout performed.
