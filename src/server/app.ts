@@ -117,6 +117,10 @@ export function createApp({
   app.get("/api/tasks/:id", (req, res) =>
     res.json(tasks.get(owner(res), id(req))),
   );
+  app.delete("/api/tasks/:id/history", (req, res) => {
+    z.object({}).strict().parse(req.body);
+    res.json(tasks.removeFromHistory(owner(res), id(req)));
+  });
   app.post("/api/tasks/:id/cancel", (req, res) => {
     z.object({}).strict().parse(req.body);
     res.json(tasks.cancel(owner(res), id(req)));

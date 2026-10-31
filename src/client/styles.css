@@ -187,7 +187,7 @@ input[type="checkbox"] {
   padding: 2px 12px;
   line-height: 1.7;
 }
-.recent-tasks > button {
+.recent-task-open {
   display: flex;
   gap: 9px;
   padding: 10px 12px;
@@ -197,13 +197,13 @@ input[type="checkbox"] {
   color: #c9c9c9;
   border-radius: 5px;
 }
-.recent-tasks > button span {
+.recent-task-open span {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.recent-tasks > button:hover,
-.recent-tasks > button.selected {
+.recent-task-open:hover,
+.recent-task-open.selected {
   background: #353535;
   color: white;
 }
@@ -764,6 +764,17 @@ h1 {
   background: none;
   width: 100%;
   font-size: 16px;
+}
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.history-item > .history-row {
+  min-width: 0;
+  flex: 1;
+  border-bottom: 0;
 }
 .history-row {
   display: flex;
@@ -2039,4 +2050,57 @@ input::placeholder {
   .selected-offer-strip small {
     font-size: 12px;
   }
+}
+
+.recent-task-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.recent-task-row .recent-task-open {
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  text-align: left;
+}
+.recent-task-open > svg {
+  flex-shrink: 0;
+}
+.recent-task-row > .icon-button {
+  flex-shrink: 0;
+}
+.delete-history-dialog {
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.delete-history-dialog::backdrop {
+  background: #0009;
+}
+.delete-history-dialog h2 {
+  margin: 0 0 16px;
+  font-size: 20px;
+}
+.delete-history-dialog p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.delete-history-dialog .delete-history-prompt {
+  color: var(--ink);
+  overflow-wrap: anywhere;
+  max-height: 100px;
+  overflow: auto;
+}
+.delete-history-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
 }

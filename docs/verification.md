@@ -280,6 +280,16 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 
 - Deployed `7af0b12`; Vercel `59G8Z8AcLnyVNMVT2FpeNVuuiWa2` SUCCESS. Existing live task `acd9d458-60fd-4e11-ad92-1281968032a0` displays the421px background canvas alongside its saved prompt and approval view. Screenshot: ignored `artifacts/chat-background-live.png`. Completed-answer behavior verified with offline harness only; no payment or paid execution initiated.
 
+## Single task history deletion — 31 October 2026
+
+- Preflight: clean starting revision `1016c8d`; Node24.21.0/npm11.19.0; lock SHA-256 `e86e9f916dfbcef78e0b3474b5ad9229cbf34d69cff48970ac2f4a85267f0d7e`. App typecheck,92 tests/build PASS. Sponsor packages match all seven pins; typecheck/38 tests PASS. No dependency changes or fresh install needed; developer pack unchanged.
+- Public readiness observed ready/model/wallet/paymentsEnabled=true. Existing mainnet provider and buyer connection evidence is documented above; no new wallet connection or spending approval inferred. Q3/Q5 remain pending.
+- Coordinator owns T0/T5 slice: owner-scoped persistent removal of one task from history, per-item controls and confirmation, preserving payment/execution records and direct recovery links. Local browser verification recorded below; public deployment verification pending.
+
+- Implementation:94 tests, typecheck and build PASS. API regression covers unauthenticated/foreign-owner/CSRF/Origin rejection, strict body validation, duplicate delete and preserving the other entry. Disk restart and completed worker update preserve history removal and the original receipt/result.
+- Chrome offline fixture: Cancel retains both chats; deleting the selected chat clears its URL/composer and leaves the other chat; reload retains removal. History menu failure leaves the item and shows an actionable error. In-app browser native-confirm testing stalled; replaced native confirm with an accessible in-app dialog and completed checks in Chrome.
+- Backend rollback digest: `c0bda0cd69f953eb4b187151819acad0edf00582864ed3d3f7cbc1c5e33fb96d`. New linux/amd64 image digest: `7de492e5a07967d35ef06db34490b49f348af73dc613d33e3cc6736e9b496584`.
+
 ## New task opens marketplace — 31 October 2026
 
 - Same-session preflight remains valid. Existing concurrent task-history edits preserved. Coordinator owns only the New task navigation handler: sidebar button, recent-tasks plus and empty-history Create a task open Marketplace; choosing an offer and Request more work retain their chat behavior.

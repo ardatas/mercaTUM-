@@ -84,6 +84,7 @@ Same-origin JSON commands require authentication and schema validation. Mutating
 | `POST /api/repositories/:id/context` | `{ selectedPaths, consent: true }` → approved manifest and hashes |
 | `POST /api/tasks` | `{ mode, prompt, providerId, snapshotId?, extensionOfTaskId? }` → created task; validate any parent belongs to the owner; start real coordinator planning |
 | `GET /api/tasks` | → paginated owned task summaries |
+| `DELETE /api/tasks/:id/history` | `{}` → `{ removed: true }`; owner/Origin/CSRF protected, idempotent history removal only. Retain task, receipts, events and direct recovery links; no cancellation or payment action. |
 | `GET /api/tasks/:id` | → task state, current quote/attempt/receipt and result metadata |
 | `POST /api/tasks/:id/quote` | `{ payerIdentityKey }` → quote for its saved pending agent call; requires provider readiness |
 | `POST /api/quotes/:id/approve` | `{ approved: true, feePolicy, maxAuthorizedDebitSats }` → reserved attempt; human action in UI |

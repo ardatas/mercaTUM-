@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   ArrowUpRight,
   ArrowRight,
@@ -38,6 +38,7 @@ import {
   findSelection,
   type MarketplaceSelection,
 } from "../shared/marketplace";
+import { DeleteHistoryDialog } from "./components/ui/delete-history-dialog";
 import { ArtifactViewer } from "./components/ui/artifact-viewer";
 import { FileViewer } from "./components/ui/file-viewer";
 import { ActionMenu, ContextActions } from "./components/ui/context-menu";
@@ -90,6 +91,10 @@ export function App() {
       Pick<PublicTask, "id" | "mode" | "prompt" | "state" | "createdAt">[]
     >([]),
     [task, setTask] = useState<PublicTask>(),
+    [deleteTarget, setDeleteTarget] = useState<{
+      id: string;
+      prompt: string;
+    }>(),
     [view, setView] = useState<"workspace" | "capacity" | "history" | "agents">(
       "capacity",
     ),
@@ -118,6 +123,7 @@ export function App() {
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
   }, []);
+  const removedHistoryIds = useRef(new Set<string>());
   const navVisible = desktopNav || sidebar;
   useEffect(() => {
     if (!sidebar) return;
@@ -142,7 +148,8 @@ export function App() {
     ].includes(task.state);
 
   const refresh = useCallback(async () => {
-    setHistory(await api("/api/tasks"));
+    const items = await api<typeof history>("/api/tasks");
+    setHistory(items.filter((t) => !removedHistoryIds.current.has(t.id)));
     const data = await api<{ providers: Provider[]; readiness: Readiness }>(
       "/api/providers",
     );
@@ -187,7 +194,7 @@ export function App() {
     const update = async () => {
       try {
         const t = await api<PublicTask>(`/api/tasks/${id}`);
-        if (!closed) setTask(t);
+        if (!closed && !removedHistoryIds.current.has(id)) setTask(t);
       } catch {
         /* Polling resumes on reconnect. */
       }
@@ -223,6 +230,25 @@ export function App() {
     setView("workspace");
     setSidebar(false);
     window.history.replaceState(null, "", "/");
+  };
+  const deleteHistory = (item: (typeof history)[number]) => {
+    if (busy) return;
+    setError("");
+    setDeleteTarget(item);
+  };
+  const confirmDeleteHistory = () => {
+    if (busy || !deleteTarget) return;
+    const item = deleteTarget;
+    void perform(async () => {
+      await api(`/api/tasks/${item.id}/history`, {}, "DELETE");
+      removedHistoryIds.current.add(item.id);
+      setHistory((items) => items.filter((t) => t.id !== item.id));
+      setDeleteTarget(undefined);
+      if (task?.id === item.id) {
+        reset();
+        if (view === "history") setView("history");
+      }
+    });
   };
   const startNewTask = () => {
     reset();
@@ -433,43 +459,74 @@ export function App() {
           </button>
         </nav>
         <div className="sidebar-divider" />
+        {deleteTarget && (
+          <DeleteHistoryDialog
+            prompt={deleteTarget.prompt}
+            busy={busy}
+            error={error}
+            onCancel={() => setDeleteTarget(undefined)}
+            onConfirm={confirmDeleteHistory}
+          />
+        )}
         <div className="sidebar-section">
           <span>RECENT TASKS</span>
-          <button className="icon-button" aria-label="New task" onClick={startNewTask}>
+          <button
+            className="icon-button"
+            aria-label="New task"
+            onClick={startNewTask}
+          >
             <Plus size={14} />
           </button>
         </div>
         <div className="recent-tasks">
           {history.length ? (
             history.slice(0, 8).map((t) => (
-              <ContextActions
-                key={t.id}
-                actions={[
-                  {
-                    label: "Open task",
-                    run: () => void perform(() => loadTask(t.id)),
-                  },
-                  {
-                    label: "Copy task link",
-                    run: () =>
-                      void navigator.clipboard.writeText(
-                        `${location.origin}/?task=${t.id}`,
-                      ),
-                  },
-                ]}
-              >
-                <button
-                  className={task?.id === t.id ? "selected" : ""}
-                  onClick={() => void perform(() => loadTask(t.id))}
+              <div className="recent-task-row" key={t.id}>
+                <ContextActions
+                  actions={[
+                    {
+                      label: "Open task",
+                      run: () => void perform(() => loadTask(t.id)),
+                      disabled: busy,
+                    },
+                    {
+                      label: "Copy task link",
+                      run: () =>
+                        void navigator.clipboard.writeText(
+                          `${location.origin}/?task=${t.id}`,
+                        ),
+                    },
+                    {
+                      label: "Delete from history",
+                      run: () => deleteHistory(t),
+                      disabled: busy,
+                    },
+                  ]}
                 >
-                  {t.mode === "code" ? (
-                    <Code2 size={14} />
-                  ) : (
-                    <MessageSquare size={14} />
-                  )}
-                  <span>{t.prompt}</span>
-                </button>
-              </ContextActions>
+                  <button
+                    className={`recent-task-open ${task?.id === t.id ? "selected" : ""}`}
+                    disabled={busy}
+                    onClick={() => void perform(() => loadTask(t.id))}
+                  >
+                    {t.mode === "code" ? (
+                      <Code2 size={14} />
+                    ) : (
+                      <MessageSquare size={14} />
+                    )}
+                    <span>{t.prompt}</span>
+                  </button>
+                </ContextActions>
+                <ActionMenu
+                  label={`Actions for ${t.prompt}`}
+                  actions={[
+                    {
+                      label: "Delete from history",
+                      run: () => deleteHistory(t),
+                      disabled: busy,
+                    },
+                  ]}
+                />
+              </div>
             ))
           ) : (
             <p>No tasks yet</p>
@@ -932,27 +989,39 @@ export function App() {
                       t.prompt.toLowerCase().includes(search.toLowerCase()),
                     )
                     .map((t) => (
-                      <button
-                        className="history-row"
-                        key={t.id}
-                        onClick={() => void perform(() => loadTask(t.id))}
-                      >
-                        {t.mode === "code" ? (
-                          <Code2 size={19} />
-                        ) : (
-                          <MessageSquare size={19} />
-                        )}
-                        <span>
-                          <strong>{t.prompt}</strong>
-                          <small>
-                            {new Date(t.createdAt).toLocaleString()}
-                          </small>
-                        </span>
-                        <span className="state-badge">
-                          {stateText(t.state)}
-                        </span>
-                        <ArrowUpRight size={16} />
-                      </button>
+                      <div className="history-item" key={t.id}>
+                        <button
+                          className="history-row"
+                          disabled={busy}
+                          onClick={() => void perform(() => loadTask(t.id))}
+                        >
+                          {t.mode === "code" ? (
+                            <Code2 size={19} />
+                          ) : (
+                            <MessageSquare size={19} />
+                          )}
+                          <span>
+                            <strong>{t.prompt}</strong>
+                            <small>
+                              {new Date(t.createdAt).toLocaleString()}
+                            </small>
+                          </span>
+                          <span className="state-badge">
+                            {stateText(t.state)}
+                          </span>
+                          <ArrowUpRight size={16} />
+                        </button>
+                        <ActionMenu
+                          label={`History actions for ${t.prompt}`}
+                          actions={[
+                            {
+                              label: "Delete from history",
+                              run: () => deleteHistory(t),
+                              disabled: busy,
+                            },
+                          ]}
+                        />
+                      </div>
                     ))}
                   {!history.length && (
                     <div className="empty-state">

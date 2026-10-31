@@ -28,6 +28,16 @@ let task: PublicTask = {
     },
   ],
 };
+const historyKey = "mercatum-history-preview-removed";
+const removed = new Set<string>(
+  JSON.parse(sessionStorage.getItem(historyKey) ?? "[]"),
+);
+const otherTask: PublicTask = {
+  ...task,
+  id: "other-fixture",
+  prompt: "Keep this other conversation.",
+  state: "SUCCEEDED",
+};
 const streams = new Set<FixtureEventSource>();
 class FixtureEventSource {
   onmessage: (() => void) | null = null;
@@ -80,7 +90,21 @@ window.fetch = async (input, init) => {
     };
     return json(task);
   }
-  if (path === "/api/tasks") return json([task]);
+  if (path.endsWith("/history") && init?.method === "DELETE") {
+    if (new URLSearchParams(location.search).has("deleteError"))
+      return new Response(
+        JSON.stringify({
+          error: { message: "Offline deletion failure. Try again." },
+        }),
+        { status: 503 },
+      );
+    removed.add(path.split("/")[3]);
+    sessionStorage.setItem(historyKey, JSON.stringify([...removed]));
+    return json({ removed: true });
+  }
+  if (path === "/api/tasks")
+    return json([task, otherTask].filter((t) => !removed.has(t.id)));
+  if (path === "/api/tasks/other-fixture") return json(otherTask);
   if (path === "/api/tasks/fixture") return json(task);
   throw new Error(`Offline fixture does not implement ${path}`);
 };

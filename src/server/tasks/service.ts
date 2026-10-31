@@ -216,8 +216,14 @@ export class TaskService {
     };
   }
   list(owner: string) {
+    const removed = new Set(
+      this.store
+        .list<{ id: string }>("history-removal", owner)
+        .map((r) => r.id),
+    );
     return this.store
       .list<Task>("task", owner)
+      .filter((t) => !removed.has(t.id))
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .slice(0, 100)
       .map((t) => ({
@@ -233,6 +239,13 @@ export class TaskService {
     const a = t.result?.artifacts.find((a) => a.id === artifactId);
     if (!a) throw new AppError("NOT_FOUND", "Artifact unavailable.", 404);
     return a;
+  }
+  removeFromHistory(owner: string, id: string) {
+    this.store.owned<Task>("task", id, owner);
+    // Keep the ledger and task intact for reconciliation and active workers.
+    // Separate records cannot be overwritten by an in-flight task update.
+    this.store.put("history-removal", { id, ownerId: owner });
+    return { removed: true };
   }
   retry(owner: string, id: string, key: string) {
     this.store.idempotent(owner, `retry:${id}`, key, {}, () => {

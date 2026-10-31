@@ -98,6 +98,33 @@ function pay(s: ReturnType<typeof setup>, id: string) {
   });
 }
 describe("durable entitlement and execution", () => {
+  it("keeps a history removal after restart and worker updates without losing entitlement", async () => {
+    const s = setup();
+    const id = await task(s);
+    pay(s, id);
+    const before = s.svc.get("alice", id);
+    s.svc.removeFromHistory("alice", id);
+    expect(s.svc.list("alice")).toEqual([]);
+    expect(s.svc.get("alice", id)).toEqual(before);
+    await s.svc.run(id);
+    expect(s.svc.get("alice", id).state).toBe("SUCCEEDED");
+    expect(s.svc.get("alice", id).receipt).toEqual(before.receipt);
+    expect(s.svc.list("alice")).toEqual([]);
+    s.store.close();
+    const reopened = new Store(join(s.dir, "app.sqlite"));
+    stores.push(reopened);
+    const service = new TaskService(
+      reopened,
+      s.config,
+      s.ai,
+      { context: () => "", changes: () => [] },
+      () => true,
+    );
+    expect(service.list("alice")).toEqual([]);
+    expect(service.get("alice", id).receipt).toEqual(before.receipt);
+    expect(service.get("alice", id).result).toBeDefined();
+    expect(() => service.removeFromHistory("bob", id)).toThrow();
+  });
   it("pins the selected Gemini adapter and model when creating a task", async () => {
     const s = setup();
     s.config.MODEL_PROVIDER = "gemini";

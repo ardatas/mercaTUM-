@@ -45,3 +45,5 @@ Local visual theme now follows reference 9: neutral charcoal/white/gray surfaces
 Payment recovery refinement: a confirmed unsigned fee rejection must return to fresh quote review with the observed fee and prior limit. Signing/broadcast uncertainty continues to block replacement payments. Deployed and verified in Safari: the original fee-rejected task returned to fresh quote review and survives reload. The original 194-sat draft exceeded its 110-sat cap. No new spending approved or initiated.
 
 Marketplace-first revision: fixed desktop navigation links marketplace and chat; mobile navigation uses a drawer. Both views share the dark palette. Compact cards show five columns on wide screens and adapt down to one on phones. Selecting a subscription opens chat; model-specific effort choices are saved with the task and cannot alter an existing quote. Actual execution configuration and payment metadata remain authoritative.
+
+Task history supports deleting individual entries from recent tasks and history with confirmation. Removal persists per owner; it retains task/payment records and direct recovery links, and does not cancel active work.

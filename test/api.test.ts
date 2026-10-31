@@ -91,6 +91,61 @@ describe("HTTP ownership and trusted commands", () => {
       .get("/api/tasks/" + created.body.id + "/artifacts/any")
       .expect(404);
   });
+  it("removes only an owned history entry with same-origin CSRF protection", async () => {
+    const { app } = setup();
+    const a = await session(app);
+    const b = await session(app);
+    const create = (key: string) =>
+      a.agent
+        .post("/api/tasks")
+        .set("Origin", "http://localhost:3000")
+        .set("X-CSRF-Token", a.csrf)
+        .set("Idempotency-Key", key)
+        .send(command)
+        .expect(201);
+    const first = await create("history-first");
+    const second = await create("history-second");
+    const path = `/api/tasks/${first.body.id}/history`;
+    await request(app).delete(path).send({}).expect(401);
+    await a.agent.delete(path).send({}).expect(403);
+    await a.agent
+      .delete(path)
+      .set("Origin", "https://evil.example")
+      .set("X-CSRF-Token", a.csrf)
+      .send({})
+      .expect(403);
+    await b.agent
+      .delete(path)
+      .set("Origin", "http://localhost:3000")
+      .set("X-CSRF-Token", b.csrf)
+      .send({})
+      .expect(404);
+    await a.agent
+      .delete(path)
+      .set("Origin", "http://localhost:3000")
+      .set("X-CSRF-Token", a.csrf)
+      .send({ ownerId: "forged" })
+      .expect(400);
+    expect((await a.agent.get("/api/tasks")).body).toHaveLength(2);
+    for (let retry = 0; retry < 2; retry++) {
+      await a.agent
+        .delete(path)
+        .set("Origin", "http://localhost:3000")
+        .set("X-CSRF-Token", a.csrf)
+        .send({})
+        .expect(200, { removed: true });
+    }
+    expect(
+      (await a.agent.get("/api/tasks")).body.map((t: { id: string }) => t.id),
+    ).toEqual([second.body.id]);
+    await a.agent.get(`/api/tasks/${first.body.id}`).expect(200);
+    await a.agent
+      .delete("/api/tasks/missing/history")
+      .set("Origin", "http://localhost:3000")
+      .set("X-CSRF-Token", a.csrf)
+      .send({})
+      .expect(404);
+  });
   it("fails closed when model is unavailable and rejects forged paid inputs", async () => {
     const { app, store } = setup(false);
     const a = await session(app);

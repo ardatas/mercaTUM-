@@ -2,6 +2,8 @@
 
 Updated: 31 October 2026. Vercel frontend and persistent backend deployed; native-wallet validation pending.
 
+- Single task history deletion implemented: per-item menus in recent tasks/history, confirmation, persistent owner-scoped removal and selected-chat reset. Receipts and task recovery links retained; active work continues. Typecheck/build and94 tests pass; browser cancellation, selected-chat deletion, reload, other-chat preservation and error handling observed. Deployment pending.
+
 - Chat background now stays mounted during pending, streaming and completed responses; local browser confirms all three states. Typecheck/build pass; deployed at `7af0b12`, with background verified in an existing live chat.
 - Supplied red mascot logo replaces the sidebar and header marks and supplies the browser/touch icon. Typecheck/build pass; deployed at `d460d7d` and both logo images verified loaded in the public browser.
 - Capability profile panel removed at user request; capacity summary now spans the dashboard row. Offer scores retained. Typecheck/build pass; deployed at `39e2925` and verified in the public browser.
