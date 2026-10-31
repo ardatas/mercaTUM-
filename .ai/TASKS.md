@@ -152,4 +152,4 @@ Coordinator owns isolated T1/T2/T5 recovery integration: preparation before clai
 
 ### Purchase review and token capacity — 31 October 2026
 
-IN PROGRESS — coordinator owns T5: saved model display plus actual executor, compact purchase details,5,000-sat default cap, sourced AA Index benchmarks and token capacity. Payment/execution contracts retained.
+DONE — deployed `ef58633`,106 integrated tests/typecheck/build PASS; public marketplace verified. Coordinator owns T5: saved model display plus actual executor, compact purchase details,5,000-sat default cap, sourced AA Index benchmarks and token capacity. Payment/execution contracts retained.
