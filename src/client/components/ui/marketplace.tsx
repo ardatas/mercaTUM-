@@ -1,12 +1,5 @@
 import { useId, useMemo, useState, type CSSProperties } from "react";
-import {
-  ArrowDownUp,
-  ArrowRight,
-  ArrowUpRight,
-  Search,
-  Sparkles,
-  Zap,
-} from "lucide-react";
+import { ArrowDownUp, ArrowUpRight, Search, Sparkles, Zap } from "lucide-react";
 import {
   brandNames,
   offers,
@@ -182,7 +175,7 @@ function Radar({ offer }: { offer: Offer }) {
               textAnchor="middle"
               dominantBaseline="middle"
               fill="#aaaab0"
-              fontSize="9"
+              fontSize="12"
             >
               {label}
             </text>
@@ -244,14 +237,16 @@ function OfferCard({
     >
       <div className="mp-offer-top">
         <ModelLogo brand={offer.brand} />
-        <span className="mp-offer-tag">{offer.tag}</span>
+        <div className="mp-offer-title">
+          <h3>{brandNames[offer.brand]}</h3>
+          <span>{offer.tier}</span>
+        </div>
         <ArrowUpRight size={19} className="mp-offer-arrow" />
       </div>
-      <div className="mp-offer-title">
-        <h3>{brandNames[offer.brand]}</h3>
-        <span>{offer.tier}</span>
-      </div>
-      <div className="mp-offer-model">
+      <div
+        className="mp-offer-model"
+        title={offer.models.map((model) => model.label).join(", ")}
+      >
         {offer.models[0].label}
         {offer.models.length > 1 && <span> +{offer.models.length - 1}</span>}
       </div>
@@ -264,7 +259,9 @@ function OfferCard({
           </strong>
         </div>
         <div className="mp-score">
-          <span className="mp-metric-label">Capability score</span>
+          <span className="mp-metric-label" title="Capability score">
+            Score<span className="mp-sr-only">: capability</span>
+          </span>
           <strong>
             {offer.score}
             <small> / 100</small>
@@ -288,10 +285,7 @@ function OfferCard({
         </span>
       </div>
       <div className="mp-offer-footer">
-        <span className="mp-seller">
-          <span className="mp-avatar">{offer.initials}</span>
-          {offer.seller}
-        </span>
+        <span className="mp-seller">{offer.seller}</span>
         <span className="mp-offer-price">
           {priceSats === undefined ? (
             "Open chat"
@@ -300,7 +294,6 @@ function OfferCard({
               <b>{priceSats}</b> sats / task
             </>
           )}
-          <ArrowRight size={15} />
         </span>
       </div>
     </button>

@@ -244,3 +244,12 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 - Live browser at https://mercatum-ai.vercel.app: marketplace first, navigation hidden, all six local logos loaded. Document client/scroll width both 1265px. Search for Kimi returns one offer; capacity sort places Gemini then DeepSeek first. Clicking Kimi opens its branded chat, with K3.1 Pro and Low/High/Maximum options.
 - Live task `acd9d458-60fd-4e11-ad92-1281968032a0`, selected Kimi K3.1 Pro/High, reached AWAITING_APPROVAL through real model planning. Reload preserved offer, model and High effort; settings remain locked. No quote approval, native wallet action, payment or paid execution initiated. Q3/Q5 still pending human approval; a real paid call with the new effort setting is not claimed.
 - Preview saved to ignored `artifacts/marketplace-live.png`. Offline mobile inspection covered 390px marketplace and 320px chat/model-effort popover. No runtime dependency or sponsor-pack changes.
+
+## Dark workspace and compact marketplace revision — 31 October 2026
+
+- Clean starting revision fbf8d9a. Same implementation session: Node 24.21.0/npm 11.19.0, unchanged lock/pins, app typecheck/92 tests/build and sponsor typecheck/38 tests passed above. Scope is presentation/navigation only; no payment or AI adapter edits. Existing mainnet approval boundaries and live qualification gaps remain unchanged.
+- Coordinator owns shared dark theme, fixed desktop navigation, compact readable marketplace cards and responsive verification. User supersedes the previous collapsed-desktop-sidebar preference.
+
+- Browser: completed-answer and approval offline fixtures show dark surfaces and readable controls; desktop sidebar remains visible. Responsive harness at 1440px (1425px content viewport with scrollbar) reports five columns and equal client/scroll widths. 320px chat reports equal client/scroll widths; menu opens and Marketplace returns to catalog with drawer closed. Cards use 22px titles, 28px metrics, 12px minimum labels (13px on mobile), approximately 244px height on wide desktop.
+
+- Final revision checks: typecheck, 92 tests, production build and diff whitespace check PASS. Presentation/navigation only; backend, secrets, BSV and model configuration unchanged.

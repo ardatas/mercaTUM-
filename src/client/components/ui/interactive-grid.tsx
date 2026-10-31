@@ -46,8 +46,8 @@ export function InteractiveGrid({
             : Infinity;
           const strength = Math.max(0, 1 - distance / proximity);
           context.fillStyle = strength
-            ? `hsl(${hue} 80% ${26 + strength * 24}%)`
-            : "rgba(34, 34, 34, 0.22)";
+            ? `hsl(${hue} 80% ${45 + strength * 24}%)`
+            : "rgba(174, 176, 184, 0.18)";
           context.beginPath();
           context.arc(x, y, radius, 0, Math.PI * 2);
           context.fill();

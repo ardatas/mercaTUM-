@@ -136,6 +136,7 @@ createRoot(document.getElementById("fixture-controls")!).render(
       padding: 8,
       maxWidth: 230,
       background: "#fff6d7",
+      color: "#222",
       border: "1px solid #c4ad6c",
       font: "12px sans-serif",
     }}

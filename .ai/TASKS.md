@@ -137,3 +137,7 @@ Coordinator owns T1/T2/T5 integration: preserve confirmed unsigned aborts, recov
 ### Marketplace and model controls — 31 October 2026
 
 DONE for marketplace scope: implemented, deployed at 568e858 and browser-verified. Qualification/payment gates remain pending. Coordinator: shared selection contract, immutable task selection, chat/navigation integration and deployment. Marketplace agent: isolated bento UI/assets. Research agent: official model/effort sources. Payment approval and actual execution metadata remain authoritative.
+
+### Dark workspace and compact cards — 31 October 2026
+
+Implemented; deployment pending. Coordinator owns theme/navigation; marketplace agent owns compact readable cards. Five columns at >=1360px; fixed desktop navigation at >=900px; mobile drawer retained. Browser verifies dark chat/approval and 320px navigation.

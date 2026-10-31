@@ -98,6 +98,9 @@ export function App() {
     [mode, setMode] = useState<"chat" | "code">("chat"),
     [newChat, setNewChat] = useState(0),
     [sidebar, setSidebar] = useState(false),
+    [desktopNav, setDesktopNav] = useState(
+      () => matchMedia("(min-width: 900px)").matches,
+    ),
     [snapshot, setSnapshot] = useState<RepositorySnapshot>(),
     [repo, setRepo] = useState(""),
     [ref, setRef] = useState("HEAD"),
@@ -106,6 +109,16 @@ export function App() {
     [extension, setExtension] = useState<string>(),
     [initialPrompt, setInitialPrompt] = useState(""),
     [pendingPrompt, setPendingPrompt] = useState("");
+  useEffect(() => {
+    const media = matchMedia("(min-width: 900px)");
+    const update = () => {
+      setDesktopNav(media.matches);
+      setSidebar(false);
+    };
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  const navVisible = desktopNav || sidebar;
   useEffect(() => {
     if (!sidebar) return;
     const close = (event: KeyboardEvent) => {
@@ -332,16 +345,19 @@ export function App() {
     });
   return (
     <div
-      className={`app-shell ${sidebar ? "nav-open" : "nav-closed"} ${view === "capacity" ? "marketplace-shell" : ""}`}
+      className={`app-shell ${navVisible ? "nav-open" : "nav-closed"} ${view === "capacity" ? "marketplace-shell" : ""}`}
     >
-      {sidebar && (
+      {sidebar && !desktopNav && (
         <button
           className="sidebar-scrim"
           aria-label="Close navigation"
           onClick={() => setSidebar(false)}
         />
       )}
-      <aside className={`sidebar ${sidebar ? "open" : ""}`} inert={!sidebar}>
+      <aside
+        className={`sidebar ${navVisible ? "open" : ""}`}
+        inert={!navVisible}
+      >
         <button
           className="brand"
           onClick={() => {
@@ -366,6 +382,11 @@ export function App() {
             onClick={() => {
               setView("workspace");
               setSidebar(false);
+              window.history.replaceState(
+                null,
+                "",
+                task ? `/?task=${task.id}` : "/",
+              );
             }}
           >
             <MessageSquare size={17} />
@@ -376,6 +397,7 @@ export function App() {
             onClick={() => {
               setView("capacity");
               setSidebar(false);
+              window.history.replaceState(null, "", "/");
             }}
           >
             <Blocks size={17} />
