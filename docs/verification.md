@@ -154,3 +154,8 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 
 - Follow-up: BSV Desktop 3.3.1 listens on loopback ports 3321 and 2121. Read-only WalletClient calls from Node (with the application originator) return authenticated=true, wallet-brc100-1.0.0 and mainnet. This proves local API availability, not browser-origin integration. Desktop UI confirmed Mainnet. The app remains testnet; user asked to select the demo network before configuration changes or spending. In-app browser retry still failed; Chrome navigation could not complete because macOS locked again.
 - The documentation push `cc0797e` also deployed successfully: production deployment `XWhEPaob4q4D6TC4v3Us4BVLw7Gz` observed Ready. No further account verification was needed for GitHub deployments.
+
+### Testnet selection
+
+- User selected a funded testnet wallet for the demo. Production authenticated /api/wallet-config returns 200 with network=testnet. Read-only local WalletClient.getNetwork still reports mainnet.
+- BSV Desktop exposes its network button and Settings in accessibility, but interaction did not change its UI; a coordinate attempt reported no available window. Raising/refetching the window did not resolve this. User asked to select Testnet and the funded wallet manually. No payment request or native spending approval issued.
