@@ -1596,11 +1596,13 @@ h1 {
 }
 @media (max-width: 760px) {
   .sidebar {
+    visibility: hidden;
     transform: translateX(-100%);
     transition: transform 0.25s;
     width: 244px;
   }
   .sidebar.open {
+    visibility: visible;
     transform: translateX(0);
   }
   .sidebar-scrim {
@@ -1798,4 +1800,43 @@ h1 {
     transition: none !important;
     scroll-behavior: auto !important;
   }
+}
+
+.artifact-download > button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+.artifact-download > button > span {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.artifact-preview {
+  font-size: 11px;
+  background: #f6f8fb;
+  border: 1px solid #dfe5ef;
+  border-top: 0;
+  border-radius: 0 0 7px 7px;
+  overflow: auto;
+  max-height: 400px;
+}
+.artifact-preview pre {
+  margin: 0;
+  padding: 12px;
+  line-height: 1.7;
+  min-width: max-content;
+}
+.artifact-preview p {
+  padding: 12px;
+}
+.diff-added {
+  background: #e4f0e8;
+  color: #49735b;
+}
+.diff-removed {
+  background: #f8e9e8;
+  color: #946561;
 }

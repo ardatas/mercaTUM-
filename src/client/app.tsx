@@ -30,6 +30,7 @@ import { api, startSession } from "./api";
 import { PromptInput } from "./components/ui/prompt-input";
 import { ActivityChain } from "./components/ui/activity-chain";
 import { CapacityDial } from "./components/ui/capacity-dial";
+import { ArtifactViewer } from "./components/ui/artifact-viewer";
 import { FileViewer } from "./components/ui/file-viewer";
 import { ActionMenu, ContextActions } from "./components/ui/context-menu";
 import type {
@@ -590,7 +591,6 @@ export function App() {
                               onClick={() => {
                                 setMode(s.mode);
                                 setInitialPrompt(s.prompt);
-                                setNewChat((n) => n + 1);
                               }}
                             >
                               <s.icon size={18} />
@@ -726,17 +726,10 @@ export function App() {
                                 {task.result.answer}
                               </ReactMarkdown>
                             </div>
-                            {task.result.artifacts.map((a) => (
-                              <a
-                                className="artifact-download"
-                                key={a.id}
-                                href={`/api/tasks/${task.id}/artifacts/${a.id}`}
-                              >
-                                <FileText size={17} />
-                                <span>{a.name}</span>
-                                <Download size={16} />
-                              </a>
-                            ))}
+                            <ArtifactViewer
+                              taskId={task.id}
+                              artifacts={task.result.artifacts}
+                            />
                             {task.mode === "code" && (
                               <p className="subtle">
                                 Checks: not run. Review and test the patch

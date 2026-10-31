@@ -1,6 +1,6 @@
 # Application contracts
 
-Authoritative proposed interfaces. Implement runtime validation and derive TypeScript types from it in `src/shared/`. All IDs are opaque strings, timestamps UTC ISO-8601, sats positive safe integers, public keys validated compressed secp256k1 hex, txids 64 hex characters. Unknown fields in commands are rejected. Public responses omit server secrets and opaque model checkpoints.
+Authoritative interfaces. Runtime validation and TypeScript types live in `src/shared/contracts.ts`; persistent records and constraints live in `src/server/tasks/store.ts`. All IDs are opaque strings, timestamps UTC ISO-8601, sats positive safe integers, public keys validated compressed secp256k1 hex, txids 64 hex characters. Unknown fields in commands are rejected. Public responses omit server secrets and opaque model checkpoints.
 
 ## Ownership and identity
 

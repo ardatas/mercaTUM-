@@ -1,6 +1,6 @@
 # Architecture
 
-Proposed implementation, not existing application code. Use one Node >=22 TypeScript service serving a built React/Vite frontend, JSON routes, SSE and remote MCP. One process with persistent SQLite storage is sufficient for this demo and avoids distributed payment claims. Choose exact non-BSV dependencies during preflight and lock them; BSV versions come from the sponsor pack.
+The local implementation uses one Node >=22 TypeScript service serving a built React/Vite frontend, JSON routes, SSE and remote MCP. Public deployment and live qualification remain pending. One process with persistent SQLite storage is sufficient for this demo and avoids distributed payment claims. Choose exact non-BSV dependencies during preflight and lock them; BSV versions come from the sponsor pack.
 
 ```mermaid
 flowchart LR
@@ -19,7 +19,7 @@ flowchart LR
 
 ## Modules and authority
 
-Proposed paths are ownership boundaries for [tasks](../.ai/TASKS.md), not claims that files exist.
+These implemented module paths are ownership boundaries for [tasks](../.ai/TASKS.md).
 
 | Module | Owns | Cannot authorize |
 |---|---|---|

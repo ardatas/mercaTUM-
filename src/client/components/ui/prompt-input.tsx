@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import {
   ArrowUp,
   Code2,
@@ -26,6 +26,9 @@ export function PromptInput({
 }) {
   const [expanded, setExpanded] = useState(false);
   const [value, setValue] = useState(initialValue);
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (value.trim() && !busy) onSubmit(value.trim());

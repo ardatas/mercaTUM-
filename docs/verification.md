@@ -103,3 +103,15 @@ User authorized implementation, preservation/use of seven design prompts and fre
 | Q5 | BLOCKED | No configured real model + approved real payment + resumed coordinator demonstration |
 
 Public qualification is **not claimed**. Public hosting deferred by the user; live secrets, model/network/wallet and human spending remain prerequisites.
+
+### Final local runtime/browser checks
+
+- Built `mercatum:local` container successfully. Unprivileged production runtime served `/healthz` 200 and the app 200; `/readyz` correctly remained 503 without model/provider setup. Secure session cookie observed. The same session/CSRF survived an actual container restart with its named `/data` volume. Test-only container and volume removed afterward; no buyer/provider funds involved. An initial host port collision left the unrelated listener untouched; verification used an allocated loopback port.
+- Local app at http://localhost:3000 listens on 127.0.0.1. `.env` was created only from the blank example with mode 0600 and verified ignored by Git. No secrets were generated.
+- Desktop 1440px and mobile 390px browser layouts inspected. Mobile document width matched its viewport content width (375px after scrollbar), with no horizontal overflow. Drawer opens/closes; closed mobile navigation is hidden from focus/accessibility.
+- Added authenticated inline file/patch previews and download controls; actual paid generated artifacts await configured model/payment evidence. Wallet SDK loads on demand. Build warning remains for the roughly 606KB initial JS chunk (about 193KB gzip); not a build failure.
+- Source pack/guide parity rechecked against initial revision `821bcdf`; unchanged.
+
+- Final preview console: no warnings/errors captured. Composer preset selection preserves expansion; only New task resets it. Local screenshot artifacts are saved under ignored `artifacts/local-desktop.jpg` and `artifacts/local-mobile.jpg`. No wallet approval, model result or chain transaction is depicted.
+
+Application lock SHA-256 at local delivery: `e86e9f916dfbcef78e0b3474b5ad9229cbf34d69cff48970ac2f4a85267f0d7e`.

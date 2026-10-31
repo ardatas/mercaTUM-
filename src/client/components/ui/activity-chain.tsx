@@ -73,7 +73,12 @@ export function ActivityChain({
                       <Check size={13} />
                     )}
                   </span>
-                  <span>{labels[e.type] ?? e.type}</span>
+                  <span>
+                    {e.type === "payment.submitted" &&
+                    e.data.phase === "wallet_requested"
+                      ? "Wallet action requested"
+                      : (labels[e.type] ?? e.type)}
+                  </span>
                   <time>
                     {new Date(e.timestamp).toLocaleTimeString([], {
                       hour: "2-digit",
