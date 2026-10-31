@@ -7,3 +7,5 @@
 !index.html
 !src
 !src/**
+!public
+!public/**

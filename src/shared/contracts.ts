@@ -1,4 +1,16 @@
 import { z } from "zod";
+import { findSelection, type MarketplaceSelection } from "./marketplace.js";
+export const marketplaceSelectionSchema = z
+  .object({
+    offerId: z.string().max(80),
+    modelId: z.string().max(80),
+    effort: z.string().max(20),
+  })
+  .strict()
+  .refine(
+    (value) => !!findSelection(value),
+    "Select an available offer, model and effort.",
+  );
 export const idSchema = z.string().min(1).max(100);
 export const publicKeySchema = z.string().regex(/^(02|03)[a-fA-F0-9]{64}$/);
 export const networkSchema = z.enum(["mainnet", "testnet"]);
@@ -8,6 +20,7 @@ export const createTaskSchema = z
     mode: z.enum(["chat", "code"]),
     prompt: z.string().trim().min(1).max(12000),
     providerId: z.literal("demo-provider"),
+    selection: marketplaceSelectionSchema.optional(),
     snapshotId: idSchema.optional(),
     extensionOfTaskId: idSchema.optional(),
   })
@@ -90,6 +103,7 @@ export interface ExecutionConfig {
   adapterId: "openai-responses" | "gemini-generate-content";
   modelId: string;
   version: "v1";
+  thinkingLevel?: "LOW" | "MEDIUM" | "HIGH";
   limits: Limits;
 }
 export type TaskState =
@@ -252,6 +266,7 @@ export type PublicQuote = Omit<
   "ownerId" | "fingerprint" | "configurationDigest"
 >;
 export interface PublicTask {
+  selection?: MarketplaceSelection;
   id: string;
   mode: "chat" | "code";
   prompt: string;

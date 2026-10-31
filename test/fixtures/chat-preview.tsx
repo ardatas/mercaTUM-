@@ -72,6 +72,7 @@ window.fetch = async (input, init) => {
     task = {
       ...task,
       prompt: JSON.parse(String(init.body)).prompt,
+      selection: JSON.parse(String(init.body)).selection,
       state: "PLANNING",
       result: undefined,
       error: undefined,

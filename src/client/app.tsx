@@ -30,7 +30,14 @@ import { api, startSession } from "./api";
 import { PromptInput } from "./components/ui/prompt-input";
 import ThinkingState, { getStreamedAnswer } from "./components/ui/thinking";
 import { InteractiveGrid } from "./components/ui/interactive-grid";
-import { CapacityDial } from "./components/ui/capacity-dial";
+import { Marketplace, ModelLogo } from "./components/ui/marketplace";
+import {
+  offers,
+  brandNames,
+  defaultSelection,
+  findSelection,
+  type MarketplaceSelection,
+} from "../shared/marketplace";
 import { ArtifactViewer } from "./components/ui/artifact-viewer";
 import { FileViewer } from "./components/ui/file-viewer";
 import { ActionMenu, ContextActions } from "./components/ui/context-menu";
@@ -84,8 +91,10 @@ export function App() {
     >([]),
     [task, setTask] = useState<PublicTask>(),
     [view, setView] = useState<"workspace" | "capacity" | "history" | "agents">(
-      "workspace",
+      "capacity",
     ),
+    [selection, setSelection] =
+      useState<MarketplaceSelection>(defaultSelection()),
     [mode, setMode] = useState<"chat" | "code">("chat"),
     [newChat, setNewChat] = useState(0),
     [sidebar, setSidebar] = useState(false),
@@ -97,7 +106,16 @@ export function App() {
     [extension, setExtension] = useState<string>(),
     [initialPrompt, setInitialPrompt] = useState(""),
     [pendingPrompt, setPendingPrompt] = useState("");
+  useEffect(() => {
+    if (!sidebar) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSidebar(false);
+    };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [sidebar]);
   const provider = providers[0];
+  const selected = findSelection(selection)!;
   const streamedAnswer =
     task?.state === "RUNNING" ? getStreamedAnswer(task.events) : "";
   const taskSettled =
@@ -121,6 +139,8 @@ export function App() {
   const loadTask = useCallback(async (id: string) => {
     const t = await api<PublicTask>(`/api/tasks/${id}`);
     setTask(t);
+    if (t.selection && findSelection(t.selection)) setSelection(t.selection);
+    else setSelection(defaultSelection("gemini-ultra"));
     setMode(t.mode);
     if (t.snapshotId)
       setSnapshot(await api(`/api/repositories/${t.snapshotId}`));
@@ -204,6 +224,7 @@ export function App() {
           mode,
           prompt,
           providerId: "demo-provider",
+          selection,
           ...(mode === "code" ? { snapshotId: snapshot?.id } : {}),
           ...(extension ? { extensionOfTaskId: extension } : {}),
         });
@@ -309,43 +330,10 @@ export function App() {
       }
       await loadTask(q.taskId);
     });
-  const renderCapacity = (large = false) => (
-    <div className={`provider-card ${large ? "large" : ""}`}>
-      <div className="provider-header">
-        <div className="provider-icon">
-          <Sparkles size={18} />
-        </div>
-        <div>
-          <strong>{provider?.name ?? "mercaTUM Studio"}</strong>
-          <span>Chat & code</span>
-        </div>
-        <span className="badge">Demo provider</span>
-      </div>
-      <div className="capacity-dials">
-        <CapacityDial
-          value={provider?.capacity.fiveHour ?? 72}
-          label="5-hour capacity"
-        />
-        <CapacityDial
-          value={provider?.capacity.weekly ?? 86}
-          label="Weekly capacity"
-        />
-      </div>
-      <div className="provider-footer">
-        <div>
-          <strong>
-            {provider?.priceSats ?? "—"} <small>sats / task</small>
-          </strong>
-        </div>
-        <span className={`availability ${readiness?.ready ? "online" : ""}`}>
-          {readiness?.ready ? "Available" : "Setup pending"}
-        </span>
-      </div>
-      <p className="simulation-note">Simulated listing and capacity.</p>
-    </div>
-  );
   return (
-    <div className="app-shell">
+    <div
+      className={`app-shell ${sidebar ? "nav-open" : "nav-closed"} ${view === "capacity" ? "marketplace-shell" : ""}`}
+    >
       {sidebar && (
         <button
           className="sidebar-scrim"
@@ -353,8 +341,15 @@ export function App() {
           onClick={() => setSidebar(false)}
         />
       )}
-      <aside className={`sidebar ${sidebar ? "open" : ""}`}>
-        <button className="brand" onClick={reset}>
+      <aside className={`sidebar ${sidebar ? "open" : ""}`} inert={!sidebar}>
+        <button
+          className="brand"
+          onClick={() => {
+            setView("capacity");
+            setSidebar(false);
+            window.history.replaceState(null, "", "/");
+          }}
+        >
           <span className="brand-symbol">
             m<span>↗</span>
           </span>
@@ -384,7 +379,7 @@ export function App() {
             }}
           >
             <Blocks size={17} />
-            Available capacity<span className="nav-count">1</span>
+            Marketplace<span className="nav-count">{offers.length}</span>
           </button>
           <button
             className={view === "history" ? "active" : ""}
@@ -476,14 +471,15 @@ export function App() {
           <div>
             <button
               className="mobile-menu icon-button"
-              aria-label="Open navigation"
-              onClick={() => setSidebar(true)}
+              aria-label={sidebar ? "Close navigation" : "Open navigation"}
+              aria-expanded={sidebar}
+              onClick={() => setSidebar(!sidebar)}
             >
               <Menu size={19} />
             </button>
             <strong>
               {view === "capacity"
-                ? "Available capacity"
+                ? "Marketplace"
                 : view === "history"
                   ? "Task history"
                   : view === "agents"
@@ -493,6 +489,17 @@ export function App() {
                       : "Chat"}
             </strong>
           </div>
+          <button
+            className="marketplace-home"
+            onClick={() => {
+              setView("capacity");
+              setSidebar(false);
+              window.history.replaceState(null, "", "/");
+            }}
+          >
+            <Blocks size={16} />
+            <span>mercaTUM</span>
+          </button>
         </header>
         <main>
           {error && (
@@ -520,6 +527,27 @@ export function App() {
                     <InteractiveGrid />
                   )}
                   <div className="workspace-main">
+                    <div className="selected-offer-strip">
+                      <ModelLogo brand={selected.offer.brand} />
+                      <div>
+                        <strong>
+                          {brandNames[selected.offer.brand]}{" "}
+                          <span>{selected.offer.tier}</span>
+                        </strong>
+                        <small>
+                          From {selected.offer.seller} ·{" "}
+                          {selected.offer.remaining} messages available
+                        </small>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setView("capacity");
+                          window.history.replaceState(null, "", "/");
+                        }}
+                      >
+                        Browse offers <ArrowUpRight size={14} />
+                      </button>
+                    </div>
                     {pendingPrompt ? (
                       <div className="task-content">
                         <article
@@ -820,7 +848,9 @@ export function App() {
                         onSubmit={submit}
                         busy={busy || !loaded || !taskSettled}
                         modeLocked={!taskSettled || busy}
-                        model={provider?.modelId ?? ""}
+                        model={selected.model.label}
+                        selection={selection}
+                        onSelectionChange={setSelection}
                         hasContext={!!snapshot?.consentedAt}
                         initialValue={initialPrompt}
                         placeholder={
@@ -843,16 +873,14 @@ export function App() {
                 </div>
               )}
               {view === "capacity" && (
-                <div className="page-content">
-                  <h1>Available capacity</h1>
-                  {renderCapacity(true)}
-                  {readiness && !readiness.ready && (
-                    <p className="notice">{readiness.blockers.join(" ")}</p>
-                  )}
-                  <button className="button primary" onClick={reset}>
-                    Start a task <ArrowRight size={16} />
-                  </button>
-                </div>
+                <Marketplace
+                  priceSats={provider?.priceSats}
+                  onSelect={(offerId) => {
+                    reset();
+                    setMode("chat");
+                    setSelection(defaultSelection(offerId));
+                  }}
+                />
               )}
               {view === "history" && (
                 <div className="page-content">

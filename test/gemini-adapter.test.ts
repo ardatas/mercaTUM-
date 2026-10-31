@@ -378,3 +378,17 @@ describe("Gemini streamed execution", () => {
     ).toBe(false);
   });
 });
+
+it("uses the frozen native effort for paid generation and preserves token caps", async () => {
+  const { adapter, requests } = client([stream([model([{ text: "Answer" }])])]);
+  const selected = task();
+  selected.config.thinkingLevel = "HIGH";
+  await adapter.execute(selected, () => {});
+  expect(requests[0].body.generationConfig.thinkingConfig).toEqual({
+    includeThoughts: false,
+    thinkingLevel: "HIGH",
+  });
+  expect(requests[0].body.generationConfig.maxOutputTokens).toBe(
+    DEFAULT_LIMITS.maxOutputTokens,
+  );
+});

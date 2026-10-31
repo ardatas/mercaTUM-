@@ -315,3 +315,34 @@ describe("shared admission and known-limit recovery", () => {
     expect(s.svc.get("alice", id).state).toBe("LIMIT_REACHED");
   });
 });
+
+it("persists catalog selection and native effort without changing the configured execution model", async () => {
+  const s = setup();
+  s.config.MODEL_PROVIDER = "gemini";
+  const command = {
+    mode: "chat",
+    prompt: "Explain a tree",
+    providerId: "demo-provider",
+    selection: {
+      offerId: "claude-max",
+      modelId: "claude-opus-5-5",
+      effort: "max",
+    },
+  };
+  const t = s.svc.create("alice", command, "selected-task");
+  await new Promise((r) => setTimeout(r, 5));
+  expect(s.svc.get("alice", t.id).selection).toEqual(command.selection);
+  const stored = s.store.get<Task>("task", t.id)!;
+  expect(stored.config.modelId).toBe("test-model");
+  expect(stored.config.thinkingLevel).toBe("HIGH");
+  s.config.MODEL_ID = "changed-default";
+  expect(s.store.get<Task>("task", t.id)!.config.modelId).toBe("test-model");
+  expect(() =>
+    s.svc.create(
+      "alice",
+      { ...command, selection: { ...command.selection, effort: "low" } },
+      "selected-task",
+    ),
+  ).toThrow();
+  expect(s.svc.get("alice", t.id).receipt).toBeUndefined();
+});

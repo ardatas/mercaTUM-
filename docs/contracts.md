@@ -128,3 +128,7 @@ Error envelope: `{ error: { code, message, retryable, taskId?, attemptId? } }`. 
 ## MCP surface
 
 Use the official MCP TypeScript SDK and its current Streamable HTTP/auth guidance, verified at implementation time. `/mcp` exposes `list_providers`, `create_task`, `get_task`, `get_result`. Reuse the browser service schemas and owner checks. Asynchronous creation may initially return CREATED/PLANNING. `get_task` supplies the approval URL when available. A task awaiting payment returns `{ status: 'pending_user_approval', approvalUrl, taskId }`; build the URL from trusted `PUBLIC_APP_URL`. Browser session ownership must match the token owner. MCP cannot approve quotes, call the buyer wallet or submit an execution permit. Quote/payment details remain inspectable through owned task status.
+
+## Marketplace selection
+
+`POST /api/tasks` optionally accepts `selection: { offerId, modelId, effort }`. Validate the complete combination against `src/shared/marketplace.ts`, persist it with the immutable task and expose it through PublicTask. Unknown combinations fail before planning. Existing browser/MCP requests without selection remain supported. The selection participates in idempotency and fingerprinting. Actual execution model, quote terms and result metadata remain server-owned. For Gemini, freeze an optional LOW/MEDIUM/HIGH thinkingLevel in ExecutionConfig before quoting and use it for the paid generation; older tasks retain LOW. Higher settings stay under the existing output and runtime caps.

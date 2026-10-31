@@ -1,3 +1,5 @@
+import { ModelControls } from "./model-controls";
+import type { MarketplaceSelection } from "../../../shared/marketplace";
 import { useState, useEffect, type FormEvent } from "react";
 import { ArrowUp, Code2, MessageSquare, Paperclip } from "lucide-react";
 // Reference 3: expand once on initial focus; blur never contracts it.
@@ -7,6 +9,8 @@ export function PromptInput({
   onSubmit,
   busy,
   model,
+  selection,
+  onSelectionChange,
   hasContext,
   initialValue = "",
   placeholder,
@@ -17,6 +21,8 @@ export function PromptInput({
   onSubmit: (prompt: string) => void;
   busy: boolean;
   model: string;
+  selection?: MarketplaceSelection;
+  onSelectionChange?: (v: MarketplaceSelection) => void;
   hasContext: boolean;
   initialValue?: string;
   placeholder?: string;
@@ -78,10 +84,18 @@ export function PromptInput({
             Code
           </button>
         </div>
-        <span className="prompt-model">
-          <span className="status-dot" />
-          {model || "Model setup pending"}
-        </span>
+        {selection && onSelectionChange ? (
+          <ModelControls
+            selection={selection}
+            onChange={onSelectionChange}
+            disabled={modeLocked || busy}
+          />
+        ) : (
+          <span className="prompt-model">
+            <span className="status-dot" />
+            {model || "Model setup pending"}
+          </span>
+        )}
         {hasContext && (
           <span className="context-chip">
             <Paperclip size={13} />

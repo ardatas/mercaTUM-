@@ -1,3 +1,4 @@
+import { executionThinking } from "../../shared/marketplace.js";
 import {
   AppError,
   createTaskSchema,
@@ -101,6 +102,9 @@ export class TaskService {
           modelId: this.config.MODEL_ID,
           version: "v1" as const,
           limits: { ...this.config.limits },
+          ...(command.selection && this.config.MODEL_PROVIDER === "gemini"
+            ? { thinkingLevel: executionThinking(command.selection.effort) }
+            : {}),
         };
         const task: Task = {
           ...command,
@@ -200,6 +204,7 @@ export class TaskService {
       createdAt: t.createdAt,
       updatedAt: t.updatedAt,
       modelId: t.config.modelId,
+      selection: t.selection,
       snapshotId: t.snapshotId,
       extensionOfTaskId: t.extensionOfTaskId,
       quote,

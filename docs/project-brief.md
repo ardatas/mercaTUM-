@@ -9,7 +9,7 @@ The coordinator agent requests paid execution through a tool call. Payment appro
 | Part | Required behavior |
 |---|---|
 | Buyer experience | Chat and code modes, task history, payment approval, streamed activity, results and receipts. Exact UI supplied separately. |
-| Capacity listing | One clearly labelled demo provider. The operator's API key powers real execution; availability/quota labels are simulated. |
+| Capacity listing | Eight colorful subscription offers across six model brands, with seller, tier, model choices, remaining capacity and capability visuals. Listings are fixtures backed by the configured execution provider. |
 | Code task | Import a public GitHub repository at a resolved commit; review selected context; produce and apply validated changes to the snapshot; download a real diff. |
 | Payment | Real sats from the buyer's standard wallet to a separate operator-owned provider wallet, with explicit approval. |
 | Agent | Real model-generated purchase request, durable pause/resume and actual paid model execution. |
@@ -43,3 +43,5 @@ Local UI refinement: a message-bubble/chat-answer layout, persistent bottom comp
 Local visual theme now follows reference 9: neutral charcoal/white/gray surfaces with spectrum accents, and a decorative interactive grid in empty chat only. The visual theme is deployed.
 
 Payment recovery refinement: a confirmed unsigned fee rejection must return to fresh quote review with the observed fee and prior limit. Signing/broadcast uncertainty continues to block replacement payments. Deployed and verified in Safari: the original fee-rejected task returned to fresh quote review and survives reload. The original 194-sat draft exceeded its 110-sat cap. No new spending approved or initiated.
+
+Marketplace-first revision: full-width marketplace with navigation closed initially. Selecting a subscription opens chat; model-specific effort choices are saved with the task and cannot alter an existing quote. Actual execution configuration and payment metadata remain authoritative.
