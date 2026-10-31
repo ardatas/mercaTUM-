@@ -1,5 +1,5 @@
 import { useId, useMemo, useState, type CSSProperties } from "react";
-import { ArrowDownUp, ArrowUpRight, Search, Sparkles, Zap } from "lucide-react";
+import { ArrowDownUp, ArrowUpRight, Search, Zap } from "lucide-react";
 import {
   brandNames,
   offers,
@@ -43,14 +43,6 @@ function smooth(points: [number, number][]) {
   return d;
 }
 
-const dimensions = [
-  "Coding",
-  "Reasoning",
-  "Writing",
-  "Context",
-  "Speed",
-  "Knowledge",
-];
 const brands = Object.keys(brandNames) as Brand[];
 const number = (value: number) => value.toLocaleString("en-US");
 
@@ -126,103 +118,14 @@ function CapacityChart() {
   );
 }
 
-function Radar({ offer }: { offer: Offer }) {
-  const c = 132,
-    radius = 85;
-  const point = (i: number, r: number): [number, number] => [
-    c + Math.cos(-Math.PI / 2 + (i * Math.PI) / 3) * r,
-    c + Math.sin(-Math.PI / 2 + (i * Math.PI) / 3) * r,
-  ];
-  const points = offer.strengths.map((score, i) =>
-    point(i, (radius * score) / 100),
-  );
-  // Closed cyclic cubic spline retains the exact six dimension values.
-  let path = `M${points[0][0]},${points[0][1]}`;
-  for (let i = 0; i < points.length; i++) {
-    const a = points[(i + 5) % 6],
-      b = points[i],
-      d = points[(i + 1) % 6],
-      e = points[(i + 2) % 6],
-      k = 0.12;
-    path += `C${b[0] + (d[0] - a[0]) * k},${b[1] + (d[1] - a[1]) * k} ${d[0] - (e[0] - b[0]) * k},${d[1] - (e[1] - b[1]) * k} ${d[0]},${d[1]}`;
-  }
-  return (
-    <svg
-      className="mp-radar"
-      viewBox="0 0 264 264"
-      role="img"
-      aria-label={`${brandNames[offer.brand]} ${offer.tier} capability profile: ${dimensions.map((label, i) => `${label} ${offer.strengths[i]}`).join(", ")}`}
-    >
-      {[0.25, 0.5, 0.75, 1].map((fraction) => (
-        <circle
-          key={fraction}
-          cx={c}
-          cy={c}
-          r={radius * fraction}
-          fill="none"
-          stroke="#ffffff16"
-        />
-      ))}
-      {dimensions.map((label, i) => {
-        const p = point(i, radius),
-          t = point(i, radius + 23);
-        return (
-          <g key={label}>
-            <line x1={c} y1={c} x2={p[0]} y2={p[1]} stroke="#ffffff12" />
-            <text
-              x={t[0]}
-              y={t[1]}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fill="#aaaab0"
-              fontSize="12"
-            >
-              {label}
-            </text>
-          </g>
-        );
-      })}
-      <path
-        d={`${path}Z`}
-        fill={offer.color}
-        fillOpacity=".09"
-        stroke={offer.color}
-        strokeWidth="2.5"
-      />
-      {points.map(([x, y], i) => (
-        <circle key={i} cx={x} cy={y} r="3" fill={offer.color}>
-          <title>
-            {dimensions[i]}: {offer.strengths[i]}/100
-          </title>
-        </circle>
-      ))}
-      <circle cx={c} cy={c} r="24" fill="#19191c" stroke="#ffffff16" />
-      <text
-        x={c}
-        y={c + 1}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fill={offer.color}
-        fontSize="20"
-        fontWeight="600"
-        fontFamily="ui-monospace, monospace"
-      >
-        {offer.score}
-      </text>
-    </svg>
-  );
-}
-
 function OfferCard({
   offer,
   priceSats,
   onSelect,
-  onInspect,
 }: {
   offer: Offer;
   priceSats?: number;
   onSelect: (id: string) => void;
-  onInspect: (id: string) => void;
 }) {
   const percent = Math.round((offer.remaining / offer.total) * 100);
   return (
@@ -231,8 +134,6 @@ function OfferCard({
       className="mp-offer"
       style={{ "--offer-color": offer.color } as CSSProperties}
       onClick={() => onSelect(offer.id)}
-      onMouseEnter={() => onInspect(offer.id)}
-      onFocus={() => onInspect(offer.id)}
       aria-label={`Open ${brandNames[offer.brand]} ${offer.tier} from ${offer.seller}, ${offer.remaining} messages remaining, capability score ${offer.score}`}
     >
       <div className="mp-offer-top">
@@ -310,8 +211,6 @@ export function Marketplace({
   const [query, setQuery] = useState("");
   const [brand, setBrand] = useState<Brand | "all">("all");
   const [sort, setSort] = useState("featured");
-  const [inspected, setInspected] = useState(offers[0].id);
-  const current = offers.find((offer) => offer.id === inspected) ?? offers[0];
   const shown = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return offers
@@ -376,39 +275,6 @@ export function Marketplace({
           </div>
           <CapacityChart />
         </section>
-        <section
-          className="mp-panel mp-profile-panel"
-          aria-label="Model capability comparison"
-        >
-          <div className="mp-profile-copy">
-            <span className="mp-panel-label">
-              <Sparkles size={14} /> Capability profile
-            </span>
-            <label className="mp-profile-select">
-              <span className="mp-sr-only">Compare offer capabilities</span>
-              <select
-                value={inspected}
-                onChange={(event) => setInspected(event.target.value)}
-              >
-                {offers.map((offer) => (
-                  <option key={offer.id} value={offer.id}>
-                    {brandNames[offer.brand]} · {offer.tier}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <div className="mp-profile-score" style={{ color: current.color }}>
-              {current.score}
-              <span>/ 100</span>
-            </div>
-            <p>
-              Explore the strengths.
-              <br />
-              Choose your fit.
-            </p>
-          </div>
-          <Radar offer={current} />
-        </section>
       </div>
       <div className="mp-listing-header">
         <div>
@@ -469,7 +335,6 @@ export function Marketplace({
             offer={offer}
             priceSats={priceSats}
             onSelect={onSelect}
-            onInspect={setInspected}
           />
         ))}
       </div>

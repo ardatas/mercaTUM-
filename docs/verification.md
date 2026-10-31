@@ -255,3 +255,9 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 - Final revision checks: typecheck, 92 tests, production build and diff whitespace check PASS. Presentation/navigation only; backend, secrets, BSV and model configuration unchanged.
 
 - Deployed frontend code `98c1bee`, Vercel `EVJa5hZaP77LJmwNWKQi1Ht2mWCp` SUCCESS. Canonical live assets `index-BJC_CEDf.js` / `index-wPF5RNl8.css`. Browser confirms fixed visible desktop sidebar, dark Claude chat/composer/effort menu, and direct sidebar return to Marketplace. At 1265px, document client and scroll widths both1265, card height243px, metric labels12px and titles22px. Screenshot: ignored `artifacts/dark-chat-live.png`. No backend rollout or payment action needed for this presentation-only revision.
+
+## Remove Capability profile — 31 October 2026
+
+- Clean starting revision 321c003. Same-session preflight remains valid: unchanged runtime/lock/sponsor dependencies, prior92 tests/typecheck/build PASS. Narrow UI removal only: delete the profile panel and its hover state; retain offer scores and remaining-capacity summary. No payment/backend change.
+
+- Removed profile component, selector, radar SVG, hover state and obsolete CSS. Remaining capacity summary spans the row. Typecheck/build and diff check PASS.

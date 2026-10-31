@@ -72,7 +72,7 @@
 }
 .mp-overview {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 14px;
   margin-bottom: 22px;
 }
@@ -187,61 +187,7 @@
   width: 15px;
   height: 15px;
 }
-.mp-profile-panel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 13px 20px;
-  min-width: 0;
-}
-.mp-profile-copy {
-  min-width: 0;
-  flex: 0 1 210px;
-}
-.mp-profile-select {
-  display: block;
-  margin-top: 8px;
-}
-.mp-profile-select select {
-  max-width: 100%;
-  background: #242427;
-  color: #ededf2;
-  border: 1px solid #ffffff18;
-  border-radius: 8px;
-  padding: 6px 20px 6px 9px;
-  font-size: 13px;
-  font-weight: 550;
-  cursor: pointer;
-  color-scheme: dark;
-}
-.mp-profile-score {
-  font-family: "SFMono-Regular", Consolas, monospace;
-  line-height: 1.1;
-  font-size: 30px;
-  letter-spacing: -1.5px;
-  margin-top: 9px;
-}
-.mp-profile-score > span {
-  font-size: 12px;
-  letter-spacing: 0;
-  color: #aaaab3;
-  margin-left: 7px;
-}
-.mp-profile-copy > p {
-  font-size: 12px;
-  line-height: 1.4;
-  color: var(--mp-muted);
-  margin: 6px 0 0;
-}
-.mp-radar {
-  width: 176px;
-  height: 176px;
-  max-width: 48%;
-  flex-shrink: 1;
-  margin: -12px -9px -12px 0;
-  overflow: visible;
-}
+
 .mp-listing-header {
   display: flex;
   align-items: center;
@@ -625,8 +571,7 @@
   .mp-header-label {
     display: none;
   }
-  .mp-capacity-panel,
-  .mp-profile-panel {
+  .mp-capacity-panel {
     padding-inline: 16px;
   }
   .mp-capacity-panel {
@@ -652,13 +597,7 @@
     width: 13px;
     height: 13px;
   }
-  .mp-profile-copy > p {
-    max-width: 145px;
-  }
-  .mp-profile-select select {
-    font-size: 12px;
-    padding-right: 3px;
-  }
+
   .mp-toolbar {
     flex-wrap: wrap;
     gap: 7px;
@@ -691,17 +630,7 @@
     width: 15px;
     height: 15px;
   }
-  .mp-profile-panel {
-    padding: 15px 20px;
-  }
-  .mp-radar {
-    width: 180px;
-    height: 180px;
-    max-width: 50%;
-  }
-  .mp-profile-select select {
-    font-size: 13px;
-  }
+
   .mp-listing-header {
     align-items: flex-start;
     flex-direction: column;
@@ -761,29 +690,11 @@
     gap: 3px 8px;
     flex-direction: column;
   }
-  .mp-profile-panel {
-    padding: 16px;
-    gap: 5px;
-  }
-  .mp-profile-copy {
-    flex: 1 1 145px;
-  }
+
   .mp-panel-label {
     font-size: 12px;
   }
-  .mp-profile-select select {
-    width: 100%;
-    font-size: 12px;
-    padding-left: 6px;
-  }
-  .mp-radar {
-    max-width: 47%;
-    height: auto;
-    margin-right: -9px;
-  }
-  .mp-profile-copy > p {
-    font-size: 12px;
-  }
+
   .mp-listing-header h2 {
     font-size: 20px;
   }
