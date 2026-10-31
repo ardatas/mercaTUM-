@@ -1,0 +1,39 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "buildCommand": "npx vite build",
+  "outputDirectory": "dist/client",
+  "installCommand": "npm ci",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://api.mercatum.35.198.77.207.sslip.io/api/:path*"
+    },
+    {
+      "source": "/mcp",
+      "destination": "https://api.mercatum.35.198.77.207.sslip.io/mcp"
+    },
+    {
+      "source": "/healthz",
+      "destination": "https://api.mercatum.35.198.77.207.sslip.io/healthz"
+    },
+    {
+      "source": "/readyz",
+      "destination": "https://api.mercatum.35.198.77.207.sslip.io/readyz"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "no-referrer" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' http://localhost:3321 https://localhost:2121 http://127.0.0.1:3321 https://127.0.0.1:2121; frame-ancestors 'none'; object-src 'none'; base-uri 'self'"
+        }
+      ]
+    }
+  ]
+}

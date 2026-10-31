@@ -1,0 +1,13 @@
+.env
+.env.*
+.deploy
+data
+wallet-data
+artifacts
+BSV-TBC26-Developer-Pack
+BSV_STACK_COMPLETE_GUIDE.md
+test
+docs
+.ai
+*.sqlite*
+*.db*
