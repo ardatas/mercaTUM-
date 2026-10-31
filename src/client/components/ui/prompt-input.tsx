@@ -42,7 +42,7 @@ export function PromptInput({
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onFocus={() => setExpanded(true)}
-        rows={expanded ? 4 : 2}
+        rows={2}
         maxLength={12000}
         onKeyDown={(e) => {
           if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {

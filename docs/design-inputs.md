@@ -21,3 +21,5 @@ Visual plan: quiet graphite sidebar, off-white workspace, charcoal text, silver 
 Verbatim references retain their original example copy and imports for provenance. Integrated components live under src/client/components/ui with the @ alias rooted at src/client; demo placeholders are replaced by owned task data.
 
 Latest user direction: near-black text, concise functional labels, and a chat-only main workspace. Remove the welcome hero, suggestion cards, explanatory sidebar panel and marketing footer. Keep capacity in its own navigation view and preserve transaction approval details.
+
+Composer refinement: anchor to the bottom with 24px desktop / 16px minimum mobile spacing. Start compact, then ease upward and slightly wider on first focus (720×107px → 780×147px desktop); keep the expanded state until New task. Respect reduced motion.

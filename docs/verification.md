@@ -120,3 +120,8 @@ Application lock SHA-256 at local delivery: `e86e9f916dfbcef78e0b3474b5ad9229cbf
 
 - Removed the workspace hero, suggestions, capacity/explainer aside and footer. Capacity remains in its own tab; setup blockers remain visible there. Simplified navigation and page copy, with near-black primary text and darker secondary text. Payment approval details unchanged.
 - `npm run typecheck` and `npm run build`: PASS. Existing large-chunk build warning remains. Browser inspected at 1440×1000 and 390×844: main contains only the chat controls, mobile document/scroll width both 390px, textarea computed color rgb(17,17,17). Composer stays at four rows after blur and resets to two on New task. Capacity navigation works; no browser warning/error logs observed. Screenshots updated in ignored artifacts directory.
+
+### Bottom composer refinement — 31 October 2026
+
+- Typecheck and build PASS. Desktop browser measured 720×107px initially and 780×147px after focus, retaining a 24px bottom gap. Blur preserves expansion; New task restores 720×107px. Replaced intrinsic row-count jump with a 360ms eased height/width transition without overshoot.
+- Mobile 390×844 measured 362×146px expanded, 16px bottom spacing and no horizontal overflow. Screenshots updated. Existing reduced-motion override remains in effect.
