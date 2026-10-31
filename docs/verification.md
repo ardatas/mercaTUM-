@@ -159,3 +159,9 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 
 - User selected a funded testnet wallet for the demo. Production authenticated /api/wallet-config returns 200 with network=testnet. Read-only local WalletClient.getNetwork still reports mainnet.
 - BSV Desktop exposes its network button and Settings in accessibility, but interaction did not change its UI; a coordinate attempt reported no available window. Raising/refetching the window did not resolve this. User asked to select Testnet and the funded wallet manually. No payment request or native spending approval issued.
+
+### Buyer testnet confirmed
+
+- After the user switched networks, local SDK getNetwork/isAuthenticated returned testnet/true. BSV Desktop 3.3.1 displayed Testnet and 0 satoshis. The network mismatch is resolved; the wallet is not yet funded.
+- Chrome automation returned no available window; clicking Get paid in BSV Desktop did not navigate. Deployed-browser wallet connection remains unverified. No createAction/signAction or purchase approval was attempted.
+- The BSV Association faucet at https://bsvfaucet.com is reachable and advertises free testnet coins with email/wallet sign-in and a testnet receiving address. Sign-in page inspected; no account login, address submission or funding request performed.
