@@ -279,3 +279,9 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 - Removed task/pending guards from chat InteractiveGrid. Local offline harness confirms canvas during planning and streaming and alongside a completed answer (421px canvas height). Screenshot: ignored `artifacts/chat-background-completed.png`. Typecheck/build/diff check PASS.
 
 - Deployed `7af0b12`; Vercel `59G8Z8AcLnyVNMVT2FpeNVuuiWa2` SUCCESS. Existing live task `acd9d458-60fd-4e11-ad92-1281968032a0` displays the421px background canvas alongside its saved prompt and approval view. Screenshot: ignored `artifacts/chat-background-live.png`. Completed-answer behavior verified with offline harness only; no payment or paid execution initiated.
+
+## New task opens marketplace — 31 October 2026
+
+- Same-session preflight remains valid. Existing concurrent task-history edits preserved. Coordinator owns only the New task navigation handler: sidebar button, recent-tasks plus and empty-history Create a task open Marketplace; choosing an offer and Request more work retain their chat behavior.
+
+- Typecheck/build PASS. Local browser confirms both sidebar New task controls open Marketplace and choosing Claude opens a fresh chat.

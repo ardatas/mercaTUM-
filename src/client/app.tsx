@@ -224,6 +224,10 @@ export function App() {
     setSidebar(false);
     window.history.replaceState(null, "", "/");
   };
+  const startNewTask = () => {
+    reset();
+    setView("capacity");
+  };
   const connect = () =>
     perform(async () => {
       const connected = await walletAdapter.connectWallet();
@@ -376,7 +380,7 @@ export function App() {
           <span>mercaTUM</span>
           <ChevronDown size={14} />
         </button>
-        <button className="new-task" onClick={reset}>
+        <button className="new-task" onClick={startNewTask}>
           <Plus size={16} />
           New task <kbd>↗</kbd>
         </button>
@@ -431,7 +435,7 @@ export function App() {
         <div className="sidebar-divider" />
         <div className="sidebar-section">
           <span>RECENT TASKS</span>
-          <button className="icon-button" aria-label="New task" onClick={reset}>
+          <button className="icon-button" aria-label="New task" onClick={startNewTask}>
             <Plus size={14} />
           </button>
         </div>
@@ -954,7 +958,7 @@ export function App() {
                     <div className="empty-state">
                       <History size={32} />
                       <h2>No tasks yet</h2>
-                      <button className="button" onClick={reset}>
+                      <button className="button" onClick={startNewTask}>
                         Create a task
                       </button>
                     </div>
