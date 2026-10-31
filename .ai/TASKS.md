@@ -20,7 +20,7 @@ Allowed status: TODO, RUNNING, REVIEW, DONE, BLOCKED. A blocked task records the
 
 ### Quote executor label — 31 October 2026
 
-T5 / coordinator: secondary “Runs on” row removed at user request. Selected model/effort and server execution metadata retained. Typecheck, four purchase-review tests and build PASS; deployment pending.
+T5 / coordinator: secondary “Runs on” row removed at user request. Selected model/effort and server execution metadata retained. Typecheck, four purchase-review tests and build PASS; deployed `7728a3b`, public Chrome purchase review verified.
 
 Use at most two implementation subagents concurrently; keep file ownership disjoint. Each receives its task below plus the current contracts and relevant source sections. Requests to edit shared schemas/dependencies return to the coordinator; do not race edits to package.json, lockfile, migrations or central routes. Agents may propose a contract correction; coordinator records it before affected work continues.
 

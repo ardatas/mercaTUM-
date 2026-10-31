@@ -415,6 +415,11 @@ Benchmark snapshot (Artificial Analysis, v5.0,31 October2026; scores are model b
 
 - Deployed `41c588c`; Vercel `3ijund3GdP4kwHFocV3X7eKK5oDH` SUCCESS. Public browser confirms858px chart. Screenshot: ignored `artifacts/narrower-capacity-live.png`.
 
+## Quote executor label removal — 31 October 2026
+
+- Preflight: revision `be5c17c`, Node24.21.0/npm11.19.0; application typecheck and174 tests PASS. Sponsor starter installed packages match exact pins; typecheck and38 tests PASS. Public readiness reports model/wallet/payments ready. Existing architecture documentation/assets preserved. No wallet action; live spending evidence remains pending.
+- Coordinator owns T5 quote presentation: removed the secondary “Runs on” executor row at the user's request, retaining selected model/effort and immutable server quote data. Typecheck, four purchase-review tests, build and diff check PASS. Deployed `7728a3b`; Vercel `XQ8Uv92cPxR9gSCifqHepehvDxPX` SUCCESS. Public Chrome loads `/assets/index-BGJxAjiO.js` and renders purchase review with no “Runs on” text; the existing Gemini-selected task retains its selected-model label. The non-Gemini selection is covered by the purchase-review render test. No approval or payment initiated.
+
 ## Architecture visual — 31 October 2026
 
 - Created `docs/assets/mercatum-architecture.png` using the built-in image generator and embedded it in README. Original generation and refinement prompts are saved beside it. Confirmed PNG format and 1672×941 dimensions with `sips`.

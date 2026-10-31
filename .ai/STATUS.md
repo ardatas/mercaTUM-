@@ -2,6 +2,8 @@
 
 Updated: 31 October 2026. Vercel frontend and persistent backend deployed; native-wallet validation pending.
 
+- Removed the quote's secondary “Runs on” executor row at user request. Typecheck/four purchase-review tests/build PASS; deployed `7728a3b` and public Chrome purchase review verified.
+
 - Added a technical architecture PNG for README/pitch use at `docs/assets/mercatum-architecture.png` (1672×941). Reviewed against current source and contracts; the image explicitly retains pending live paid execution validation. Documentation/assets only.
 
 - Browse offers redesigned with violet accent, larger hit target and full-width labelled mobile button. Local navigation/layout and typecheck/build PASS; deployed at `86d3c6a` and live navigation verified.
