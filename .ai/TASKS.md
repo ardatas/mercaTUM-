@@ -1,163 +1,30 @@
-# Implementation task ledger
+# Task ledger
 
-Implementation began on 31 October 2026. Local work is implemented as recorded below; live acceptance stays blocked where evidence is missing. Follow [workflow](WORKFLOW.md); record observed results in [verification](../docs/verification.md). The coordinator updates this ledger, owns shared contracts/package files and accepts integrated work.
+Use [workflow](WORKFLOW.md) before application changes. Status reflects acceptance evidence, not code presence. Detailed invariants live in [contracts](../docs/contracts.md) and the module flows; observed checks live in [verification](../docs/verification.md).
 
-| ID | Assignment | Dependencies | Status | Owner / evidence |
+| ID | Scope / paths | Dependencies | Status | Evidence / remaining acceptance |
 |---|---|---|---|---|
-| T0 | Preflight, shared schemas, app skeleton and durable storage | Implementation request | DONE | Coordinator; typecheck, durable ownership/claim/restart tests |
-| T1 | Buyer wallet and approval adapter | T0 schemas | BLOCKED | Implemented/tested offline; live-origin native wallet behavior pending |
-| T2 | Provider wallet, quote, verification and Arcade ledger | T0 schemas/storage | BLOCKED | Separate mainnet merchant wallet initialized publicly; real transaction/Arcade evidence pending |
-| T3 | Real coordinator/tool loop and paid chat executor | T0; integrate T2 receipt | BLOCKED | Gemini 3.8 Flash real probe/planning/tool calls pass; paid executor/resume requires real approved receipt |
-| T4 | Repository import, context and actual patch artifacts | T0; integrate T3 executor | DONE | Real GitHub SHA import + validated actual patches; model-generated live patch awaits T3 |
-| T5 | Buyer UI from design slots | T0; integrate T1–T4; design input | REVIEW | Coordinator: reference 9 grid/neutral spectrum theme implemented and desktop/mobile checked; prior chat UI verified; live paid states pending |
-| T6 | Remote MCP adapter | T0; integrate T2/T3 services | REVIEW | Official client reaches real public Gemini planning/approval; token and pending task survive restart; paid result pending |
-| T7 | Deployment and live-origin wallet integration | T0 early probe; final T1–T6 | BLOCKED | Vercel production and persistent backend deployed; browser/MCP/SSE/reload verified. Mainnet selected; funded BSV Desktop connected from live Safari. Exact quote/native approval and live draft validation remain required |
-| T8 | Integration, live demo and gate evidence | T1–T7 | BLOCKED | Local checks + read-only payment/agent review; Q2–Q5 need live external setup |
+| T0 | Shared schemas, persistence, routes and configuration | Preflight | DONE | Ownership, idempotency, claims and restart checks recorded. |
+| T1 | Buyer adapter: `src/client/wallet/` | T0 | BLOCKED | Offline checks and public wallet connection recorded. Human-approved live draft/signing flow remains. |
+| T2 | Quote, verification, Arcade and provider wallet: `src/server/payments/` | T0 | BLOCKED | Provider wallet and offline verification implemented. Real transaction, Arcade status and internalization remain. |
+| T3 | Coordinator, paid executor and continuation: `src/server/ai/` | T0, T2 receipt | BLOCKED | Real Gemini planning observed. Paid execution/resume needs an approved real receipt. |
+| T4 | Public snapshots and artifacts: `src/server/repos/` | T0, T3 | REVIEW | Live import/context and offline patch validation observed. Model-generated paid patch remains. |
+| T5 | Marketplace/chat/code/approval UI: `src/client/` | T0–T4 | REVIEW | Deployed UI and responsive checks recorded. Live paid result and recovery states remain. |
+| T6 | MCP: `src/server/mcp/` | T0, T2, T3 | REVIEW | Public authenticated submission reaches approval. Receipt-backed result retrieval remains. |
+| T7 | Deployment and durable recovery | T0–T6 | REVIEW | Frontend/backend and unpaid restart persistence observed. Paid recovery and snapshot restore remain untested. |
+| T8 | End-to-end qualification and submission material | T1–T7 | BLOCKED | Complete Q1–Q5 and project acceptance; record tx/answer/patch/MCP evidence. |
 
-Allowed status: TODO, RUNNING, REVIEW, DONE, BLOCKED. A blocked task records the exact prerequisite and next action. Independent tasks continue. Mark DONE only after the coordinator inspects the diff and verifies acceptance evidence.
+## Next acceptance sequence
 
-## Dispatch rules
+1. T1/T2: inspect unresolved attempts; obtain human approval of the current exact quote. Verify network, distinct recipient, fee/change bounds and native signing. Reconcile the same transaction through Arcade and provider internalization.
+2. T3/T5: tie the saved model call to that receipt, real answer and resumed coordinator. Check result persistence and same-entitlement recovery without another debit.
+3. T4/T6/T7: demonstrate paid code artifacts and MCP result retrieval; verify durable paid state. Label generated-code checks `not_run` unless actually executed.
+4. T8: update gate evidence and prepare the [submission](../docs/submission.md). Keep external submission separate from preparation.
 
-### Quote executor label — 31 October 2026
+For each slice, inspect the diff, run relevant checks and record observed results. Test refusal, wrong amount/network/recipient, replay, scope/limit handling and uncertain outcomes offline; use live payments only within the user's approved scope.
 
-T5 / coordinator: secondary “Runs on” row removed at user request. Selected model/effort and server execution metadata retained. Typecheck, four purchase-review tests and build PASS; deployed `7728a3b`, public Chrome purchase review verified.
+## Ownership
 
-Use at most two implementation subagents concurrently; keep file ownership disjoint. Each receives its task below plus the current contracts and relevant source sections. Requests to edit shared schemas/dependencies return to the coordinator; do not race edits to package.json, lockfile, migrations or central routes. Agents may propose a contract correction; coordinator records it before affected work continues.
+The coordinator owns shared schemas, package/lockfile, migrations, central routes and integration. If delegating implementation, use at most two subagents with disjoint paths; each receives contracts, acceptance criteria and source references. Shared contract changes return to the coordinator before dependent work continues.
 
-Every handoff returns changed paths, behavior implemented, commands/results, unresolved limits and integration instructions. Integrate and verify each slice before expanding scope. A final read-only reviewer may check payment/agent causality and authorization, but cannot substitute for observed live evidence.
-
-## T0 — Coordinator: foundation
-
-**Own:** root app configuration, package/lockfile, `src/shared/`, `src/server/tasks/` central services, server bootstrap/routes, DB migrations and integration documentation.
-
-- Execute preflight; compare installed BSV pins and check source pack integrity. Keep the reference starter untouched.
-- Create the single Node/React TypeScript app described in architecture.md. Use only needed BSV packages at exact sponsor versions; install and lock other dependencies deliberately.
-- Translate contracts.md into runtime schemas/types and public DTOs, including fixed-price scope/limits, owned extension links and SCOPE_REJECTED/LIMIT_REACHED states. Establish strict input validation, owner-scoped sessions, Origin/CSRF checks, error envelope, rate limits and redacted logging.
-- Create durable task/quote/attempt/receipt/pending-call/event/artifact records, unique outpoint/task constraints, idempotency records and transactional fenced execution claims and upstream-start markers. Serialize payment acceptance and job execution.
-- Define proposed local scripts for typecheck, meaningful tests, production build and start; verify them after implementation. Do not document nonexistent commands as working.
-
-**Accept:** migrations survive restart; another owner cannot read/mutate a task; concurrent claims and duplicate idempotency keys behave correctly; mismatched bodies conflict; server secret fields are absent from public DTOs. Hand off stable interfaces before parallel module work.
-
-## T1 — Buyer wallet
-
-**Own:** `src/client/wallet/` and focused wallet adapter tests. UI integration uses T5's components.
-
-**Read:** bsv-flow.md; sponsor AGENTS; guide §§4–9; starter `client/payments.ts`, payment tests; installed SDK wallet declarations.
-
-- Use WalletClient auto connection and native wallet methods. Detect wallet absence/lock, network mismatch and buyer/provider identity equality before debit.
-- Adapt the tested BRC-29 helper for the server's quoted prefix and a fresh suffix, explicit output identification and a short non-sensitive attempt label. Preserve complete AtomicBEEF.
-- Implement explicit quote approval, one-time wallet invocation, proof persistence/upload and reconciliation after reload/timeout. A duplicate server response cannot invoke createAction twice.
-- Establish the selected wallet's actual spending/fee permission behavior and enforce the human's authorized debit bound. Do not assume a native prompt occurs under remembered grants.
-- Coordinate a minimal deployed HTTPS wallet probe with T7 before final UI work. Live human authorization remains manual.
-
-**Accept:** offline adapter checks cover refusal, network mismatch, missing proof, same-attempt retry and unknown outcome without recharging. Observe actual standard-wallet connection from the public origin. Before a live payment, demonstrate the native approval/budget behavior; missing support is a recorded blocker, not a bypass.
-
-## T2 — BSV server payment
-
-**Own:** `src/server/payments/`, merchant wallet adapter and focused payment tests. Coordinate migrations/interfaces through T0.
-
-**Read:** bsv-flow.md; guide §§7–9, 14.1/14.2 and 20; starter payment/mockchain tests; installed Arcade source/declarations.
-
-- Initialize operator wallet with private root secret and durable wallet-toolbox SQLite data. Configure correct network, Arcade-first services, chaintracker and running monitor.
-- Issue immutable fixed-price quotes with scope, intended deliverable, numeric limits, pricing-policy version and random unique prefixes; follow contracts.md's fixed-price policy. Reserve approval terms, retain late valid proofs for reserved attempts and lock one unresolved attempt per task. Actual usage cannot reprice a paid quote.
-- Verify bounded AtomicBEEF, recomputed txid, quoted prefix, expected identities, output script/value and trusted network services. Enforce replay/outpoint/task uniqueness atomically.
-- Submit the SAME transaction to Arcade in EF; resolve validated ancestry if required. Store redacted POST/status evidence and distinguish submitted, network-known and mined.
-- Internalize protocol `wallet payment`, persist receipt/entitlement and recover crashes between wallet state and app DB. Expose reconciliation without a second buyer debit.
-
-**Accept:** a real offline mock-chain transfer between distinct wallets, forged amount/script/prefix/txid rejection, wrong-task replay, concurrent duplicate proof handling and crash recovery. Verify immutable service price despite usage/config changes; an extension requires its own approval/receipt and cannot reuse the parent receipt. Live integration records provider internalization plus actual Arcade POST/network status; tests alone leave Q3 pending.
-
-## T3 — Real agent and chat
-
-**Own:** `src/server/ai/`, including `src/server/ai/worker.ts` behind T0's task interfaces; focused agent tests. T0 retains `src/server/tasks/` services and migrations.
-
-**Read:** ai-flow.md, contracts.md, current official model function-calling/continuation docs.
-
-- Implement one real configured Responses API adapter with strict `request_paid_execution`. Validate actual model call arguments and persist original call ID/private continuation before approval.
-- Bound operator-paid planning; assess context/task fit before offering a quote and reject oversized scope without payment. Reject malformed/parallel purchase calls. Keep price/recipient/limits outside model authority. Execute the immutable saved model/configuration snapshot under its quote; deployment defaults cannot change a paid task.
-- Pause the call for user approval. Executor accepts only a server-loaded permit from T2's receipt; production has no bypass/mock-paid route.
-- Make actual paid inference, stream sanitized events, store results, feed the original call's output back and resume the coordinator. Use the API key only server-side.
-- Enforce the quoted request and aggregate execution/recovery limits, reserving coordinator continuation budget. Known exhaustion becomes LIMIT_REACHED with valid partial progress; never silently increase limits, create another payment or mark partial work complete. User-requested extra scope is a separately quoted linked task. Technical failure recovery retains its original entitlement; reuse saved executor results on coordinator-resume retries.
-
-**Accept:** tests prove executor is never called before a verified receipt, forged permits/tool args fail, duplicate workers do not rerun a claimed job, restart restores pending call, configuration changes cannot alter a quoted task, a started upstream request with an expired lease becomes EXECUTION_UNKNOWN, stale workers cannot publish, and paid failure does not charge. Test pre-payment scope rejection and known-limit partial results without success/recharge; retry cannot bypass exhausted scope. A real API smoke test verifies configured model capability. Live Q5 evidence ties actual tool call to receipt/txid and completed answer.
-
-## T4 — Repository task
-
-**Own:** `src/server/repos/`, artifact generation and focused repository/change-set tests. AI adapter remains T3-owned.
-
-- Import public GitHub owner/repository/ref through fixed-host API access; pin to commit SHA before retrieving bounded text. Enforce ai-flow.md file/byte/context limits.
-- Exclude secrets/binaries/symlinks/protected paths, show a manifest and save explicit context selection/consent. Repository instructions stay data.
-- Validate model ChangeSet against pinned file hashes and path boundaries. Apply changes to a copied snapshot, generate unified diff and downloadable changed files with owner authorization.
-- Mark all checks `not_run` unless actually executed. Avoid arbitrary commands, private OAuth, Git pushes and fake terminal output.
-
-**Accept:** small public repo yields actual changed files and a patch matching the fixed base; stale hashes, traversal, protected files, oversized imports/outputs and unauthorized downloads fail. Nothing in the original repository or user's machine is modified.
-
-## T5 — Buyer UI
-
-**Own:** `src/client/` excluding `wallet/`; coordinate shared DTO changes through T0. Read design-inputs.md and use the user's supplied prompts.
-
-- Build the specified shell, chat/code modes, demo-provider card, repository context/review, task activity, results, history and MCP connection surface.
-- Implement all D0–D7 states, particularly distinct payment pending/unknown/verified, paid execution failure and same-entitlement recovery.
-- Wire actual APIs/SSE/wallet adapter; never infer success from a timer, display invented balances/metrics or expose secrets/checkpoints.
-- Quote approval must show scope, intended deliverable, model, numeric limits, exact fixed service sats, network, recipient, fee policy and total debit bound. Distinguish limit-reached partial results, separately approved extensions and technical retries under the original entitlement. Unknown payment reconciles instead of offering another debit.
-
-**Accept:** live browser tests show chat and repository result, wallet handoff, receipt link, history/reload, event reconnect and usable desktop/mobile layouts. If design is missing, build technical adapters and the minimal wallet probe; request the missing visual input before claiming final polish.
-
-## T6 — MCP
-
-**Own:** `src/server/mcp/` and protocol tests. Read contracts.md and current official MCP SDK transport/auth guidance.
-
-- Expose only list_providers/create_task/get_task/get_result through the shared service layer with owner-scoped bearer tokens.
-- Return a trusted browser approval URL for pending tasks; preserve token owner/session ownership. Implement issue/revoke UX through T5/T0.
-- Use the deployed public origin, finite request limits and standard protocol transport. Do not forward arbitrary model URLs or wallet commands.
-
-**Accept:** a real MCP client lists/calls tools, creates an owned task, polls planning status until it receives the approval URL, and retrieves the result after browser payment. Revoked/other-owner tokens fail; MCP cannot bypass approval or mint a receipt/permit.
-
-## T7 — Deployment
-
-**Own:** container/deployment configuration and runbook changes; coordinate root scripts with T0.
-
-- Prepare the one-process production build and private persistent volume early. Deploy a minimal wallet-origin probe as soon as T1 is ready; avoid discovering wallet transport failures after UI completion.
-- Configure TLS, server secrets and model/merchant/network settings through hosting secret management, not chat/Git. Establish actual model account access before enabling purchase.
-- Run migrations, wallet monitor, worker and restart reconciliation. Verify both app and wallet DBs persist across redeploy; configure backups and private artifact storage.
-- Complete final deployment after module integration, then inspect public readiness, browser delivery, wallet connection, MCP and SSE reconnect.
-
-**Accept:** live HTTPS URL, successful readiness and browser evidence, correct asset delivery, durable paid-task recovery after restart and no secrets in bundles/logs. Hosting or credential gaps remain explicit BLOCKED items while independent work continues.
-
-## T8 — Integration and qualification
-
-**Own:** final integration fixes, verification.md, README usage/limitations and submission.md. Use a read-only reviewer for the critical payment/agent path after core tests pass.
-
-- Exercise real model tool request, human-approved real BSV payment and completed chat task on the deployed site. Then demonstrate an actual code patch and MCP entry path.
-- Capture Q1–Q5 evidence, redacted Arcade submission/status and explorer link; keep wallet prompts under human control. No extra real payments solely to repeat already passing evidence.
-- Verify refusal/mismatch/replay/unknown cases, scope rejection, hard limits and separate extension approval offline; verify reload/restart recovery on the app and honest not_run labels for code checks. Ensure no post-payment surcharge or technical-retry charge.
-- Update task ledger and qualification results from observations. Prepare the public repo/video/Devfolio material; do not send messages or submit externally without authorization.
-
-**Accept:** core application checks pass, deployed user flows work and all Q1–Q5 PASS with observed evidence. If an external blocker prevents this, T8 remains BLOCKED/incomplete; do not mark it DONE. Final report distinguishes code/tests, deployment, chain payment and actual AI execution.
-
-### Fee-cap recovery — 31 October 2026
-
-Coordinator owns T1/T2/T5 integration: preserve confirmed unsigned aborts, recover legacy pre-sign drafts through a confirmed abort or a saved unsigned draft proven to exceed the original cap, and return to fresh quote approval. Local regression/typecheck/build PASS (87 tests). Deployed at 0bb29ea; original Safari task recovered to fresh quote review and survives reload. Full WalletClient payment regression passes with noSendChange metadata. Human approval/native signing and paid execution remain pending; signed or uncertain attempts remain reconciliation-only.
-
-### Marketplace and model controls — 31 October 2026
-
-DONE for marketplace scope: implemented, deployed at 568e858 and browser-verified. Qualification/payment gates remain pending. Coordinator: shared selection contract, immutable task selection, chat/navigation integration and deployment. Marketplace agent: isolated bento UI/assets. Research agent: official model/effort sources. Payment approval and actual execution metadata remain authoritative.
-
-### Dark workspace and compact cards — 31 October 2026
-
-DONE: deployed 98c1bee and live-browser verified. Coordinator owns theme/navigation; marketplace agent owns compact readable cards. Five columns at >=1360px; fixed desktop navigation at >=900px; mobile drawer retained. Browser verifies dark chat/approval and 320px navigation.
-
-### Single task history deletion — 31 October 2026
-
-DONE — T0/T5 implemented and deployed at `32be4d2`: persistent owner-scoped history removal, sidebar/history controls, confirmation and selected-task reset; payment and execution records retained.94 tests/typecheck/build pass; live disposable-chat deletion/reload verified.
-
-### Payment recovery follow-up — 31 October 2026
-
-Coordinator owns isolated T1/T2/T5 recovery integration: preparation before claim, safe release of unclaimed approvals, signature-history recovery, bounded ancestry restoration and actionable UI. Regression reproduces the former stuck unclaimed state. No live payment or qualification claim.
-
-### Purchase review and token capacity — 31 October 2026
-
-DONE — deployed `ef58633`,106 integrated tests/typecheck/build PASS; public marketplace verified. Coordinator owns T5: saved model display plus actual executor, compact purchase details,5,000-sat default cap, sourced AA Index benchmarks and token capacity. Payment/execution contracts retained.
-
-### Mainnet validation and wallet module loading — 31 October 2026
-
-IN PROGRESS — coordinator: reproduce/fix lazy wallet module failure, deploy recovery backend, exercise all catalog selections and dialog/error states, then verify human-approved mainnet chat/code payments with aggregate debit <=5,000 sats. Preserve ambiguous attempts; record actual model and evidence per gate.
+Handoffs include changed paths, behavior, checks/results and unresolved limits. Status values: TODO, RUNNING, REVIEW, DONE, BLOCKED. Mark DONE only after the acceptance evidence is reviewed. A blocked task names its missing prerequisite; independent work can continue.

@@ -1,44 +1,23 @@
-# Status
+# Current status
 
-Updated: 31 October 2026. Vercel frontend and persistent backend deployed; native-wallet validation pending.
+Updated 31 October 2026 from repository evidence. This summary does not constitute a new live check.
 
-- Removed the quote's secondary “Runs on” executor row at user request. Typecheck/four purchase-review tests/build PASS; deployed `7728a3b` and public Chrome purchase review verified.
+## Delivered
 
-- Added a technical architecture PNG for README/pitch use at `docs/assets/mercatum-architecture.png` (1672×941). Reviewed against current source and contracts; the image explicitly retains pending live paid execution validation. Documentation/assets only.
+- [Public app](https://mercatum-ai.vercel.app): Vercel frontend with API/SSE/MCP proxying to a persistent Node backend. Infrastructure and rollout references are in [deployment](../docs/deployment.md).
+- Real Gemini `gemini-3.8-flash` capability probe and chat/code planning reach `AWAITING_APPROVAL`. Catalog offers, sellers and capacity are fixtures; the selected brand does not change the upstream API.
+- Public repository import, reviewed context, MCP entry, SSE replay, session/task persistence across restart and owner-scoped history removal have recorded checks.
+- BSV Desktop mainnet connection observed from deployed Safari and Chrome. Buyer/provider identities are distinct. Quoting is enabled; native spending and paid execution remain unverified.
+- Dark marketplace/chat UI, model/effort selection, quote review and mobile navigation are deployed. Latest recorded app baseline: 174 tests plus typecheck/build; sponsor starter: 38 tests plus typecheck. These are earlier results, not checks rerun for this summary.
 
-- Browse offers redesigned with violet accent, larger hit target and full-width labelled mobile button. Local navigation/layout and typecheck/build PASS; deployed at `86d3c6a` and live navigation verified.
-- Capacity graph refined to a slightly narrower72% desktop cap at `41c588c` (live858px, about15% narrower); mobile remains full width.
-- Capacity graph fills available panel space with aligned provider logos; full-width stacked graph on phones. Typecheck/build and desktop/mobile checks PASS; deployed at `b54a93a` and live graph dimensions verified.
-- Wallet module-loading failure fixed at `fee3286`: wallet code loads with the initial page, preventing stale lazy-chunk failures after deployment. Typecheck/build and174 tests PASS; all8 offers/13 models/67 effort combinations exercised in live Chrome. Native Chrome WalletClient connection to BSV Desktop mainnet observed after granting local-app access. `28669db` adds permission/retry guidance. Mainnet test budget is5,000 sats total including fees; first100-sat chat quote prepared with500-sat test cap, awaiting human approval. No test debit yet.
+## Remaining qualification
 
-- Brand marks enlarged to68px left/44px right; model badges and headings enlarged in marketplace and chat. Desktop five-column and320px checks PASS; deployed at `2bfdd63` and live sizes verified.
-- Chat input now spans the same width as responses in both resting and expanded states; local browser measures matching868px widths. Typecheck/build PASS; deployed at `c9bae2e` and live width verified.
-- Purchase review and marketplace update deployed at `ef58633`: saved chat model/effort plus actual Gemini executor, compact terms,5,000-sat default cap, sourced AA Index v5.0 scores and demo token capacity. Typecheck/build and106 integrated tests PASS; desktop/320px checks PASS. Public browser verifies sourced benchmarks, token capacity and selected-model composer; served bundle includes the5,000-sat review. Actual execution remains Gemini.
+[Evidence](../docs/verification.md#current-qualification) is authoritative for gate status. Q1 has local application evidence; Q2 has a live connection but needs the authorized flow. Q3, Q4 live signing and Q5 remain incomplete. No real transaction, Arcade acceptance, receipt-backed answer or model-generated patch is recorded.
 
-- Top-left mascot increased from40px to56px. Desktop browser verifies the larger image and brand text fit the sidebar; typecheck/build pass. Pushed `b71130d`; subsequent documentation revision `c38b7f8` is now Vercel SUCCESS (`DYHmkjdevpBpd3VVdBa4h98D8kBS`).
+1. Reconcile any saved attempt before preparing another purchase.
+2. Complete one human-approved chat payment, verifying unsigned fee/change bounds before native signing; capture Arcade acceptance, provider receipt, actual answer and coordinator resume.
+3. Demonstrate paid code artifacts, MCP result retrieval and paid recovery/reload. Complete the [submission checklist](../docs/submission.md).
 
-- Wallet connection button now uses a colorful48px square BSV badge beside its label, with80px minimum height. Deployed at `96667c8`; typecheck/build pass and public Chrome verifies logo loading, full color and dimensions.
+The recorded mainnet validation allowance is **5,000 sats total including all fees**, not per task. The prepared chat used a 100-sat service price and 500-sat debit cap; its quote may have expired. The UI's 5,000-sat default cap is neither a fee estimate nor spending consent. Each purchase still requires exact quote and native wallet approval.
 
-- Single task history deletion implemented: per-item menus in recent tasks/history, confirmation, persistent owner-scoped removal and selected-chat reset. Receipts and task recovery links retained; active work continues. Typecheck/build and94 tests pass; browser cancellation, selected-chat deletion, reload, other-chat preservation and error handling observed. Deployed at `32be4d2`; live deletion and reload verified using a disposable chat.
-
-
-- Payment recovery follow-up deployed: prepare before wallet claim, release unclaimed approvals, recover the original signed transaction from history, hydrate bounded ancestry, and display specific blockers. Backend image `dc1e55404bea93e2e710ed2e1b13881bc3ccf623f6437f74a9f14b9cb31a62a7` passed health/readiness. Live paid recovery remains pending.
-- Chat background now stays mounted during pending, streaming and completed responses; local browser confirms all three states. Typecheck/build pass; deployed at `7af0b12`, with background verified in an existing live chat.
-- Supplied red mascot logo replaces the sidebar and header marks and supplies the browser/touch icon. Typecheck/build pass; deployed at `d460d7d` and both logo images verified loaded in the public browser.
-- Capability profile panel removed at user request; capacity summary now spans the dashboard row. Offer scores retained. Typecheck/build pass; deployed at `39e2925` and verified in the public browser.
-- Dark workspace/fixed navigation revision: chat, composer, menus and approval panels now share marketplace charcoal surfaces with violet accents. Desktop navigation stays fixed at 216px, mobile retains a drawer. Compact readable cards use five columns at >=1360px, four/three/two/one at smaller widths. Browser observed five columns with no overflow at 1440px harness and mobile navigation at 320px. Deployed at `98c1bee`; live chat, effort menu and fixed sidebar navigation verified.
-- Marketplace-first revision implemented: eight colorful subscription offers across ChatGPT, Claude, Gemini, Mistral, Kimi and DeepSeek; local logos, search/filter/sort, capacity/score visuals, collapsed navigation, model/effort controls and saved per-task selection. Native effort is frozen under existing caps; actual execution metadata and receipt gates retained. Typecheck/build and 92 tests pass; desktop and 320/390px browser interaction checks observed. Deployed at `568e858` and verified live. Kimi K3.1 Pro/High selection survived reload of task `acd9d458-60fd-4e11-ad92-1281968032a0` at AWAITING_APPROVAL; no payment initiated.
-- Fee-cap recovery deployed at `0bb29ea`. Safari task `51f93096-ab0b-4252-b555-2cff0749b2f8` recovered from PAYMENT_UNKNOWN to fresh quote review, surviving reload. Its saved unsigned draft was 100 service + 94 fee = 194 sats against a 110-sat cap; signing was never requested. Fresh quote awaits human approval. Full WalletClient offline payment/change/receipt regression, 87 tests, typecheck/build pass. No live signature, transaction or paid result claimed.
-- Local conversational UI updated: question bubble, plain assistant response, bottom composer and reference 8 thinking trace that disappears on answer output. Compact system typography matches the supplied component; prior sidebar readability retained. Typecheck/build and 85 tests pass; offline browser lifecycle checks cover desktop/mobile. Local model/wallet remain unavailable; no live paid answer claimed. This UI revision is deployed and observed in Safari.
-- Reference 9 grid/theme implemented locally: neutral charcoal/white/gray surfaces, pointer-driven spectrum dots in empty chat, and spectrum capacity arcs. Desktop pointer changes, navigation teardown and 390px layout verified. Deployed and observed in the public app.
-- Repository: ardatas/mercaTUM-, main; frequent commits/pushes authorized.
-- User now requests public Vercel deployment and Gemini. API credential is stored in ignored local configuration, backend Secret Manager and the Vercel project as a secret environment variable.
-- Public app and canonical origin: https://mercatum-ai.vercel.app. Vercel proxies API/SSE/MCP to the persistent HTTPS backend.
-- Vercel project mercatum-ai: production deployment 2fWf879N49vtaQEXyZYEXsCy8Vhr is Ready at revision 0bb29ea. GitHub integration deployed successfully; the earlier manual-import email challenge is no longer a deployment blocker.
-- Native Gemini 3.8 Flash adapter integrated, with real tool-call IDs, private continuation signatures and streaming. Real capability probe, chat/code planning and MCP task creation reach AWAITING_APPROVAL.
-- User selected mainnet. Separate operator mainnet wallet initialized, preserving testnet storage. Buyer assets remain in BSV Desktop. PAYMENTS_ENABLED=true; public readiness passes; no real BSV transaction, paid answer or model-generated patch has been observed.
-- Public backend uses one e2-small VM, persistent20GB disk, TLS, scoped runtime secrets, IAP SSH, and seven-day daily snapshot policy. Session/CSRF, provider identity and browser/MCP tasks survived an actual container restart. Snapshot restore is untested.
-- Checks: typecheck/build and72 application tests pass; sponsor starter typecheck and38 tests pass. Public SSE replay and unauthenticated rejection checked. UI retains chat-only screen, bottom composer and modest persistent expansion.
-- Gates: Q1 local application evidence PASS. Safari on the deployed Vercel origin now shows WalletClient connected to BSV Desktop on mainnet, with a buyer identity distinct from the provider. Q2 still needs the authorized payment flow; Q3/Q5 remain blocked on exact quote and human native spending approval, and Q4 live signing evidence is pending. The first real Gemini chat purchase is prepared at 100 service sats with a proposed 150-sat total debit cap. No payment has been sent. In-app browser transport remains unavailable; use Safari.
-
-See [verification](../docs/verification.md), [deployment](../docs/deployment.md) and [tasks](TASKS.md). Developer pack and root guide remain unchanged.
+Next work: [task ledger](TASKS.md). Historical observations, revisions and screenshots: [verification](../docs/verification.md). Preserve the developer pack and root guide.

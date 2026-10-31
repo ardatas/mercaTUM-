@@ -1,39 +1,58 @@
 # Submission
 
-Recheck the official [track](https://hackathon.tum-blockchain.com/prizes#bsv-association) and [submission instructions](https://hackathon.tum-blockchain.com/prizes#how-to-submit) before submitting on [Devfolio](https://tum.devfolio.co/).
+Deadline confirmed in the rendered [submission instructions](https://hackathon.tum-blockchain.com/prizes#how-to-submit): **31 October 2026, 15:00 Europe/Berlin**. One Devfolio submission per team, up to three partner tracks; TUM Blockchain Track judging is automatic. Add every teammate and submit before the deadline. Edits are allowed until it closes.
 
-Recorded deadline: **31 October 2026, 15:00 Europe/Berlin**, read from the rendered submission tab during initial setup; revalidate before submission.
+Final readiness check: app checks and public health pass; the repo is public. Real payment/paid execution and the video/transaction links remain unverified. The current Chrome Devfolio session is signed out, so project fields, team membership and submitted status could not be inspected. The README includes setup/run instructions and a Mermaid architecture diagram. Separate vector exports are optional local assets.
 
-- [ ] Q1–Q5 PASS with observed evidence in [verification](verification.md).
-- [ ] Public repository with actual run/deploy instructions and stated limits.
-- [ ] Deployed HTTPS application with standard-wallet access and persistent state.
-- [ ] Demo video <=2.5 minutes showing real agent tool request, human wallet approval, real sats received, Arcade/WhatsOnChain and actual task result.
-- [ ] Briefly show code patch artifacts and external-agent MCP entry path.
-- [ ] Label the rental/provider listing as simulated; describe the real model API execution honestly.
-- [ ] Devfolio description: problem, target buyer, usage, implementation and BSV contribution.
-- [ ] Team added, BSV track selected and project submitted before the deadline.
+Track-fit concern: the expanded BSV brief expects a DeFi product as the core, with an agent using it to pay. Current implementation provides direct AI-service micropayments and no swap, liquidity or other DeFi mechanism. Do not claim one; technical payment qualification and product fit are separate assessments.
 
-Suggested demonstration: submit a task → agent requests paid execution → approve displayed quote → authorize in BSV Desktop/Browser → show received transaction → inspect actual answer or code diff and receipt. Keep keys, prompts containing secrets and tokens out of the recording.
+## Devfolio upload checklist
 
-Repository URL: [ardatas/mercaTUM-](https://github.com/ardatas/mercaTUM-). Live app: [mercatum-ai.vercel.app](https://mercatum-ai.vercel.app). Video: PENDING. Devfolio project: PENDING. Example transaction: PENDING.
+Checked against the supplied Judging Briefing, pages 4–6. These statuses describe prepared material, not verified completion of the Devfolio form.
 
-## Prepared description (not submitted)
+| Field / item | Prepared material / action |
+|---|---|
+| Project name and tagline | mercaTUM — Human-approved BSV micropayments for AI tasks. |
+| Project media (required) | Upload an actual application cover image or screenshot. Local live screenshots exist under ignored `artifacts/`; upload is unverified. Do not use an offline fixture as proof of live paid execution. |
+| The problem it solves (required) | Use the description below: bounded AI tasks, direct wallet payments, no platform deposit, reviewed code context and MCP access. |
+| Challenges we ran into (required) | An unsigned draft totalled 194 sats (100 service + 94 fee), exceeding its 110-sat cap. Recovery returns proven unsigned failures to quote review; signed or uncertain attempts reconcile the same transaction before another debit. |
+| Technologies used (required) | TypeScript, React, Tailwind CSS, Vite, Node.js, Express, SQLite, Knex, Zod, BSV SDK, Wallet Toolbox, BRC-29, Arcade, Gemini API, MCP, Docker, Caddy, Vercel, Google Cloud, Vitest and GitHub. |
+| Tracks | Select BSV Association / DeFi Rails for Agentic Payments if entering it; at most three partner tracks. TUM Blockchain Track judging is automatic. |
+| Builders | Add every teammate; membership unverified. |
+| Repository / live app | Public repository and live app links are below; README includes setup and run instructions. |
+| Video / BSV proof | Add the accessible video URL (at most 2.5 minutes) and actual WhatsOnChain transaction link; neither is recorded yet. |
+| Publication | Click **Publish project** before 15:00 and verify the published project URL. **Save as draft is not a submission.** |
 
-**mercaTUM — buy a bounded AI task with your wallet.**
+## Required material
 
-A buyer brings a question or a public code repository, reviews a fixed quote, and approves a direct BSV payment to the provider. The app verifies the receipt before a real model can execute the task. Results, code patches and receipts remain in the workspace; an external MCP agent uses the same approval path.
+- Public repository with setup/run instructions: [ardatas/mercaTUM-](https://github.com/ardatas/mercaTUM-).
+- Demo video, at most 2.5 minutes, showing the project end to end and a real agent payment: PENDING.
+- WhatsOnChain links to example transactions: PENDING.
+- Devfolio description covering the problem, target users, usage, implementation and contribution to BSV: draft below; submission PENDING.
 
-The marketplace listing and capacity values are simulated. The implementation uses an operator-owned model API, not consumer subscription sharing. Buyer keys stay in a standard wallet. A separate Toolbox wallet receives provider revenue, and Arcade verifies network acceptance of the same signed transaction. Human approval remains mandatory for each purchase.
+Live app: [mercatum-ai.vercel.app](https://mercatum-ai.vercel.app). Current qualification: [evidence](verification.md#current-qualification). A deployed app and offline tests do not establish a completed paid demo.
 
-**Current demonstrated state:** deployed Vercel frontend and persistent backend; Gemini 3.8 Flash real scope/tool requests; real GitHub import; validated patch generation from offline fixtures; 72 passing application tests. Public browser, MCP, SSE, reload and container-restart checks pass. Safari WalletClient connects to BSV Desktop on mainnet. A real payment, native signing evidence, receipt-backed model execution and a model-generated code patch remain pending.
+## Description draft
 
-## Planned video outline (150 seconds maximum; not recorded)
+mercaTUM lets a buyer or their MCP agent purchase a bounded AI task with BSV. A coordinator requests paid execution; the buyer reviews a fixed quote and approves a direct payment from a standard wallet to the provider. Server verification, Arcade acceptance and provider receipt gate model execution. The intended result is a chat answer or a downloadable patch against a reviewed public-repository snapshot.
 
-- 0–20s: show the buyer workspace and explicitly labelled demo capacity.
-- 20–45s: submit a small task; show the real agent purchase request and bounded fixed quote.
-- 45–80s: human reviews quote and native wallet; show receipt, network, sats, Arcade observation and WhatsOnChain.
-- 80–110s: show actual answer, coordinator continuation and persisted history after reload.
-- 110–135s: show public repository at its fixed commit and the resulting real downloadable patch, with checks marked not run.
-- 135–150s: show MCP submission returning the same human approval path.
+The project uses the BSV SDK, Wallet Toolbox, BRC-29 payments and Arcade. Buyer keys stay in BSV Desktop/Browser; the server wallet holds only provider revenue. Per-task micropayments let buyers pay without depositing a platform balance and give agents a human-approved route to paid services.
 
-No video, transaction or successful paid model result has been produced yet. Public submission remains unauthorized.
+Marketplace sellers and capacity are simulated. Actual work uses the configured server-side Gemini API. Real planning, wallet connection, repository import and MCP submission have recorded evidence. Real payment, receipt-backed execution and a model-generated patch remain pending; update these claims only after the corresponding live run.
+
+## Demo sequence
+
+1. 0–20s: explain the buyer task and label demo capacity.
+2. 20–45s: show the real coordinator purchase call and fixed quote.
+3. 45–80s: human approves in app/wallet; show receipt, sats, network, Arcade status and WhatsOnChain.
+4. 80–110s: show actual answer, coordinator continuation and reload persistence.
+5. 110–135s: show the code task's pinned revision and real patch; keep checks labelled `not_run`.
+6. 135–150s: show MCP submission and result through the same approval path.
+
+Before submission, complete Q1–Q5 and project acceptance, check all public links, add the team and select the BSV track. Keep secrets and private prompts out of the recording. This document prepares the submission; no video, external submission or successful payment is recorded yet.
+
+## Live judging
+
+The supplied briefing sets booth queues to open at 15:10 and finish around 17:20. For BSV, queue there first with the demo open, wallet connected and transaction explorer ready. Each slot is 2:30 pitch/demo, 2:00 questions and 0:30 changeover. TUM Blockchain Track has no booth or live demo; judges review the published submission.
+
+Pitch: 0:00–0:20 problem and user; 0:20–1:50 working flow; 1:50–2:20 BSV integration and transaction proof; 2:20–2:30 next steps. Keep the video as backup. Winners/closing: 17:30.

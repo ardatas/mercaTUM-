@@ -1,6 +1,6 @@
 # Execution workflow
 
-Documentation preparation does not authorize application code or payments. On implementation launch, follow this loop.
+For documentation-only work, check scope, source consistency, local links and the diff. For application changes, complete preflight and the implementation loop below. Neither workflow authorizes wallet spending.
 
 ## Preflight
 
@@ -14,15 +14,15 @@ Run preflight once per implementation session; repeat affected checks when code,
 
 ## Implementation loop
 
-1. Select the next dependency-ready task in [TASKS.md](TASKS.md); mark owner and status before dispatch.
-2. Give a subagent its owned paths, required contracts, acceptance criteria and relevant source references. The coordinator owns shared schema, package/lockfile and integration changes.
+1. Select the next dependency-ready acceptance step in [TASKS.md](TASKS.md); record its owner and status.
+2. If delegating, give each subagent disjoint paths, contracts, acceptance criteria and source references. The coordinator owns shared schema, package/lockfile and integration changes.
 3. Implement one reviewable slice. Before accepting it, inspect the diff, run the task's meaningful checks and record evidence. Enforce the [fixed-price purchase policy](../docs/contracts.md#fixed-price-purchases): scope before payment, firm quote, hard limits, explicit extensions and no technical-retry charge. A subagent's completion claim is insufficient.
 4. Resolve contract changes centrally before dependent agents continue. Integrate the real wallet → verified payment → real agent execution slice before UI polish or optional features.
 5. Continue until application checks, deployment, browser use and all gates below have observed evidence. Record an external blocker and continue independent work; do not invent a PASS.
 
 ## Qualification gates
 
-The [track rules](https://hackathon.tum-blockchain.com/prizes#bsv-association) define these gates. Results belong in verification.md.
+The [track rules](https://hackathon.tum-blockchain.com/prizes#bsv-association), checked 31 October 2026, supply the five requirements below. The evidence column is our acceptance standard. Arcade broadcast also follows the sponsor instructions. Code artifacts, MCP and restart/recovery are additional project requirements. Current results belong in [verification](../docs/verification.md#current-qualification).
 
 | ID | Required behavior | Evidence for PASS |
 |---|---|---|

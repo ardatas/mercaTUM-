@@ -4,7 +4,7 @@ Start: [AGENTS.md](../AGENTS.md) → [status](STATUS.md) → [brief](../docs/pro
 
 | When | Read |
 |---|---|
-| Starting the implementation loop | [Launch prompt](EXECUTION_PROMPT.md), [task ledger](TASKS.md) |
+| Continuing implementation | [Continuation prompt](EXECUTION_PROMPT.md), [task ledger](TASKS.md) |
 | Choosing module boundaries or deployment | [Architecture](../docs/architecture.md) |
 | Implementing or reviewing interfaces, state and errors | [Contracts](../docs/contracts.md) |
 | Wallet, payment, Arcade or reconciliation work | [BSV flow](../docs/bsv-flow.md) |
@@ -16,7 +16,7 @@ Start: [AGENTS.md](../AGENTS.md) → [status](STATUS.md) → [brief](../docs/pro
 
 ## BSV reference map
 
-Use [sponsor pins](../BSV-TBC26-Developer-Pack/AGENTS.md) first. Sections below refer to the [complete guide](../BSV_STACK_COMPLETE_GUIDE.md); paths refer to the [starter](../BSV-TBC26-Developer-Pack/starter/bsv21-token-kit/).
+Read [START-HERE](../BSV-TBC26-Developer-Pack/START-HERE.md), then [sponsor pins](../BSV-TBC26-Developer-Pack/AGENTS.md). Sections below refer to the [complete guide](../BSV_STACK_COMPLETE_GUIDE.md); paths refer to the [starter](../BSV-TBC26-Developer-Pack/starter/bsv21-token-kit/).
 
 | Task | Guide | Source / test |
 |---|---|---|

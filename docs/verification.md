@@ -1,5 +1,49 @@
 # Evidence
 
+## Current qualification
+
+Consolidated on 31 October 2026 from the observations below; this documentation pass made no new model request, wallet action or deployment check. Earlier assessments are historical. Gate definitions: [workflow](../.ai/WORKFLOW.md#qualification-gates).
+
+| Gate | Status | Recorded evidence / missing acceptance |
+|---|---|---|
+| Q1: BSV stack | PASS, local application evidence | Actual SDK/Toolbox calls, exact sponsor pins and offline wallet checks. Latest recorded baseline: 174 app tests and 38 starter tests, with typecheck/build checks. |
+| Q2: Standard wallet | PENDING, connection observed | BSV Desktop mainnet connection observed from deployed Safari and Chrome. Authorized live spending flow remains unobserved. |
+| Q3: Real transaction | BLOCKED | No real txid, Arcade acceptance or WhatsOnChain transaction link recorded. Needs human-approved payment. |
+| Q4: Non-custodial funds | PENDING live evidence | Source/offline checks keep buyer keys and signing in the standard wallet. Native signing path remains unobserved. |
+| Q5: Agent payment | BLOCKED | Real Gemini purchase calls reach approval; receipt-backed paid execution and coordinator resume remain unobserved. |
+
+Project acceptance also needs a paid code patch, MCP result retrieval and paid recovery/restart evidence. Unpaid task persistence and offline generated patches do not establish those results. No qualification claim is made.
+
+## Documentation alignment — 31 October 2026
+
+Checked the user-supplied requirements against the [official BSV track](https://hackathon.tum-blockchain.com/prizes#bsv-association), current source/configuration and this log. Consolidated scope, setup, continuation instructions, current status and delivery criteria. Removed superseded UI instructions and repeated change logs from working documents; retained historical evidence here. Sponsor requirements are distinguished from additional code/MCP/recovery acceptance.
+
+Documentation checks PASS: 13 changed Markdown files, local targets/anchors, balanced fenced blocks, source consistency and `git diff --check`. Application code, dependencies, developer pack and root guide are unchanged. No runtime tests, deployment, model calls or payments were performed for this edit. The submission deadline was not revalidated.
+
+## Final submission check — 31 October 2026
+
+- Application typecheck, 174 tests and production build PASS. Sponsor starter typecheck and 38 tests PASS. Build reports a large client chunk warning; build completes.
+- Public `/healthz` returns `ok=true`; `/readyz` returns ready/model/wallet/paymentsEnabled=true with no blockers. Served JS/CSS assets return HTTP 200. These endpoints establish operational readiness, not paid qualification.
+- Live Chrome chat `cb5ed74d-cfa6-4e8c-838c-4d9e87760995` still shows a connected mainnet wallet, 100-sat service quote, 500-sat cap, unchecked consent and disabled “Quote expired” action. No receipt or paid answer is displayed. No quote refreshed or payment attempted during this check.
+- GitHub API confirms repository PUBLIC. Remote main and local HEAD match `fb75ab1e821ca4cd2e59848ea935d0c0551b538d`; documentation edits and both vector diagram files are not committed/published. Sponsor pack/root guide remain unchanged against `821bcdf`; tracked sensitive-path scan finds no env/database/key candidates (not a full secret audit).
+- Official rendered submission tab confirms Saturday 31 October, 15:00 deadline, max 2.5-minute video, public repository, description and BSV transaction links. Expanded BSV About section expects a DeFi product at the core; direct AI-service payment alone leaves track fit unresolved.
+- Devfolio in Chrome is signed out; actual project draft, video, team and submission state are unverified. Existing documents contain no video or WhatsOnChain transaction link.
+- No deployment, publication, model request, wallet spending or external submission performed. Q3/Q5 remain blocked on observed real payment and paid execution.
+
+## Judging briefing documentation check — 31 October 2026
+
+Read all 12 pages of the supplied Judging Briefing and visually checked pages 4–6. Added the required Devfolio media/problem/challenges/technology fields, builder membership, Publish project requirement and live judging timing to submission.md. Existing README covers purpose, setup/run commands, live URL and limitations; README now uses Mermaid, so separate vector assets are optional.
+
+Remote main remains `fb75ab1e821ca4cd2e59848ea935d0c0551b538d`; the documentation update remains local. Video URL, project media upload, builders, actual published Devfolio URL and BSV transaction proof are not verified. No submission, upload, deployment or payment was performed. Documentation links and diff formatting checked; runtime checks were not repeated for this documentation edit.
+
+## Documentation publication — 31 October 2026
+
+User authorized publication of the updated documentation. Scope: 13 Markdown files covering README/setup, product requirements, agent workflow, submission checklist and evidence. README uses Mermaid; optional local vector exports are excluded. Historical entries saying the documentation was local describe the earlier checks.
+
+Local links/anchors, fenced blocks and diff formatting pass. Application code, dependencies, sponsor pack and root guide are unchanged. Publication does not change the outstanding payment qualification or Devfolio submission status.
+
+## Historical observations
+
 ## Documentation preparation — 30 October 2026
 
 These are read-only setup/document checks, not an implementation preflight or qualification result.
@@ -41,7 +85,7 @@ No project model/BSV/hosting variables were present in the execution environment
 
 Known live prerequisites to establish: public HTTPS wallet transport, native spending/fee-bound behavior, chosen network, funded buyer, distinct persistent provider wallet, model account/ID and persistent hosting. Missing ones become BLOCKED with a concrete next action during implementation; none has been tested here.
 
-## Qualification
+## Initial qualification assessment (historical)
 
 Gate definitions/evidence criteria live once in [WORKFLOW.md](../.ai/WORKFLOW.md).
 
@@ -92,7 +136,7 @@ User authorized implementation, preservation/use of seven design prompts and fre
 - Docker build initially failed because native SQLite needed Python/make/g++; these were added to the build stage and the image then built. No secrets/data enter its allowlisted build context. Runtime smoke and final browser checks recorded below when completed.
 - Developer pack and root guide unchanged in Git diff. No project credentials existed at preflight; no keys, proofs or opaque checkpoints are included in committed evidence.
 
-### Current gate assessment
+### Local-only gate assessment (historical)
 
 | Gate | Status                            | Observed evidence / missing step                                                                                           |
 | ---- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -419,6 +463,13 @@ Benchmark snapshot (Artificial Analysis, v5.0,31 October2026; scores are model b
 
 - Preflight: revision `be5c17c`, Node24.21.0/npm11.19.0; application typecheck and174 tests PASS. Sponsor starter installed packages match exact pins; typecheck and38 tests PASS. Public readiness reports model/wallet/payments ready. Existing architecture documentation/assets preserved. No wallet action; live spending evidence remains pending.
 - Coordinator owns T5 quote presentation: removed the secondary “Runs on” executor row at the user's request, retaining selected model/effort and immutable server quote data. Typecheck, four purchase-review tests, build and diff check PASS. Deployed `7728a3b`; Vercel `XQ8Uv92cPxR9gSCifqHepehvDxPX` SUCCESS. Public Chrome loads `/assets/index-BGJxAjiO.js` and renders purchase review with no “Runs on” text; the existing Gemini-selected task retains its selected-model label. The non-Gemini selection is covered by the purchase-review render test. No approval or payment initiated.
+
+## Conceptual vector architecture — 31 October 2026
+
+Historical local export work. README subsequently switched to Mermaid; the optional vector files are not included in this documentation publication.
+
+- Rebuilt the diagram with deterministic SVG shapes, editable text, custom line icons and explicit connector paths. `docs/assets/mercatum-architecture-vector.svg` is the vector source; the corresponding PNG is3840×2160, rendered with Sharp. README now uses this version and links both formats.
+- Generic model-provider abstraction replaces the named API in the visual. The diagram is labeled conceptual; it is not evidence of multi-provider implementation. XML parsing passes, SVG has no embedded raster images, and no Gemini label is present. Visually inspected the PNG for legible text and connector placement; `git diff --check` passes. Application code and live payment qualification are unchanged.
 
 ## Architecture visual — 31 October 2026
 
