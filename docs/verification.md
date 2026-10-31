@@ -269,3 +269,5 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 - Clean starting revision `373647e`; same implementation-session preflight remains valid. Node24.21.0/npm11.19.0 confirmed; dependencies and lockfiles unchanged. Prior application92/sponsor38 tests pass. Coordinator owns this narrow UI asset replacement; payment gates remain pending.
 
 - Original user PNG copied unchanged to `public/brands/mercatum.png`. Sidebar40px/header28px images load with correct dimensions in the local browser. Browser/touch icon links added; obsolete generated mark styles removed. Typecheck/build/diff check PASS.
+
+- Deployed `d460d7d`, Vercel `D8DzSyXLREoRYPYpHhX2G77UbWcW` SUCCESS. Live assets `index-B8XnFQ-a.js` / `index-SnwU1Ea0.css`; browser confirms both logo images loaded at40px/28px and favicon references the supplied PNG. Screenshot: ignored `artifacts/mascot-logo-live.png`.
