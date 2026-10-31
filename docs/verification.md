@@ -263,3 +263,9 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 - Removed profile component, selector, radar SVG, hover state and obsolete CSS. Remaining capacity summary spans the row. Typecheck/build and diff check PASS.
 
 - Deployed code `39e2925`; Vercel `2J5tH3ygUdpYMUkNfMret4tFZc1m` SUCCESS. Canonical assets `index-BcuGlXsy.js` / `index-DxuUY84D.css`. Live browser confirms no Capability profile text or panel, capacity summary retained, and equal document client/scroll widths of1265px. Screenshot: ignored `artifacts/marketplace-no-profile-live.png`.
+
+## Supplied brand logo — 31 October 2026
+
+- Clean starting revision `373647e`; same implementation-session preflight remains valid. Node24.21.0/npm11.19.0 confirmed; dependencies and lockfiles unchanged. Prior application92/sponsor38 tests pass. Coordinator owns this narrow UI asset replacement; payment gates remain pending.
+
+- Original user PNG copied unchanged to `public/brands/mercatum.png`. Sidebar40px/header28px images load with correct dimensions in the local browser. Browser/touch icon links added; obsolete generated mark styles removed. Typecheck/build/diff check PASS.

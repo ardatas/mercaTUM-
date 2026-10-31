@@ -111,21 +111,10 @@ input[type="checkbox"] {
   color: #bbbbbb;
   font-weight: 600;
 }
-.brand-symbol {
-  font-size: 25px;
-  line-height: 34px;
-  letter-spacing: -3px;
-  background: #f0f0f0;
-  color: var(--sidebar);
-  border-radius: 10px;
-  width: 35px;
-  height: 35px;
-  padding-left: 6px;
-  font-weight: 700;
-}
-.brand-symbol span {
-  font-size: 16px;
-  vertical-align: top;
+.brand-logo {
+  display: block;
+  flex-shrink: 0;
+  object-fit: contain;
 }
 .new-task {
   font-weight: 600;
@@ -1742,9 +1731,6 @@ h1 {
   background: #101112;
   border-color: #292b2d;
 }
-.marketplace-shell .brand-symbol {
-  color: #222;
-}
 .selected-offer-strip {
   display: flex;
   align-items: center;
@@ -1930,10 +1916,6 @@ h1 {
 }
 .topbar {
   background: var(--canvas);
-}
-.brand-symbol {
-  background: #bca4ff;
-  color: #20182b;
 }
 .workspace {
   max-width: 940px;

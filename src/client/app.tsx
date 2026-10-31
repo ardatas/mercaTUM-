@@ -366,9 +366,13 @@ export function App() {
             window.history.replaceState(null, "", "/");
           }}
         >
-          <span className="brand-symbol">
-            m<span>↗</span>
-          </span>
+          <img
+            className="brand-logo"
+            src="/brands/mercatum.png"
+            alt=""
+            width={40}
+            height={40}
+          />
           <span>mercaTUM</span>
           <ChevronDown size={14} />
         </button>
@@ -519,7 +523,13 @@ export function App() {
               window.history.replaceState(null, "", "/");
             }}
           >
-            <Blocks size={16} />
+            <img
+              className="brand-logo"
+              src="/brands/mercatum.png"
+              alt=""
+              width={28}
+              height={28}
+            />
             <span>mercaTUM</span>
           </button>
         </header>
