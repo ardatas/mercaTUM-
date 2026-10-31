@@ -199,6 +199,23 @@ describe("real wallet engine with offline chain; no live spending", () => {
     ).rejects.toThrow("wallet locked");
     expect(claim).not.toHaveBeenCalled();
     expect(create).not.toHaveBeenCalled();
+    auth.mockRejectedValueOnce(
+      new Error(
+        "No wallet available over any communication substrate. Install a BSV wallet today!",
+      ),
+    );
+    await expect(
+      payApprovedQuote({
+        quote,
+        attemptId: "permission-pending",
+        maxAuthorizedDebitSats: 1000,
+        wallet: buyer,
+        storage,
+        claimWallet: claim,
+      }),
+    ).rejects.toThrow(/local-app access.*Connect wallet again/);
+    expect(claim).not.toHaveBeenCalled();
+    expect(create).not.toHaveBeenCalled();
     auth.mockRestore();
     await expect(
       payApprovedQuote({

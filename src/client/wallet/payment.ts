@@ -45,6 +45,19 @@ async function walletRead<T>(
         );
       }),
     ]);
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.includes(
+        "No wallet available over any communication substrate",
+      )
+    ) {
+      throw new AppError(
+        "WALLET_UNAVAILABLE",
+        "Cannot reach your BSV wallet. Open and unlock BSV Desktop, allow this site's local-app access in your browser, then click Connect wallet again. No transaction was started by this connection check.",
+      );
+    }
+    throw error;
   } finally {
     clearTimeout(timer);
   }
