@@ -364,3 +364,9 @@ Benchmark snapshot (Artificial Analysis, v5.0,31 October2026; scores are model b
 - Typecheck/build/diff checks PASS. Local Chrome observes loaded48×48px badge, no monochrome filter, and80px-tall button with fitting label/arrow. Adapted existing BSV path artwork into a blue gradient square; original source SVG retained. No wallet action triggered.
 
 - Deployed `96667c8`; Vercel `92gTehs1o9a4hoSmUarzBAbdVtLn` SUCCESS. Public Chrome confirms loaded48×48px `/brands/bsv-square.svg`, no color filter and80px button. Live screenshot: ignored `artifacts/bsv-square-button-live.png`.
+
+## Chat input width — 31 October 2026
+
+- Clean starting revision `2e8ec74`; same-session preflight remains valid with unchanged runtime/dependencies and prior106 tests PASS. Coordinator owns CSS-only adjustment: remove the720/740px input caps so resting and expanded composer match the response column.
+
+- Typecheck/build/diff check PASS. Local Chrome measures both response and composer at868px wide with matching430px left edge, before and after entering text. Screenshot: ignored `artifacts/chat-width-preview.png`.
