@@ -2,7 +2,7 @@
 
 Updated: 31 October 2026. Vercel frontend and persistent backend deployed; native-wallet validation pending.
 
-- Wallet connection button now has a72px minimum height and a locally hosted BSV Blockchain wordmark. Desktop/mobile browser dimensions and logo loading verified; typecheck/build pass. Deployment pending.
+- Wallet connection button now has a72px minimum height and a locally hosted BSV Blockchain wordmark. Desktop/mobile browser dimensions and logo loading verified locally; typecheck/build pass. Deployed at `d2d6570`; public assets/logo verified. Live visual recheck unavailable due browser-control timeouts.
 
 - Single task history deletion implemented: per-item menus in recent tasks/history, confirmation, persistent owner-scoped removal and selected-chat reset. Receipts and task recovery links retained; active work continues. Typecheck/build and94 tests pass; browser cancellation, selected-chat deletion, reload, other-chat preservation and error handling observed. Deployed at `32be4d2`; live deletion and reload verified using a disposable chat.
 

@@ -309,3 +309,5 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 - Source: official BSV website wordmark, https://bsvblockchain.org/wp-content/uploads/2025/10/logo-bsvb.svg (retrieved31 October2026). Store the unmodified logo locally, with a white CSS treatment for contrast on the dark button; increase sidebar button minimum height to72px.
 
 - Typecheck/build/diff check PASS. Browser observed72px button height at desktop (191px button width) and mobile drawer (236px width); BSV SVG loaded in both. No wallet operation triggered. Frontend-only change; backend rollout unnecessary.
+
+- Deployed `d2d6570`; Vercel `ADhFifSsuveF4uh2SSssAEiHBWEV` SUCCESS. Public assets `index-CtznOT1R.js` / `index-CvpVGaz_.css` contain the logo reference and72px button rule; `/brands/bsv.svg` returns200 and exactly matches the source file. Local desktop/mobile visual checks passed. Public visual recheck remains PENDING because Chrome control timed out; two viewport-reset attempts also timed out. No wallet action performed.
