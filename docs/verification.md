@@ -370,3 +370,5 @@ Benchmark snapshot (Artificial Analysis, v5.0,31 October2026; scores are model b
 - Clean starting revision `2e8ec74`; same-session preflight remains valid with unchanged runtime/dependencies and prior106 tests PASS. Coordinator owns CSS-only adjustment: remove the720/740px input caps so resting and expanded composer match the response column.
 
 - Typecheck/build/diff check PASS. Local Chrome measures both response and composer at868px wide with matching430px left edge, before and after entering text. Screenshot: ignored `artifacts/chat-width-preview.png`.
+
+- Deployed `c9bae2e`; Vercel `9Cim7TQFDkvvMxYX7cwPu8tZKgYY` SUCCESS. Live Chrome confirms composer and workspace content both868px with430px left edge. Completed-response alignment verified locally; no new paid task initiated. Screenshots: ignored `artifacts/chat-width-live.png` and `artifacts/chat-width-preview.png`.
