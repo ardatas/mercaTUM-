@@ -35,7 +35,9 @@ Reviewed the 58 candidate files for phased commits: original developer pack/conf
 
 ## Implementation preflight
 
-PENDING: run [.ai/WORKFLOW.md](../.ai/WORKFLOW.md) after implementation is requested. Record checked revision/app lock hash, runtime, commands/results, wallet/network/funds, provider readiness and hosting prerequisites. Do not reuse reference-kit evidence as application evidence.
+31 October 2026: implementation authorized. Clean working tree at `821bcdfba1c4b174dc225297fd30e7e26bec3493`. Node v24.21.0, npm 11.19.0. Existing starter installation: `npm ls --depth=0` matches all seven sponsor pins; `npm run typecheck` passes; `npm test` passes 38/38 tests (4 files). No reinstall was needed and no developer-pack source was edited. Starter lock SHA-256: `e4313f79014889f81e84ccaf4e64e4eb3c19fedf7a97f1feec97a7fca1465deb`.
+
+No project model/BSV/hosting variables were present in the execution environment. No project .env exists. Deployment provider, configured model account, distinct merchant key/storage, chosen network and buyer spending authorization remain to establish. No native spending or live debit authorized or performed. Application implementation may proceed; live purchases remain fail-closed.
 
 Known live prerequisites to establish: public HTTPS wallet transport, native spending/fee-bound behavior, chosen network, funded buyer, distinct persistent provider wallet, model account/ID and persistent hosting. Missing ones become BLOCKED with a concrete next action during implementation; none has been tested here.
 

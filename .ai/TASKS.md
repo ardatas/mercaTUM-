@@ -4,7 +4,7 @@ These are scoped assignments for the future implementation loop, not completed w
 
 | ID | Assignment | Dependencies | Status | Owner / evidence |
 |---|---|---|---|---|
-| T0 | Preflight, shared schemas, app skeleton and durable storage | Implementation request | TODO | Unassigned |
+| T0 | Preflight, shared schemas, app skeleton and durable storage | Implementation request | RUNNING | Coordinator; preflight below |
 | T1 | Buyer wallet and approval adapter | T0 schemas | TODO | Unassigned |
 | T2 | Provider wallet, quote, verification and Arcade ledger | T0 schemas/storage | TODO | Unassigned |
 | T3 | Real coordinator/tool loop and paid chat executor | T0; integrate T2 receipt | TODO | Unassigned |

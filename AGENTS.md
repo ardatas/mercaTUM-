@@ -1,6 +1,6 @@
 # Agent instructions
 
-Current task: prepare documentation; application implementation is not authorized in this turn. The selected product is a buyer-side chat/code app with a demo provider listing, real model execution and a real, explicitly approved BSV payment to a separate provider wallet. Scope: [project brief](docs/project-brief.md).
+Current task: implementation and deployment authorized by the user on 31 October 2026. The selected product is a buyer-side chat/code app with a demo provider listing, real model execution and a real, explicitly approved BSV payment to a separate provider wallet. Scope: [project brief](docs/project-brief.md).
 
 ## Required workflow
 
