@@ -378,3 +378,11 @@ Benchmark snapshot (Artificial Analysis, v5.0,31 October2026; scores are model b
 - Clean starting revision `a2e4c29`; same-session preflight valid, runtime/dependencies unchanged. Coordinator owns presentation sizing only: enlarge both brand marks, model icons and model headings, preserving five-column cards and mobile layouts.
 
 - Typecheck/build/diff check PASS. Local Chrome: brand marks68px/44px; chat model badge52px with38px artwork and24px heading; marketplace badges40px/44px and headings24px/26px. Five columns at1360px retain zero card-header overflow.320px chat and marketplace have matching client/scroll widths; chat tier wraps cleanly.
+
+## Mainnet qualification and wallet module diagnosis — 31 October 2026
+
+- User requests all catalog selections/dialogs, wallet connection and mainnet payment/recovery testing, fixing observed failures. Explicit total test spending budget:5,000 sats including all network fees. Native spending remains human-approved; no automatic replacement of unresolved payments.
+- Preflight at clean2e8ec74: app typecheck/106 tests PASS; same-session unchanged lock and sponsor pins/38 tests remain valid. Read current status, brief, contracts, AI/BSV flows, sponsor instructions and guide section4. Installed BSV Desktop3.3.1 observed on Mainnet. Backend still runs digest7de492e5, predating recovery fixes; rollout required before live payment tests.
+- Red reproduction: public obsolete wallet chunks payment-B9Pg7N3U.js and payment-Bw5vRzag.js return404/text/plain; current payment-BcBoMzYF.js returns200/JavaScript. Safari displays exact `Importing a module script failed.` in a catalog chat. `npx vitest run test/client-build.test.ts` FAILS: wallet code is deferred until a user action and can disappear after deployment. Ranked alternatives: stale lazy chunk (supported by404), current build missing module (current chunk200), browser policy blocking imports (to check on fresh page). Vite documents this deployment failure at https://vite.dev/guide/build#load-error-handling.
+
+- Deployed `2bfdd63`; Vercel `8RWVEif8dUiFCfmC4nizYvvmpvvp` SUCCESS. Public Chrome confirms68px/44px brand marks,24px marketplace heading and52px chat model badge with24px title. Screenshot: ignored `artifacts/larger-logos-live.png`.

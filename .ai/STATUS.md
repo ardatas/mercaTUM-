@@ -2,7 +2,7 @@
 
 Updated: 31 October 2026. Vercel frontend and persistent backend deployed; native-wallet validation pending.
 
-- Brand marks enlarged to68px left/44px right; model badges and headings enlarged in marketplace and chat. Desktop five-column and320px checks PASS; deployment pending.
+- Brand marks enlarged to68px left/44px right; model badges and headings enlarged in marketplace and chat. Desktop five-column and320px checks PASS; deployed at `2bfdd63` and live sizes verified.
 - Chat input now spans the same width as responses in both resting and expanded states; local browser measures matching868px widths. Typecheck/build PASS; deployed at `c9bae2e` and live width verified.
 - Purchase review and marketplace update deployed at `ef58633`: saved chat model/effort plus actual Gemini executor, compact terms,5,000-sat default cap, sourced AA Index v5.0 scores and demo token capacity. Typecheck/build and106 integrated tests PASS; desktop/320px checks PASS. Public browser verifies sourced benchmarks, token capacity and selected-model composer; served bundle includes the5,000-sat review. Actual execution remains Gemini.
 
