@@ -284,11 +284,16 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 
 - Preflight: clean starting revision `1016c8d`; Node24.21.0/npm11.19.0; lock SHA-256 `e86e9f916dfbcef78e0b3474b5ad9229cbf34d69cff48970ac2f4a85267f0d7e`. App typecheck,92 tests/build PASS. Sponsor packages match all seven pins; typecheck/38 tests PASS. No dependency changes or fresh install needed; developer pack unchanged.
 - Public readiness observed ready/model/wallet/paymentsEnabled=true. Existing mainnet provider and buyer connection evidence is documented above; no new wallet connection or spending approval inferred. Q3/Q5 remain pending.
-- Coordinator owns T0/T5 slice: owner-scoped persistent removal of one task from history, per-item controls and confirmation, preserving payment/execution records and direct recovery links. Local browser verification recorded below; public deployment verification pending.
+- Coordinator owns T0/T5 slice: owner-scoped persistent removal of one task from history, per-item controls and confirmation, preserving payment/execution records and direct recovery links. Local and public verification recorded below.
 
 - Implementation:94 tests, typecheck and build PASS. API regression covers unauthenticated/foreign-owner/CSRF/Origin rejection, strict body validation, duplicate delete and preserving the other entry. Disk restart and completed worker update preserve history removal and the original receipt/result.
 - Chrome offline fixture: Cancel retains both chats; deleting the selected chat clears its URL/composer and leaves the other chat; reload retains removal. History menu failure leaves the item and shows an actionable error. In-app browser native-confirm testing stalled; replaced native confirm with an accessible in-app dialog and completed checks in Chrome.
 - Backend rollback digest: `c0bda0cd69f953eb4b187151819acad0edf00582864ed3d3f7cbc1c5e33fb96d`. New linux/amd64 image digest: `7de492e5a07967d35ef06db34490b49f348af73dc613d33e3cc6736e9b496584`.
+
+
+- Public deployment: code `32be4d2`, Vercel `5SKPs7jj5Z2KFwcoTP3pJtaubkeb` SUCCESS; served assets `index-C8ec5LY7.js` / `index-zRawHj6O.css` both200. Backend deployed by digest above; public readiness healthy. Developer pack unchanged.
+- Live API disposable task `11cf0040-5080-4d36-88d6-8927ffc54c1f`: invalid CSRF403, repeated authorized removal200, missing from history, direct recovery200, no attempt/receipt.
+- Chrome live UI disposable task `f6b49f91-f5f0-4a42-ac09-c428c207e919`: history-row menu opens confirmation; deleting the selected task removes sidebar/history entry and task URL; reload still shows empty history. Screenshot: ignored `artifacts/history-delete-live.png`. No pre-existing user history removed, wallet action or payment initiated. Q3/Q5 remain pending.
 
 ## New task opens marketplace — 31 October 2026
 

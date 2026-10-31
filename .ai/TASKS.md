@@ -144,4 +144,4 @@ DONE: deployed 98c1bee and live-browser verified. Coordinator owns theme/navigat
 
 ### Single task history deletion — 31 October 2026
 
-IN PROGRESS — coordinator owns T0/T5: persistent owner-scoped history removal, sidebar/history controls, confirmation and selected-task reset; payment and execution records retained.
+DONE — T0/T5 implemented and deployed at `32be4d2`: persistent owner-scoped history removal, sidebar/history controls, confirmation and selected-task reset; payment and execution records retained.94 tests/typecheck/build pass; live disposable-chat deletion/reload verified.
