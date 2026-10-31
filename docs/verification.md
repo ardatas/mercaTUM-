@@ -317,3 +317,5 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 - Clean starting revision `d0e7bf7`; same-session preflight remains valid with unchanged runtime/dependencies. Coordinator owns a narrow T5 presentation change: increase the sidebar/mobile-drawer mascot from40px to56px, preserving the header mark and existing navigation.
 
 - Typecheck/build/diff check PASS. Desktop browser confirms loaded56×56px mascot and brand text contained within the191px-wide brand button.
+
+- Pushed `b71130d` to main; remote HEAD verified. Vercel has not attached a status/check after repeated checks; public origin still serves `index-CtznOT1R.js` from the previous revision. Deployment PENDING. Mobile/live browser inspection was unavailable due Chrome-control timeouts; desktop local rendering was observed above.
