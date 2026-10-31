@@ -2,7 +2,7 @@
 
 Updated: 31 October 2026. Vercel frontend and persistent backend deployed; native-wallet validation pending.
 
-- Chat background now stays mounted during pending, streaming and completed responses; local browser confirms all three states. Typecheck/build pass; deployment verification pending.
+- Chat background now stays mounted during pending, streaming and completed responses; local browser confirms all three states. Typecheck/build pass; deployed at `7af0b12`, with background verified in an existing live chat.
 - Supplied red mascot logo replaces the sidebar and header marks and supplies the browser/touch icon. Typecheck/build pass; deployed at `d460d7d` and both logo images verified loaded in the public browser.
 - Capability profile panel removed at user request; capacity summary now spans the dashboard row. Offer scores retained. Typecheck/build pass; deployed at `39e2925` and verified in the public browser.
 - Dark workspace/fixed navigation revision: chat, composer, menus and approval panels now share marketplace charcoal surfaces with violet accents. Desktop navigation stays fixed at 216px, mobile retains a drawer. Compact readable cards use five columns at >=1360px, four/three/two/one at smaller widths. Browser observed five columns with no overflow at 1440px harness and mobile navigation at 320px. Deployed at `98c1bee`; live chat, effort menu and fixed sidebar navigation verified.
