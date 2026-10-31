@@ -420,3 +420,5 @@ Benchmark snapshot (Artificial Analysis, v5.0,31 October2026; scores are model b
 - Clean starting revision `6227945`; same-session preflight remains valid, runtime/dependencies unchanged. Coordinator owns button presentation and mobile layout only; preserve marketplace navigation and active task.
 
 - Added violet-accent button with marketplace icon, directional arrow,46px minimum height, hover/pressed/focus styling and readable15px label. Mobile uses a full-width row instead of hiding its label.320px browser reports288px button and equal320px client/scroll widths; click opens Marketplace. Typecheck/build/diff check PASS.
+
+- Deployed `86d3c6a`; Vercel `4bdFo9VtL7vorLEsmVpqxCzWdjTg` SUCCESS. Public Chrome confirms46.5px button height/15px label and successful return to Marketplace. Screenshot: ignored `artifacts/browse-offers-live.png`.
