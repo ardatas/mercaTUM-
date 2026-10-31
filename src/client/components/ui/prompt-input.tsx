@@ -1,11 +1,5 @@
 import { useState, useEffect, type FormEvent } from "react";
-import {
-  ArrowUp,
-  Code2,
-  MessageSquare,
-  Paperclip,
-  ChevronDown,
-} from "lucide-react";
+import { ArrowUp, Code2, MessageSquare, Paperclip } from "lucide-react";
 // Reference 3: expand once on initial focus; blur never contracts it.
 export function PromptInput({
   mode,
@@ -42,7 +36,7 @@ export function PromptInput({
         aria-label="Task prompt"
         placeholder={
           mode === "chat"
-            ? "What would you like to work on?"
+            ? "Ask anything…"
             : "What should change in this repository?"
         }
         value={value}

@@ -19,3 +19,5 @@ D0/D7 use reference 1, D1 uses 3, D2 uses 4 and 7, D3 uses 6, D5 uses 2 and 5. D
 Visual plan: quiet graphite sidebar, off-white workspace, charcoal text, silver borders and restrained blue activity accents. Compact navigation; generous central composer; a glass dial is the distinctive capacity indicator. Accessible keyboard focus, reduced motion and mobile drawers. The app is named mercaTUM from the configured repository.
 
 Verbatim references retain their original example copy and imports for provenance. Integrated components live under src/client/components/ui with the @ alias rooted at src/client; demo placeholders are replaced by owned task data.
+
+Latest user direction: near-black text, concise functional labels, and a chat-only main workspace. Remove the welcome hero, suggestion cards, explanatory sidebar panel and marketing footer. Keep capacity in its own navigation view and preserve transaction approval details.

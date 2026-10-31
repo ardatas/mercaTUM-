@@ -3,6 +3,7 @@
 Updated: 31 October 2026. Local preview delivered; live setup remains pending.
 
 - Repository: [ardatas/mercaTUM-](https://github.com/ardatas/mercaTUM-), branch `main`. User authorized frequent commits/pushes.
+- UI revision: chat-only main workspace, near-black text and concise labels; capacity is a separate view. Desktop/mobile browser checks and typecheck/build pass.
 - Current user direction: local preview now; the user will configure server secrets in ignored `.env`. No public deployment or live BSV spending performed.
 - Implemented: Node/React app, durable SQLite task/payment ledger, standard-wallet adapter, provider Toolbox/Arcade adapter, real Responses adapter, public-repository snapshot/patch flow, authenticated MCP, and UI adapted from all seven saved references.
 - Local model credentials, selected model ID and provider wallet are absent. Paid flow fails closed. Simulated capacity is explicitly labelled; no fake model output or paid receipt exists.

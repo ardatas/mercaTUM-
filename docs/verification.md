@@ -115,3 +115,8 @@ Public qualification is **not claimed**. Public hosting deferred by the user; li
 - Final preview console: no warnings/errors captured. Composer preset selection preserves expansion; only New task resets it. Local screenshot artifacts are saved under ignored `artifacts/local-desktop.jpg` and `artifacts/local-mobile.jpg`. No wallet approval, model result or chain transaction is depicted.
 
 Application lock SHA-256 at local delivery: `e86e9f916dfbcef78e0b3474b5ad9229cbf34d69cff48970ac2f4a85267f0d7e`.
+
+### Chat-only UI revision — 31 October 2026
+
+- Removed the workspace hero, suggestions, capacity/explainer aside and footer. Capacity remains in its own tab; setup blockers remain visible there. Simplified navigation and page copy, with near-black primary text and darker secondary text. Payment approval details unchanged.
+- `npm run typecheck` and `npm run build`: PASS. Existing large-chunk build warning remains. Browser inspected at 1440×1000 and 390×844: main contains only the chat controls, mobile document/scroll width both 390px, textarea computed color rgb(17,17,17). Composer stays at four rows after blur and resets to two on New task. Capacity navigation works; no browser warning/error logs observed. Screenshots updated in ignored artifacts directory.

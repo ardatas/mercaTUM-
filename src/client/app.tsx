@@ -266,7 +266,7 @@ export function App() {
         </div>
         <div>
           <strong>{provider?.name ?? "mercaTUM Studio"}</strong>
-          <span>Chat & code · operator API</span>
+          <span>Chat & code</span>
         </div>
         <span className="badge">Demo provider</span>
       </div>
@@ -285,16 +285,12 @@ export function App() {
           <strong>
             {provider?.priceSats ?? "—"} <small>sats / task</small>
           </strong>
-          <span>Fixed quote before you pay</span>
         </div>
         <span className={`availability ${readiness?.ready ? "online" : ""}`}>
           {readiness?.ready ? "Available" : "Setup pending"}
         </span>
       </div>
-      <p className="simulation-note">
-        Capacity is simulated. Execution uses the configured model API. No
-        subscription credentials are shared.
-      </p>
+      <p className="simulation-note">Simulated listing and capacity.</p>
     </div>
   );
   return (
@@ -311,9 +307,7 @@ export function App() {
           <span className="brand-symbol">
             m<span>↗</span>
           </span>
-          <span>
-            mercaTUM<small>YOUR AI WORKSPACE</small>
-          </span>
+          <span>mercaTUM</span>
           <ChevronDown size={14} />
         </button>
         <button className="new-task" onClick={reset}>
@@ -402,7 +396,7 @@ export function App() {
               </ContextActions>
             ))
           ) : (
-            <p>Your work will appear here.</p>
+            <p>No tasks yet</p>
           )}
         </div>
         <div className="sidebar-bottom">
@@ -410,13 +404,13 @@ export function App() {
             <span className={wallet ? "wallet-dot connected" : "wallet-dot"} />
             <div>
               <strong>
-                {wallet ? "Wallet connected" : "Your wallet, your control"}
+                {wallet ? "Wallet connected" : "Wallet disconnected"}
               </strong>
-              <span>
-                {wallet
-                  ? `${wallet.network} · ${wallet.identityKey.slice(0, 8)}…`
-                  : "Approve each payment yourself"}
-              </span>
+              {wallet && (
+                <span>
+                  {wallet.network} · {wallet.identityKey.slice(0, 8)}…
+                </span>
+              )}
             </div>
           </div>
           <button className="wallet-button" onClick={connect} disabled={busy}>
@@ -424,9 +418,6 @@ export function App() {
             {wallet ? "Reconnect wallet" : "Connect wallet"}
             <ArrowUpRight size={14} />
           </button>
-          <div className="sidebar-footnote">
-            Built for TUM Blockchain & AI <span>2026</span>
-          </div>
         </div>
       </aside>
       <div className="main-column">
@@ -439,8 +430,6 @@ export function App() {
             >
               <Menu size={19} />
             </button>
-            <span className="breadcrumb">Personal workspace</span>
-            <span className="slash">/</span>
             <strong>
               {view === "capacity"
                 ? "Available capacity"
@@ -449,22 +438,9 @@ export function App() {
                   : view === "agents"
                     ? "Agent access"
                     : mode === "code"
-                      ? "Code workspace"
-                      : "Chat workspace"}
+                      ? "Code"
+                      : "Chat"}
             </strong>
-          </div>
-          <div className="topbar-right">
-            <span className="demo-indicator">
-              <span />
-              Demo marketplace
-            </span>
-            <button
-              className="avatar"
-              aria-label="Open task history"
-              onClick={() => setView("history")}
-            >
-              M
-            </button>
           </div>
         </header>
         <main>
@@ -482,7 +458,7 @@ export function App() {
             </div>
           )}
           {!loaded && !error ? (
-            <p className="page-loading">Opening your workspace…</p>
+            <p className="page-loading">Loading…</p>
           ) : (
             <>
               {view === "workspace" && (
@@ -490,21 +466,6 @@ export function App() {
                   <div className="workspace-main">
                     {!task ? (
                       <>
-                        <div className="workspace-heading">
-                          <div className="eyebrow">
-                            <span /> A LITTLE CAPACITY. A LOT OF POSSIBILITY.
-                          </div>
-                          <h1>
-                            What will you
-                            <br />
-                            <span>make possible?</span>
-                          </h1>
-                          <p>
-                            Bring a question. Bring your code.
-                            <br className="mobile-break" /> Get the right AI for
-                            the work.
-                          </p>
-                        </div>
                         {extension && (
                           <div className="notice">
                             New extension task. A separate quote and approval
@@ -515,7 +476,7 @@ export function App() {
                           <section className="repo-import">
                             <div>
                               <FolderGit2 size={19} />
-                              <strong>Start with a public repository</strong>
+                              <strong>Public repository</strong>
                             </div>
                             <div className="repo-input-row">
                               <input
@@ -538,10 +499,7 @@ export function App() {
                                 Import <ArrowRight size={14} />
                               </button>
                             </div>
-                            <p>
-                              Review the pinned files before sharing context
-                              with the model. Your repository stays untouched.
-                            </p>
+                            <p>Select files to share with the model.</p>
                           </section>
                         )}
                         {snapshot && mode === "code" && (
@@ -562,46 +520,6 @@ export function App() {
                           hasContext={!!snapshot?.consentedAt}
                           initialValue={initialPrompt}
                         />
-                        <div className="composer-caption">
-                          <ShieldCheck size={13} />
-                          Review the scope and fixed price before approving
-                          payment.<span>⌘ ↵ to continue</span>
-                        </div>
-                        <div className="suggestions">
-                          {[
-                            {
-                              icon: MessageSquare,
-                              title: "Make sense of an idea",
-                              text: "Compare two approaches and their tradeoffs.",
-                              prompt:
-                                "Compare REST and GraphQL for a small team building its first API. Focus on concrete tradeoffs.",
-                              mode: "chat" as const,
-                            },
-                            {
-                              icon: Code2,
-                              title: "Make a focused change",
-                              text: "Select a repo. Review a real patch.",
-                              prompt:
-                                "Make a small, focused improvement to the selected code and explain the change.",
-                              mode: "code" as const,
-                            },
-                          ].map((s) => (
-                            <button
-                              key={s.title}
-                              onClick={() => {
-                                setMode(s.mode);
-                                setInitialPrompt(s.prompt);
-                              }}
-                            >
-                              <s.icon size={18} />
-                              <strong>
-                                {s.title}
-                                <ArrowUpRight size={14} />
-                              </strong>
-                              <p>{s.text}</p>
-                            </button>
-                          ))}
-                        </div>
                       </>
                     ) : (
                       <div className="task-content">
@@ -811,61 +729,15 @@ export function App() {
                       </div>
                     )}
                   </div>
-                  <aside className="workspace-aside">
-                    <div className="section-label">
-                      YOUR CAPACITY <span>↗</span>
-                    </div>
-                    {renderCapacity()}
-                    <div className="how-it-works">
-                      <span className="section-label">A SIMPLE EXCHANGE</span>
-                      <div>
-                        <span>01</span>
-                        <p>
-                          <strong>Define the work</strong>A question or a
-                          focused code change.
-                        </p>
-                      </div>
-                      <div>
-                        <span>02</span>
-                        <p>
-                          <strong>Review your quote</strong>Clear scope. Fixed
-                          sats. Your approval.
-                        </p>
-                      </div>
-                      <div>
-                        <span>03</span>
-                        <p>
-                          <strong>Keep what you make</strong>Real output, code
-                          artifacts and a receipt.
-                        </p>
-                      </div>
-                    </div>
-                    {readiness && !readiness.ready && (
-                      <div className="setup-note">
-                        <span className="status-dot" />
-                        <strong>Getting ready</strong>
-                        <p>{readiness.blockers.join(" ")}</p>
-                        <small>
-                          No payment is available until setup checks pass.
-                        </small>
-                      </div>
-                    )}
-                  </aside>
                 </div>
               )}
               {view === "capacity" && (
                 <div className="page-content">
-                  <div className="eyebrow">THE CAPACITY MARKETPLACE</div>
-                  <h1>
-                    A little more room
-                    <br />
-                    to do your best work.
-                  </h1>
-                  <p className="page-description">
-                    One demonstration listing. Actual model execution and
-                    individually approved BSV payments.
-                  </p>
+                  <h1>Available capacity</h1>
                   {renderCapacity(true)}
+                  {readiness && !readiness.ready && (
+                    <p className="notice">{readiness.blockers.join(" ")}</p>
+                  )}
                   <button className="button primary" onClick={reset}>
                     Start a task <ArrowRight size={16} />
                   </button>
@@ -873,10 +745,7 @@ export function App() {
               )}
               {view === "history" && (
                 <div className="page-content">
-                  <h1>Your work, kept here.</h1>
-                  <p className="page-description">
-                    Tasks, results and payment receipts in this browser session.
-                  </p>
+                  <h1>Task history</h1>
                   <label className="search-field">
                     <Search size={17} />
                     <input
@@ -915,8 +784,7 @@ export function App() {
                   {!history.length && (
                     <div className="empty-state">
                       <History size={32} />
-                      <h2>A fresh start.</h2>
-                      <p>Once you start a task, you can return to it here.</p>
+                      <h2>No tasks yet</h2>
                       <button className="button" onClick={reset}>
                         Create a task
                       </button>
@@ -928,10 +796,6 @@ export function App() {
             </>
           )}
         </main>
-        <footer className="main-footer">
-          <span>Made for work worth doing.</span>
-          <span>Direct payments. No deposited balance.</span>
-        </footer>
       </div>
     </div>
   );
@@ -1055,15 +919,9 @@ function AgentAccess({ onError }: { onError: (s: string) => void }) {
   }, []);
   return (
     <div className="page-content">
-      <div className="eyebrow">BRING YOUR OWN AGENT</div>
-      <h1>
-        Same workspace.
-        <br />
-        Another way in.
-      </h1>
+      <h1>Agent access</h1>
       <p className="page-description">
-        Let an MCP client submit work and retrieve results. You still review
-        each quote and approve spending in your browser and wallet.
+        MCP tasks require your quote approval and wallet confirmation.
       </p>
       <section className="agent-card">
         <Terminal size={26} />
