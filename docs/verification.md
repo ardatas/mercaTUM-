@@ -77,3 +77,29 @@ For each PASS, add source paths, observed result and date. Missing evidence stay
 - Remaining limits / failures:
 
 Use redacted metadata only. Keep proof bytes, remittance, secrets, tokens, private prompts, repository contents and opaque model checkpoints out of committed evidence.
+
+## Local implementation — 31 October 2026
+
+User authorized implementation, preservation/use of seven design prompts and frequent commits/pushes, then selected **local preview now** and will configure secrets in `.env`. No deployment or live payment was performed.
+
+- `npm run typecheck`: PASS. `npm test`: 56 passing tests across six files. `npm run build`: PASS. Dependencies use exact versions, including `@bsv/sdk` 3.2.1 and `@bsv/wallet-toolbox` 2.14.9.
+- Actual Toolbox buyer/provider wallets on offline mock chain: unsigned draft review, bounded fee, wallet change/reference metadata, signed BRC-29 proof, same EF submission through injected Arcade interface, internalization, duplicate claims/proofs, pending observations, corrupt script/amount/txid/prefix, crash and revocation cases. These are offline fixtures, not live Arcade or BSV evidence.
+- Ownership/CSRF, secret/checkpoint omission, idempotency conflicts, unique receipts, claims, stale workers, restart recovery, no unpaid execution, fixed model snapshot, partial-limit preservation and no second-charge recovery tested. Shared durable planning quota protects browser and MCP entry.
+- Official MCP SDK client used Streamable HTTP to list four tools, submit a task into browser approval, enforce owner isolation and reject revoked tokens. Model/payment dependencies in this test are offline fixtures.
+- Real GitHub smoke imported `octocat/Hello-World` at `7fd1a60b01f91b314f59955a4e4d4e80d8edf11d`; a hash-validated README change produced a patch/file artifact in memory. No source repo was modified. Browser import, immutable revision, README preview and explicit context consent were observed.
+- Browser at local origin: desktop 1440px preview, composer rows 2 → 4 on focus, remains 4 after blur; new task resets to 2. Right-click file menu works with context mutation disabled after consent. Unconfigured task submission displays the actual provider-unavailable error and does not make a purchase.
+- Read-only critical-path review found shared-planning quota bypass and lost partial status on resume failure; both corrected with regression tests. No unpaid-execution, duplicate-debit or cross-owner bypass found in that source review.
+- Docker build initially failed because native SQLite needed Python/make/g++; these were added to the build stage and the image then built. No secrets/data enter its allowlisted build context. Runtime smoke and final browser checks recorded below when completed.
+- Developer pack and root guide unchanged in Git diff. No project credentials existed at preflight; no keys, proofs or opaque checkpoints are included in committed evidence.
+
+### Current gate assessment
+
+| Gate | Status | Observed evidence / missing step |
+|---|---|---|
+| Q1 | PASS (local application evidence) | Actual SDK WalletClient/transaction and Toolbox merchant calls in app, exact lock pins, passing real-wallet offline checks |
+| Q2 | BLOCKED | No standard-wallet connection/authorization from a deployed HTTPS origin observed |
+| Q3 | BLOCKED | No real transaction, Arcade POST/network acceptance or WhatsOnChain link |
+| Q4 | PENDING live evidence | Source and offline test keep buyer signing in wallet; live native custody/approval path unobserved |
+| Q5 | BLOCKED | No configured real model + approved real payment + resumed coordinator demonstration |
+
+Public qualification is **not claimed**. Public hosting deferred by the user; live secrets, model/network/wallet and human spending remain prerequisites.

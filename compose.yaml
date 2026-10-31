@@ -1,0 +1,15 @@
+services:
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:3000:3000"
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DATA_DIR: /data
+    volumes:
+      - mercatum-data:/data
+    restart: unless-stopped
+    stop_grace_period: 30s
+volumes:
+  mercatum-data:

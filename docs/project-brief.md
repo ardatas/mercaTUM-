@@ -33,3 +33,7 @@ Excluded: seller onboarding, real subscription resale, bidding, multiple model a
 From the deployed site, a buyer submits a chat task and a public-repository code task, approves real BSV spending, gets actual model results and can inspect payment receipts/WhatsOnChain. Reloading or reconnecting preserves progress. Demonstrate MCP submission reaching the same approval flow. Record Q1–Q5 evidence under [workflow](../.ai/WORKFLOW.md).
 
 Technical choices: [architecture](architecture.md), [contracts](contracts.md), [BSV flow](bsv-flow.md), [AI flow](ai-flow.md). Visual input: [design slots](design-inputs.md).
+
+## Current delivery phase — 31 October 2026
+
+The user selected local preview while configuring secrets in `.env`. The application and live-service adapters are implemented, but no real model run, native wallet payment or public deployment is claimed. The deployed goal above remains the later acceptance target. See verification.md for observed local results and missing gates.
