@@ -285,3 +285,5 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 - Same-session preflight remains valid. Existing concurrent task-history edits preserved. Coordinator owns only the New task navigation handler: sidebar button, recent-tasks plus and empty-history Create a task open Marketplace; choosing an offer and Request more work retain their chat behavior.
 
 - Typecheck/build PASS. Local browser confirms both sidebar New task controls open Marketplace and choosing Claude opens a fresh chat.
+
+- Deployed `a2bf44e`; Vercel `CuPqX4Nm5ygiEudb4o86i4Wb4rL4` SUCCESS. Served bundle `index-CekV2wdR.js` contains the marketplace handler. Local interaction checks passed. Live UI interaction verification remains PENDING: browser clicks produced no transition and Safari reported the Mac is locked. Concurrent history changes remain unstaged and excluded from this deployment.
