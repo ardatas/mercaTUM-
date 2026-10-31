@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { Script, Transaction, type WalletActionOutput } from "@bsv/sdk";
+import { Script, Transaction, UnlockingScript } from "@bsv/sdk";
 import { reviewDraft, reviewChangeOutputs } from "../src/client/wallet/payment";
 function fixture() {
   const source = new Transaction();
   source.addOutput({ satoshis: 1000, lockingScript: Script.fromHex("51") });
   const tx = new Transaction();
-  tx.addInput({ sourceTransaction: source, sourceOutputIndex: 0 });
+  tx.addInput({
+    sourceTransaction: source,
+    sourceOutputIndex: 0,
+    unlockingScript: UnlockingScript.fromHex(""),
+  });
   tx.addOutput({ satoshis: 100, lockingScript: Script.fromHex("52") });
   tx.addOutput({ satoshis: 890, lockingScript: Script.fromHex("51") });
   return tx;
@@ -36,66 +40,20 @@ describe("unsigned fee bounds", () => {
 });
 
 describe("wallet-authored change ownership metadata", () => {
-  const output = (
-    outputIndex: number,
-    satoshis: number,
-    basket: string,
-    lockingScript: string,
-  ): WalletActionOutput => ({
-    outputIndex,
-    satoshis,
-    basket,
-    lockingScript,
-    spendable: true,
-    tags: [],
-    outputDescription: "",
-  });
-  const wallet = (
-    outputs: WalletActionOutput[],
-    reference = "reference 010203",
-  ) => ({
-    listActions: async () => ({
-      totalActions: 1,
-      actions: [
-        {
-          txid: "",
-          satoshis: -110,
-          status: "unsigned" as const,
-          isOutgoing: true,
-          description: "Payment draft",
-          version: 1,
-          lockTime: 0,
-          labels: ["mercatum-attempt", reference],
-          outputs,
-        },
-      ],
-    }),
-  });
-  it("accepts reference-bound default change and blocks external/unknown outputs before signing", async () => {
-    const valid = [output(0, 100, "", "52"), output(1, 890, "default", "")];
-    await expect(
-      reviewChangeOutputs(wallet(valid), fixture(), 0, "attempt", "AQID"),
-    ).resolves.toBeUndefined();
-    await expect(
-      reviewChangeOutputs(
-        wallet([valid[0], output(1, 890, "commission", "51")]),
-        fixture(),
-        0,
-        "attempt",
-        "AQID",
-      ),
-    ).rejects.toThrow(/unrequested output/);
-    await expect(
-      reviewChangeOutputs(
-        wallet(valid, "reference 999999"),
-        fixture(),
-        0,
-        "attempt",
-        "AQID",
-      ),
-    ).rejects.toThrow(/cannot identify/);
-    await expect(
-      reviewChangeOutputs(wallet([valid[0]]), fixture(), 0, "attempt", "AQID"),
-    ).rejects.toThrow(/cannot identify/);
+  it("binds every non-payment output to the exact unsigned transaction and rejects unknown change", () => {
+    const tx = fixture();
+    const change = `${tx.id("hex")}.1`;
+    expect(() => reviewChangeOutputs(tx, 0, [change])).not.toThrow();
+    for (const invalid of [
+      undefined,
+      [],
+      [change, change],
+      ["a".repeat(64) + ".1"],
+      [`${tx.id("hex")}.0`],
+    ]) {
+      expect(() => reviewChangeOutputs(tx, 0, invalid)).toThrow(
+        /cannot verify/,
+      );
+    }
   });
 });

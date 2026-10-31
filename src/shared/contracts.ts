@@ -54,7 +54,7 @@ export const unsignedAbortSchema = z
   .object({
     quoteId: idSchema,
     reference: z.string().min(1).max(300),
-    aborted: z.literal(true),
+    aborted: z.boolean(),
     code: z.enum(["DEBIT_LIMIT_EXCEEDED", "DRAFT_REJECTED"]),
     feeSats: z
       .number()

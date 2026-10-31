@@ -174,13 +174,14 @@ describe("real wallet engine with offline chain; no live spending", () => {
       quote,
       attemptId: attempt.id,
       maxAuthorizedDebitSats: 1000,
-      wallet: buyer,
+      wallet: new WalletClient(buyer),
       storage: local,
       onProof: (p) => {
         expect(savedPaymentProof(attempt.id, local)).toEqual(p);
       },
     });
     expect(create.mock.calls[0][0].options?.signAndProcess).toBe(false);
+    expect(create.mock.calls[0][0].options?.noSend).toBe(true);
     expect(sign).toHaveBeenCalledTimes(1);
     expect(proof.derivationPrefix).toBe(quote.derivationPrefix);
     const waiting = await service.submitProof("owner", attempt.id, proof);
@@ -300,6 +301,7 @@ describe("real wallet engine with offline chain; no live spending", () => {
     vi.spyOn(buyer, "getNetwork").mockResolvedValue({ network: "testnet" });
     const sign = vi.spyOn(buyer, "signAction");
     const create = vi.spyOn(buyer, "createAction");
+    const derive = vi.spyOn(buyer, "getPublicKey");
     const abort = vi.spyOn(buyer, "abortAction");
     const store = new Store(":memory:");
     store.put("task", task("fee-task"));
@@ -362,11 +364,15 @@ describe("real wallet engine with offline chain; no live spending", () => {
         reference: draft.reference,
         draft: draft.tx,
         quoteId: quote.id,
-        derivationSuffix: "unavailable-legacy-suffix",
+        derivationSuffix: derive.mock.calls
+          .find(([args]) =>
+            args.keyID?.startsWith(quote.derivationPrefix + " "),
+          )![0]
+          .keyID!.slice(quote.derivationPrefix.length + 1),
       }),
     );
-    // Exercise the actual SDK boundary: failed history has an empty txid and is
-    // rejected by WalletClient, so recovery must use validated released inputs.
+    // Exercise the SDK boundary with the original saved derivation and cap.
+    // Already-aborted history cannot be read; prove the pre-sign fee rejection.
     const browserWallet = new WalletClient(buyer);
     const recovered = await recoverUnsignedDraft({
       quote,
@@ -375,19 +381,29 @@ describe("real wallet engine with offline chain; no live spending", () => {
       wallet: browserWallet,
       storage: local,
     });
-    expect(recovered?.aborted).toBe(true);
+    expect(recovered).toMatchObject({
+      aborted: false,
+      code: "DEBIT_LIMIT_EXCEEDED",
+      feeSats: rejected.feeSats,
+    });
     expect(sign).not.toHaveBeenCalled();
     expect(create).toHaveBeenCalledOnce();
     // Server recovery also covers an attempt already moved to UNKNOWN by the old UI.
     await service.reconcile("owner", attempt.id);
     expect(() =>
+      service.rejectUnsigned("owner", attempt.id, {
+        ...recovered!,
+        feeSats: 0,
+      }),
+    ).toThrow(/proven to exceed/);
+    expect(() =>
       service.rejectUnsigned("stranger", attempt.id, rejected),
     ).toThrow(/unavailable/);
     expect(
-      service.rejectUnsigned("owner", attempt.id, rejected).attempt.state,
+      service.rejectUnsigned("owner", attempt.id, recovered!).attempt.state,
     ).toBe("REJECTED");
     expect(
-      service.rejectUnsigned("owner", attempt.id, rejected).attempt.state,
+      service.rejectUnsigned("owner", attempt.id, recovered!).attempt.state,
     ).toBe("REJECTED");
     const recoveredTask = store.get<Task>("task", "fee-task")!;
     expect(recoveredTask.state).toBe("AWAITING_APPROVAL");
@@ -452,12 +468,12 @@ describe("real wallet engine with offline chain; no live spending", () => {
         }),
       ).rejects.toThrow(/already started/);
       expect(create).toHaveBeenCalledOnce();
-      // An abort refusal or failure cannot release inputs still reserved by the draft.
+      // Without a proven over-limit draft, an abort refusal/failure stays unknown.
       expect(
         await recoverUnsignedDraft({
           quote,
           attemptId: "uncertain-attempt",
-          maxAuthorizedDebitSats: 100,
+          maxAuthorizedDebitSats: 100000,
           wallet: new WalletClient(buyer),
           storage: local,
         }),

@@ -114,58 +114,21 @@ export function reviewDraft(
     outputIndex: matching[0].index,
   };
 }
-/** Change ownership is wallet metadata. The pinned Toolbox does not expose unsigned
- * change scripts yet, so bind metadata to its BRC-153 reference plus output index/value.
- * Require the standard wallet to identify every
- * other output as its spendable default-basket change; reject commissions or unknown outputs. */
-export async function reviewChangeOutputs(
-  wallet: Pick<WalletInterface, "listActions">,
+/** The standard noSendChange result binds wallet-managed change to this exact
+ * unsigned transaction. No history/admin-basket query is needed before signing. */
+export function reviewChangeOutputs(
   tx: Transaction,
   paymentIndex: number,
-  attemptId: string,
-  reference: string,
+  noSendChange: string[] | undefined,
 ) {
-  const label = `mercatum-${attemptId}`;
-  const history = await wallet.listActions({
-    labels: [label],
-    labelQueryMode: "all",
-    includeLabels: true,
-    includeOutputs: true,
-    includeOutputLockingScripts: true,
-    limit: 10,
-  });
-  const referenceLabel = `reference ${Utils.toHex(Utils.toArray(reference, "base64"))}`;
-  const candidates = history.actions.filter(
-    (action) =>
-      action.labels?.includes(referenceLabel) &&
-      action.labels?.includes(label) &&
-      action.outputs?.length === tx.outputs.length &&
-      action.outputs.every((output) => {
-        const actual = tx.outputs[output.outputIndex];
-        return (
-          actual &&
-          actual.satoshis === output.satoshis &&
-          (actual.lockingScript.toHex() === output.lockingScript ||
-            (output.outputIndex !== paymentIndex &&
-              output.lockingScript === "" &&
-              output.basket === "default" &&
-              output.spendable))
-        );
-      }),
-  );
-  if (candidates.length !== 1)
-    throw new AppError(
-      "PAYMENT_UNKNOWN",
-      "The wallet cannot identify all outputs of the unsigned draft. Signing is blocked.",
-    );
-  const outputs = candidates[0].outputs!;
+  const change = new Set(noSendChange || []);
+  const expected = tx.outputs
+    .map((_, index) => `${tx.id("hex")}.${index}`)
+    .filter((_, index) => index !== paymentIndex);
   if (
-    new Set(outputs.map((o) => o.outputIndex)).size !== tx.outputs.length ||
-    outputs.some(
-      (output) =>
-        output.outputIndex !== paymentIndex &&
-        (!output.spendable || output.basket !== "default"),
-    )
+    change.size !== (noSendChange || []).length ||
+    change.size !== expected.length ||
+    expected.some((outpoint) => !change.has(outpoint))
   )
     throw new AppError(
       "PAYMENT_MISMATCH",
@@ -264,44 +227,6 @@ export async function recoverUnsignedDraft(options: {
       return false;
     }
   };
-  if (!stillUnsigned() || tx.inputs.length === 0) return;
-  try {
-    const result = await wallet.abortAction({ reference: saved.reference });
-    if (result.aborted !== true) return;
-  } catch {
-    // The pinned wallet refuses to abort an already-aborted reference, and the
-    // SDK cannot decode that failed-history row's empty txid. Keep validation
-    // intact: instead prove every original input was released back to this wallet.
-    // This fallback is NEVER allowed for a sign_requested local record.
-    const available = await wallet.listOutputs({
-      basket: "default",
-      limit: 10000,
-    });
-    if (!stillUnsigned()) return;
-    const unique = new Set<string>();
-    for (const input of tx.inputs) {
-      const parent = input.sourceTransaction;
-      if (
-        !parent ||
-        (input.sourceTXID && parent.id("hex") !== input.sourceTXID)
-      )
-        return;
-      const outpoint = `${parent.id("hex")}.${input.sourceOutputIndex}`;
-      if (unique.has(outpoint)) return;
-      unique.add(outpoint);
-      const source = parent.outputs[input.sourceOutputIndex];
-      if (
-        !source ||
-        !available.outputs.some(
-          (output) =>
-            output.outpoint === outpoint &&
-            output.spendable === true &&
-            output.satoshis === source.satoshis,
-        )
-      )
-        return;
-    }
-  }
   let feeSats: number | undefined;
   try {
     const { publicKey } = await wallet.getPublicKey({
@@ -322,11 +247,29 @@ export async function recoverUnsignedDraft(options: {
   } catch {
     /* Cancellation is proven even when the draft cannot be reviewed. */
   }
+  if (!stillUnsigned() || tx.inputs.length === 0) return;
+  let aborted = false;
+  try {
+    const result = await wallet.abortAction({ reference: saved.reference });
+    // Positive refusal may indicate a network transaction. Never override it.
+    if (result.aborted !== true) return;
+    aborted = true;
+  } catch {
+    // Older clients saved the unsigned draft but not the successful abort.
+    // Recover ONLY the mathematically over-limit branch: reviewDraft throws
+    // before signAction, and the durable phase is written before any signing.
+    // Do not request admin-only wallet baskets or bypass SDK history validation.
+    if (
+      feeSats === undefined ||
+      quote.priceSats + feeSats <= maxAuthorizedDebitSats
+    )
+      return;
+  }
   if (!stillUnsigned()) return;
   const rejection: UnsignedAbort = {
     quoteId: quote.id,
     reference: saved.reference,
-    aborted: true,
+    aborted,
     code:
       feeSats !== undefined &&
       quote.priceSats + feeSats > maxAuthorizedDebitSats
@@ -414,6 +357,7 @@ export async function payApprovedQuote(options: {
     ],
     options: {
       signAndProcess: false,
+      noSend: true,
       randomizeOutputs: false,
       acceptDelayedBroadcast: false,
       returnTXIDOnly: false,
@@ -446,13 +390,7 @@ export async function payApprovedQuote(options: {
       quote.priceSats,
       maxAuthorizedDebitSats,
     );
-    await reviewChangeOutputs(
-      wallet,
-      unsigned,
-      reviewed.outputIndex,
-      attemptId,
-      draft.reference,
-    );
+    reviewChangeOutputs(unsigned, reviewed.outputIndex, created.noSendChange);
     if (draft.tx.length + unsigned.inputs.length * 110 > 2_000_000)
       throw new AppError(
         "PAYMENT_UNKNOWN",
@@ -507,7 +445,9 @@ export async function payApprovedQuote(options: {
       proofSpaceReservation: " ".repeat(unsigned.inputs.length * 1200 + 10000),
     }),
   );
-  // The native wallet is controlled by the human, never UI automation. Its reviewed draft is fixed.
+  // Native human approval signs the fixed draft without broadcasting. The server
+  // verifies and submits these same signed bytes through Arcade; a timeout here
+  // remains ambiguous and can never authorize a replacement payment.
   const signed = await wallet.signAction({
     reference: draft.reference,
     spends: {},

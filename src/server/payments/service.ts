@@ -297,6 +297,19 @@ export class PaymentService {
           409,
         );
       const quote = this.store.owned<Quote>("quote", attempt.quoteId, ownerId);
+      if (
+        !rejection.aborted &&
+        (rejection.code !== "DEBIT_LIMIT_EXCEEDED" ||
+          rejection.feeSats === undefined ||
+          !Number.isSafeInteger(quote.priceSats + rejection.feeSats) ||
+          quote.priceSats + rejection.feeSats <=
+            attempt.approval.maxAuthorizedDebitSats)
+      )
+        throw new AppError(
+          "PAYMENT_UNKNOWN",
+          "Only an unsigned draft proven to exceed the original approval can be released without an abort acknowledgement.",
+          409,
+        );
       const detail =
         rejection.feeSats === undefined
           ? ""
@@ -304,7 +317,10 @@ export class PaymentService {
       attempt.state = "REJECTED";
       attempt.unsignedAbort = rejection;
       attempt.error =
-        "The unsigned payment draft was cancelled before signing." + detail;
+        (rejection.aborted
+          ? "The unsigned payment draft was cancelled before signing."
+          : "The saved unsigned draft exceeded your approved limit and was rejected before signing. The wallet did not return a fresh cancellation acknowledgement.") +
+        detail;
       this.store.put("attempt", attempt);
       task.state = "AWAITING_APPROVAL";
       task.error = {
