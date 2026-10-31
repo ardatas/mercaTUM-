@@ -1,6 +1,6 @@
 # Architecture
 
-The implementation uses one Node >=22 TypeScript service serving a built React/Vite frontend, JSON routes, SSE and remote MCP. The Vercel frontend and persistent backend are publicly deployed; live paid qualification remains pending. One process with persistent SQLite storage is sufficient for this demo and avoids distributed payment claims. Choose exact non-BSV dependencies during preflight and lock them; BSV versions come from the sponsor pack.
+The implementation uses one Node >=22 TypeScript service serving a built React/Vite frontend, JSON routes, SSE and remote MCP. The Vercel frontend and persistent backend are publicly deployed; live paid qualification remains pending. One process with persistent SQLite storage is sufficient for this demo and avoids distributed payment claims. Keep dependency versions locked; BSV versions come from the sponsor pack.
 
 ```mermaid
 flowchart LR
@@ -52,8 +52,6 @@ The quote-to-task binding, idempotency, session authorization and execution perm
 | Logs / judging evidence | Redacted IDs, state, timings, sats, txids and public links | Exclude headers/tokens, raw BEEF, derivation remittance, prompts and opaque model checkpoints. |
 
 Serve a restrictive CSP, render model Markdown safely, validate Origin/CSRF on cookie-authenticated mutations, and authorize every task/event/artifact lookup by owner. Rate-limit free planning and paid task submissions. Repository text cannot change tool permissions or payment policy.
-
-Optional later: a salted commitment to a result or receipt can anchor a timestamp without publishing content. It proves a committed byte sequence, not execution quality, and is unnecessary for qualification. Do not publish unsalted hashes of predictable private prompts.
 
 ## Deployment contract
 

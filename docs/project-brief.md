@@ -1,55 +1,44 @@
-# Project brief
+# Project scope
 
-Build a deployed buyer-side AI workspace. A user asks a question or imports a repository for a code task, selects a demo AI capacity listing, approves a small BSV payment, and receives an actual answer or downloadable code changes.
+mercaTUM is a buyer-side AI workspace with BSV payments for bounded chat and public-repository code tasks. A real coordinator agent requests a purchase; human approval and a verified receipt release paid model execution. External agents use the same services through MCP.
 
-The coordinator agent requests paid execution through a tool call. Payment approval suspends the run; a verified payment resumes it. External agents can submit the same tasks through MCP and send the human to the browser for approval.
+## Track requirements
 
-## Scope
+Target: BSV Association's **DeFi Rails for Agentic Payments**. The [official track](https://hackathon.tum-blockchain.com/prizes#bsv-association), checked 31 October 2026, requires:
 
-| Part | Required behavior |
+1. BSV SDK and Wallet Toolbox where wallet functionality is needed, from the Association's TypeScript stack.
+2. User-facing connection to a standard wallet such as BSV Desktop or BSV Browser.
+3. A real BSV transaction on testnet or mainnet.
+4. Non-custodial user funds.
+5. At least one AI agent making a payment through the project.
+
+Our flow is a direct micropayment for an AI service. Demonstrate why buyers and agents would use it and how it brings activity to BSV. The project does not implement lending, swaps or escrow; meeting technical gates alone does not establish prize suitability. [Workflow](../.ai/WORKFLOW.md#qualification-gates) maps these requirements to observed evidence.
+
+## Product requirements
+
+| Area | Required behavior |
 |---|---|
-| Buyer experience | Chat and code modes, task history, payment approval, streamed activity, results and receipts. Exact UI supplied separately. |
-| Capacity listing | Eight colorful subscription offers across six model brands, with seller, tier, model choices, remaining capacity and capability visuals. Listings are fixtures backed by the configured execution provider. |
-| Code task | Import a public GitHub repository at a resolved commit; review selected context; produce and apply validated changes to the snapshot; download a real diff. |
-| Payment | Real sats from the buyer's standard wallet to a separate operator-owned provider wallet, with explicit approval. |
-| Agent | Real model-generated purchase request, durable pause/resume and actual paid model execution. |
-| MCP | Authenticated task submission/status/result tools over the same business services as the browser. Human approval stays in the browser/wallet. |
-| Deployment | Public HTTPS app, server-only secrets, persistent job and provider-wallet storage, observable live execution. |
+| Marketplace | Eight labelled demo offers across six brands, with model/effort choices and simulated capacity. One configured execution provider serves the tasks. Catalog selection is not multi-provider routing. |
+| Chat | Submit a bounded question, approve payment, stream real progress and receive an actual answer. Each new question is an independent task. |
+| Code | Import a public GitHub repository at an immutable commit; approve selected context; validate and apply generated changes to a copied snapshot; download changed files and a real diff. |
+| Payments | Buyer pays a distinct operator-owned provider wallet from BSV Desktop/Browser. Show scope, limits, service sats, fee policy and maximum debit before approval. Verify and broadcast the same transaction through Arcade. |
+| Agent | Persist the real purchase tool call, pause for approval, execute only after receipt verification and resume the original call. |
+| Recovery | Preserve tasks, receipts and results across reload/restart. Reconcile ambiguous payments without another debit; recover paid failures under the original entitlement. |
+| MCP | Authenticated submission, status and results over the same task services. Human approval stays in browser/wallet. |
+| Hosting | Public HTTPS frontend, server-only credentials and persistent application/provider-wallet storage. |
 
-## Boundaries
+## Purchase policy
 
-Mock the rental marketplace, not the paid task or on-chain payment. Offline tests may use a mock chain and model fixtures; the deployed demonstration must use real services. Do not collect another person's subscription credentials, session cookies or consumer account access.
+Use a fixed upfront quote for bounded work. Operator-funded planning checks scope before charging. The provider absorbs API cost variation within the quote. Execution stops at its limits and preserves valid partial results; additional scope requires a new linked task and explicit approval. Technical recovery cannot become an extension charge. [Contracts](contracts.md#fixed-price-purchases) define the policy and state transitions.
 
-Buyer assets remain in their wallet until they approve a direct payment. The provider then owns its received revenue. There are no deposited buyer balances or platform-controlled user wallets.
+Buyer funds stay in the buyer wallet until payment; received revenue belongs to the provider. There are no deposited user balances or platform-controlled buyer keys.
 
-Use a **fixed upfront quote for bounded work**, as defined in [payment policy](contracts.md#fixed-price-purchases). Operator-funded planning checks the selected context and task against the offered budget before payment. The quote states the intended deliverable, execution limits and exact service price in sats; network fees and the maximum total debit are shown separately. The provider absorbs its underlying cost variation within that scope.
+Mock only marketplace listings/capacity and offline test dependencies. The deployed demo must use real model calls and real sats. Do not collect consumer subscription credentials or advertise catalog selections as actual upstream execution.
 
-If the budget is exhausted, preserve valid progress and stop. More work is a new linked task with a new quote and explicit payment approval. Technical failure recovery uses the original paid entitlement; it cannot silently become an extension charge. Automatic refunds are outside scope and must not be advertised.
+Excluded: seller onboarding, subscription resale, bidding, additional model adapters/routing, training, tokens, escrow, yield, AMMs, arbitrary shell execution, private-repository OAuth, automatic Git writes and automatic refunds. The existing OpenAI adapter remains for configured/saved tasks; deployment uses Gemini.
 
-Excluded: seller onboarding, real subscription resale, bidding, multiple model adapters, Jev routing, custom training, tokens, escrow, yield, AMMs, arbitrary shell execution, private-repository OAuth and automatic Git pushes. These do not help the smallest deployed flow qualify. The product is payment infrastructure for AI services; it need not claim a lending or exchange protocol.
+## Acceptance
 
-## Done
+Demonstrate a real paid chat answer, a real paid code patch and MCP submission through the same human approval path. Record the model call, quote, approved debit, transaction, Arcade acceptance, provider receipt and resumed agent. Verify reload/recovery and Q1–Q5 in [evidence](verification.md). Code/MCP and recovery checks are project requirements in addition to the sponsor's five gates.
 
-From the deployed site, a buyer submits a chat task and a public-repository code task, approves real BSV spending, gets actual model results and can inspect payment receipts/WhatsOnChain. Reloading or reconnecting preserves progress. Demonstrate MCP submission reaching the same approval flow. Record Q1–Q5 evidence under [workflow](../.ai/WORKFLOW.md).
-
-Technical choices: [architecture](architecture.md), [contracts](contracts.md), [BSV flow](bsv-flow.md), [AI flow](ai-flow.md). Visual input: [design slots](design-inputs.md).
-
-## Current delivery phase — 31 October 2026
-
-The user now authorizes Vercel deployment and Gemini with the supplied server credential. The persistent HTTPS backend is deployed in the dedicated mercaTUM Google Cloud project, with Gemini 3.8 Flash and a separate provider mainnet wallet (the user superseded the earlier testnet selection). Vercel serves the verified public frontend at https://mercatum-ai.vercel.app, with API/SSE/MCP proxying to the persistent backend. Live model planning, public MCP entry, SSE replay, restart persistence and Safari WalletClient connection on mainnet are observed; real buyer approval, payment, paid answer/code artifacts and full Q1–Q5 qualification remain incomplete. See verification.md.
-
-Local UI refinement: a message-bubble/chat-answer layout, persistent bottom composer and temporary real-event thinking trace are implemented at localhost:3000. Reference 8 supplies compact progress typography and matching chat text, superseding the earlier bold 18px composer. These UI refinements are deployed and observed in Safari.
-
-Local visual theme now follows reference 9: neutral charcoal/white/gray surfaces with spectrum accents, and a decorative interactive grid throughout chat, including pending, streaming and completed responses. The visual theme is deployed.
-
-Payment recovery refinement: a confirmed unsigned fee rejection must return to fresh quote review with the observed fee and prior limit. Signing/broadcast uncertainty continues to block replacement payments. Deployed and verified in Safari: the original fee-rejected task returned to fresh quote review and survives reload. The original 194-sat draft exceeded its 110-sat cap. No new spending approved or initiated.
-
-Marketplace-first revision: fixed desktop navigation links marketplace and chat; mobile navigation uses a drawer. Both views share the dark palette. Compact cards show five columns on wide screens and adapt down to one on phones. Selecting a subscription opens chat; model-specific effort choices are saved with the task and cannot alter an existing quote. Actual execution configuration and payment metadata remain authoritative.
-
-Task history supports deleting individual entries from recent tasks and history with confirmation. Removal persists per owner; it retains task/payment records and direct recovery links, and does not cancel active work.
-
-Payment recovery follow-up: unclaimed approvals return to quote review; lost signing responses can recover the original transaction through standard wallet history and server ancestry verification. Missing evidence, cancellation refusals and ambiguous signatures remain protected with specific guidance.
-
-Wallet code now loads with the initial page so an open tab does not fetch a removed wallet chunk after deployment. Chrome mainnet connection is observed after allowing browser local-app access; connection failures explain the permission and retry step. The recovery backend is deployed. Mainnet qualification remains pending human purchase and native-wallet approvals within the authorized aggregate5,000-sat test budget.
-
-Purchase review shows the saved catalog model/effort; the secondary “Runs on” executor row is omitted at the user's request. Actual executor metadata remains in the immutable server quote. Approval defaults to a5,000-sat maximum total debit (or the service price if higher); this is a user-editable cap, not a fee estimate or prepaid balance. Full purchase terms remain expandable and consent remains unchecked. Marketplace capacity uses explicitly labeled demo token counts; scores use sourced Artificial Analysis Intelligence Index v5.0 snapshots for each card's first model and published variant.
+Current delivery and blockers: [status](../.ai/STATUS.md). UI requirements: [design inputs](design-inputs.md). Technical boundaries: [architecture](architecture.md), [contracts](contracts.md), [BSV flow](bsv-flow.md), [AI flow](ai-flow.md).

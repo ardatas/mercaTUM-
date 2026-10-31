@@ -1,41 +1,77 @@
 # mercaTUM
 
-A buyer-side AI workspace for chat and focused public-repository code tasks. The rental listing and capacity dials are simulated. Model execution uses the configured server-side Gemini API (with the original Responses adapter retained); BSV payments use the buyer's standard wallet and a separate provider wallet.
+Buy a bounded AI chat or code task with BSV. A coordinator agent requests paid execution, the buyer approves a fixed quote in a standard wallet, and the server verifies payment before running the task.
 
-**Live app: [mercatum-ai.vercel.app](https://mercatum-ai.vercel.app).** Vercel serves the frontend; a persistent HTTPS backend runs Gemini 3.8 Flash and a separate mainnet provider wallet. Real chat/code planning and MCP requests reach human approval; sessions and tasks survive a backend restart. Browser submission, reload, SSE and MCP through Vercel are verified. Safari WalletClient connects to BSV Desktop on mainnet. Quoting is enabled; exact purchase/native approval, real payment and paid results remain pending. See [observed evidence](docs/verification.md).
+[Live app](https://mercatum-ai.vercel.app) · [Project scope](docs/project-brief.md) · [Recorded evidence](docs/verification.md)
 
-## System architecture
+The marketplace has eight demo offers across six brands. Sellers and capacity are simulated; the configured Gemini API performs real planning and execution. Selecting a catalog model does not route work to that brand's API.
 
-![mercaTUM architecture: browser and MCP clients, persistent Node backend, receipt-gated Gemini execution, and human-approved BSV payments](docs/assets/mercatum-architecture.png)
+## Status
 
-[Full-resolution PNG for presentations](docs/assets/mercatum-architecture.png) · [Architecture and trust boundaries](docs/architecture.md)
-
-The server releases paid execution only after payment verification, Arcade network acceptance and provider-wallet internalization. Marketplace listings are simulated; live paid execution validation remains pending.
+Recorded on 31 October 2026: frontend and persistent backend deployed; real Gemini planning, public repository import, MCP submission, reload/restart persistence and BSV Desktop connection observed. Real payment, Arcade acceptance, paid answers and model-generated code patches remain unverified. Qualification is incomplete. See [current status](.ai/STATUS.md).
 
 ## Run locally
 
-Node 22 or newer is required (verified on Node 24).
+Requires Node >=22 and npm.
 
 ```sh
 npm ci
+cp .env.example .env
+# Configure .env locally before starting model or wallet services.
 npm run build
 npm start
 ```
 
-Open [localhost:3000](http://localhost:3000). The app binds to loopback outside production. Importing public repositories, reviewing files, the workspace and MCP token management work without a model key. Task planning requires a real configured model; no fake model output or payment-success route exists.
+Open [localhost:3000](http://localhost:3000). Preserve an existing `.env` instead of overwriting it. The server loads it at startup; restart after changes.
 
-Copy `.env.example` to `.env` and configure it locally. Never paste keys into chat or commit them. `npm start` and `npm run dev` load `.env` when present; restart after changing it.
+- Set `MODEL_PROVIDER`, `MODEL_ID` and `MODEL_API_KEY` for real model calls. The example config uses Gemini; startup checks tool-call support.
+- Set `PROVIDER_WALLET_ROOT_KEY` for a separate operator-owned receiving wallet. Buyer keys stay in BSV Desktop or BSV Browser.
+- Match `APP_NETWORK` to the buyer wallet. Local default: testnet; recorded deployment: mainnet.
+- Keep `PAYMENTS_ENABLED=false` during setup. Follow [wallet validation](docs/deployment.md#payment-recovery-and-qualification) before live purchases.
+- Persist `DATA_DIR`. Production also requires an HTTPS `PUBLIC_APP_URL` and a `SESSION_SECRET` of at least 32 characters.
 
-- `MODEL_PROVIDER`, `MODEL_API_KEY`, `MODEL_ID`: server-only provider selection and credentials. Deployment uses `gemini`, `gemini-3.8-flash`; `openai` retains the Responses adapter. Models must support tools, structured outputs and streaming. Startup performs a real tool-call/continuation capability probe; presence of a key alone does not enable purchases.
-- `PROVIDER_WALLET_ROOT_KEY`: root key of a **separate operator-owned provider wallet**, never a buyer key. Keep its database under `DATA_DIR` backed up with its secret.
-- `APP_NETWORK`: `testnet` by default; must match the buyer wallet.
-- `TASK_PRICE_SATS`: fixed service price, default 100 sats, confirmed in each quote. This default is **not authorization to spend**.
-- `SESSION_SECRET`: at least 32 random characters for production; `PUBLIC_APP_URL` must be the real HTTPS origin in production.
-- `PAYMENTS_ENABLED=false`: retain until the chosen wallet's deployed-origin transport, unsigned draft/change metadata and human native spending behavior are verified. No spending is approved by this switch alone.
+Keep credentials in ignored local configuration or a server secret manager. Without model credentials, repository browsing and UI work; real planning and paid execution are unavailable.
 
-Buyer keys stay in BSV Desktop/BSV Browser. Review every quote's recipient, network, service price and maximum total debit. The adapter requests an unsigned draft, checks fee and wallet-owned change, then invokes native signing. A wallet that cannot supply the required draft reference/change metadata is blocked. Humans approve native spending; an automation must never click it.
+## Use
 
-## Checks
+1. Select a demo offer and submit a chat task. For code, import a public GitHub repository, pin its revision and approve the selected files as model context.
+2. The coordinator calls `request_paid_execution`. Review the fixed quote: scope, execution limits, recipient, network, service sats and maximum debit including fees.
+3. Approve the quote and authorize spending in the native wallet. The server checks the signed transaction, broadcasts through Arcade and records provider receipt before execution.
+4. Read the answer or download changed files and `changes.patch`. Inspect the transaction through its WhatsOnChain receipt link.
+
+Each question is a separate task; previous dialogue is not included automatically. Code tasks produce snapshot changes without running commands or pushing to GitHub; checks remain `not_run`. History is tied to the retained browser session.
+
+For an uncertain payment, use **Check payment status** on the same attempt. Paid technical recovery keeps the original entitlement. Extra scope requires a new quote and approval. No prepaid balances or automatic refunds.
+
+## Connect an agent
+
+In **Connect your agent**, create a token and use the displayed `/mcp` Streamable HTTP endpoint with `Authorization: Bearer YOUR_TOKEN`. Tools: `list_providers`, `create_task`, `get_task`, `get_result`. Use a stable `requestId` for task creation. The token shares its browser owner's tasks; quote approval and native spending stay with the human. Tokens are shown once and can be revoked.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    Buyer[Buyer workspace] --> API[API / MCP]
+    Agents[External agents] --> API
+    API --> Tasks[Task orchestrator]
+    Buyer -->|Human approval| Wallet[Buyer wallet]
+    Wallet -->|Signed payment| Payments[Payment verification]
+    Payments <-->|Broadcast / status| BSV[Arcade / BSV network]
+    Payments -->|Internalize| Provider[Provider wallet]
+    Payments -->|Verified receipt| Tasks
+    Tasks -->|Paid execution| Models[Model provider]
+    Tasks --> Results[Answer / code patch]
+    Tasks --> DB[(Tasks / receipts / artifacts)]
+    Payments --> DB
+```
+
+Buyer keys stay in the wallet. Paid execution requires a server-verified receipt; external agents cannot approve spending.
+
+Vercel serves the React frontend and proxies API/SSE/MCP to one Node service. SQLite stores tasks, payment records and provider-wallet state on persistent disk. The server uses `@bsv/sdk` and `@bsv/wallet-toolbox` at sponsor-pinned versions.
+
+[Architecture](docs/architecture.md) · [Contracts](docs/contracts.md) · [Payment flow](docs/bsv-flow.md) · [AI flow](docs/ai-flow.md) · [Deployment](docs/deployment.md)
+
+## Verify and submit
 
 ```sh
 npm run typecheck
@@ -43,30 +79,6 @@ npm test
 npm run build
 ```
 
-Tests use offline chain/model dependencies only. They cover actual Toolbox wallets on a mock chain, proof/amount/script replay rejection, fee bounds, claim idempotency, ownership/CSRF, MCP protocol/auth, persistent worker recovery, bounded model continuation and validated patch artifacts. These tests do not establish a real on-chain transaction or live AI result.
+Tests use offline model/chain fixtures. They do not prove a live payment or paid result. For UI fixtures, run `npm run dev:client` and open `/test/fixtures/chat-preview.html?task=fixture` on the Vite port; the fixture is excluded from production.
 
-## Using the workspace
-
-1. Select Chat or Code. Code imports a public GitHub repository at an immutable commit; review files and explicitly approve context before sending it to the model.
-2. Submit a bounded task. Operator-funded planning assesses scope and produces an actual `request_paid_execution` tool call.
-3. Connect your wallet and review the immutable fixed quote. Approval reserves one payment attempt; the native wallet signs only after the draft fits the debit bound.
-4. The server verifies the proof, submits the same transaction to Arcade, observes network acceptance and internalizes provider revenue before releasing paid execution.
-5. Read the answer or download actual code changes and `changes.patch`. Code checks remain **not run**. No shell execution or automatic GitHub writes occur.
-
-Unknown payments reconcile the same attempt; do not pay again. Technical recovery keeps the original entitlement. Known limit exhaustion preserves valid partial progress; additional scope is a separately approved task. There are no automatic refunds or prepaid balances. Browser history belongs to the retained secure session, not a cross-device account.
-
-The nine original design references are preserved under [design prompts](docs/design-inputs.md). Activity displays real server events, never fabricated hidden reasoning or tool activity. The chat uses a question bubble, plain answer and persistent composer. Its expandable thinking trace disappears as answer text arrives. Enter sends; Shift+Enter adds a line. New questions are separate tasks and do not automatically include previous answers as context.
-
-For offline UI checks, run `npm run dev:client` and open `/test/fixtures/chat-preview.html?task=fixture` on the Vite port. The labelled fixture controls exercise progress, streaming, approval, completion and failure without a model or payments; this harness is excluded from the production build.
-
-## Agent access
-
-Create a token in **Connect your agent**, then configure your MCP client with the displayed `/mcp` Streamable HTTP endpoint and `Authorization: Bearer YOUR_TOKEN`. Tokens are stored hashed, shown once and revocable. Four tools share browser ownership and task services: `list_providers`, `create_task`, `get_task`, `get_result`. Use a stable `requestId` for idempotent task submission. Approval stays in the browser/native wallet. Result artifacts can be returned to the authenticated MCP client.
-
-Free planning admission is shared across browser/MCP: 10 tasks per owner/hour, 60 globally/hour and two active operations at once, plus HTTP IP limits. Production should add suitable account enrollment and edge controls before broad use.
-
-## Deployment
-
-`Dockerfile` builds one Node service; `compose.yaml` mounts durable `/data` and publishes only a loopback port. `docker compose up --build -d` requires `.env`, a production HTTPS origin and session secret. The deployed VM uses Caddy for HTTPS; Vercel proxies API/MCP requests to it. Run a single instance; do not use ephemeral serverless storage. The source pack remains untouched.
-
-`/healthz` indicates process liveness; `/readyz` is 503 while paid service is unavailable. Both SQLite application and provider-wallet state must persist. See [deployment runbook](docs/deployment.md), [contracts](docs/contracts.md), [task ledger](.ai/TASKS.md) and [qualification evidence](docs/verification.md).
+The BSV track requires stack use, a standard wallet, a real transaction, non-custodial user funds and an agent payment. [Qualification gates](.ai/WORKFLOW.md#qualification-gates) define the evidence; [submission](docs/submission.md) lists delivery requirements. For changes, start with [AGENTS.md](AGENTS.md).

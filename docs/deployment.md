@@ -1,6 +1,6 @@
 # Deployment and operations
 
-Updated 31 October 2026. The Vercel frontend and persistent backend are deployed. The verified public origin is `https://mercatum-ai.vercel.app`. See [verification](verification.md) for observed results. Mainnet quoting is enabled following the user’s network selection and live Safari wallet connection. Exact quote/native approval and live draft/signing validation remain pending; no transaction has been sent.
+Recorded deployment: 31 October 2026. Public origin: `https://mercatum-ai.vercel.app`. Vercel serves the frontend; the persistent backend handles API/SSE/MCP. Mainnet quoting is enabled, and Safari/Chrome wallet connections are recorded. Native signing, a real transaction and paid execution remain unverified. See [current evidence](verification.md#current-qualification); recheck live state before a rollout.
 
 ## Infrastructure
 
@@ -23,6 +23,12 @@ Updated 31 October 2026. The Vercel frontend and persistent backend are deployed
 Only TCP 80/443 are publicly allowed. SSH uses IAP from `35.235.240.0/20`; a targeted deny rule overrides permissive default network rules. The runtime service account has repository-scoped image read permission and access to its configuration secret. Secret values do not belong in startup metadata, Git, client bundles or logs. Docker logs are capped at three 10 MB files per container.
 
 Vercel serves the frontend and reverse-proxies application API, streaming and MCP routes to the persistent backend. Keep browser requests on the Vercel origin. `PUBLIC_APP_URL` is the canonical public frontend origin used for approval links and origin checks. It is set to `https://mercatum-ai.vercel.app` in runtime secret version 5 (origin unchanged since version 3). Browser mutations and MCP approval links through that alias are verified. Never run SQLite or the provider wallet on ephemeral Vercel function storage, or start a second active backend against the same wallet/ledger.
+
+## Recorded rollout references
+
+Latest recorded frontend code: `7728a3b`, Vercel `XQ8Uv92cPxR9gSCifqHepehvDxPX`; live purchase review verified. Earlier UI revisions remain in [verification](verification.md).
+
+Backend: `europe-west3-docker.pkg.dev/gen-lang-client-0426046080/mercatum/app@sha256:dc1e55404bea93e2e710ed2e1b13881bc3ccf623f6437f74a9f14b9cb31a62a7`, built from `fee3286`; health/readiness recorded PASS. Previous rollback digest: `7de492e5a07967d35ef06db34490b49f348af73dc613d33e3cc6736e9b496584`. Inspect the running image before using either reference.
 
 ## Deploy, restart and roll back
 
@@ -97,28 +103,14 @@ Attach the restored disk read-only to a separate recovery VM for inspection. Ver
 
 ## Payment recovery and qualification
 
-Keep `PAYMENTS_ENABLED=false` until the human confirms the network, funded buyer wallet and distinct provider recipient, and standard-wallet draft/fee-bound behavior is observed from the final origin. Every purchase requires its own quote, maximum debit and native wallet approval. Deployment authorization does not authorize a transaction.
+For a new environment, start with `PAYMENTS_ENABLED=false`. Establish the funded buyer wallet, distinct provider, matching network and standard-wallet connection from the final HTTPS origin. Enabling quoting is an explicit configuration step, not spending authorization. The recorded mainnet deployment has quoting enabled; unsigned fee/change checks and native signing remain mandatory on every approved purchase.
 
-Payment proofs are stored before verification and locally before upload. Reconciliation must reuse the original attempt. If the wallet returns no proof, recover its labelled transaction; do not automatically replace the payment. Interrupted upstream calls become `EXECUTION_UNKNOWN`; recovery retains the original receipt and consumed budget. A paid-task retry cannot create an extension charge.
+The human reviews each quote and its maximum debit and authorizes native spending. Inspect remembered wallet grants so approval is observable. Missing draft/reference/change metadata must block signing. Follow [BSV flow](bsv-flow.md) for exact verification and recovery rules.
 
-Safari standard-wallet connection is observed. Qualification still needs the authorized wallet flow, a human-approved real transaction, Arcade broadcast/status, model purchase request through paid execution and coordinator resume, code artifacts and MCP entry. Record evidence without raw proofs, prompts, checkpoints or secrets. A healthy deployment is not Q1–Q5 completion.
+Persist proof before upload/verification and reconcile the original attempt after interruption. Recover the same signed transaction from wallet history where possible; never replace an uncertain debit. A model timeout becomes `EXECUTION_UNKNOWN`; technical recovery retains its receipt and remaining limits.
+
+Capture the real transaction, Arcade acceptance, provider internalization, paid result and original coordinator continuation in [verification](verification.md). Also verify code artifacts, MCP results and paid state across restart. A healthy deployment alone does not satisfy these checks.
 
 ## Local development
 
-Latest recovery backend rollout (31 October2026): `europe-west3-docker.pkg.dev/gen-lang-client-0426046080/mercatum/app@sha256:dc1e55404bea93e2e710ed2e1b13881bc3ccf623f6437f74a9f14b9cb31a62a7`, built from`fee3286`; health/readiness PASS including model/wallet/payments readiness. Previous rollback digest:`7de492e5a07967d35ef06db34490b49f348af73dc613d33e3cc6736e9b496584`. Persistent storage preserved; no destructive migration.
-
-Run `npm run build && npm start`, then open `http://localhost:3000`. The command loads ignored `.env`; ignored `data/` holds private persistent state. `.env.example` lists server configuration. Keep local keys and task data out of Git and browser assets.
-
-### Current mainnet validation state
-
-Runtime secret version 4 switched APP_NETWORK to mainnet with payments disabled. Version 5 enabled quoting after Safari connected to the funded BSV Desktop mainnet wallet. The existing immutable backend image was redeployed, retaining application storage and separate provider-mainnet/provider-testnet SQLite files. Public readiness returns ready=true,model=true,wallet=true,paymentsEnabled=true. This flag permits quote preparation; it is not purchase authorization or evidence of live draft/signing support. The unsigned-draft and fee/change checks remain mandatory before native signing. No application code changed during the network switch.
-
-### Unsigned fee recovery deployment — 31 October 2026
-
-Frontend code revision `0bb29ea`, Vercel deployment `2fWf879N49vtaQEXyZYEXsCy8Vhr`, observed live assets `/assets/index-BMNDPhle.js` and `/assets/payment-b2vfZv0j.js`. Backend image `europe-west3-docker.pkg.dev/gen-lang-client-0426046080/mercatum/app@sha256:aa6647acc707a887d47b589bd6e3108c5f05d2b00b5040fc446db500fdc36ca3` is healthy; persistent storage retained. Frontend uses standard noSendChange metadata to verify every non-payment output before native signing, with server Arcade broadcast of the same signed transaction.
-
-Safari recovery of task `51f93096-ab0b-4252-b555-2cff0749b2f8` is observed and survives reload. The saved unsigned draft totals 194 sats (100 service + 94 fee), over its original 110-sat approval; the original pre-sign code path proves signing was not requested. A fresh abort acknowledgement was unavailable and is not claimed. Fresh quote review is ready with consent unchecked; paid execution and Q3/Q5 remain pending human approval.
-
-### Marketplace delivery — 31 October 2026
-
-Frontend `568e858`, Vercel `C8QDFcpwpDVZCBfEAFGvzNzR9vUt`; canonical assets `index-DfeBWeNQ.js` / `index-Cabso7Mv.css`. Backend image `europe-west3-docker.pkg.dev/gen-lang-client-0426046080/mercatum/app@sha256:c0bda0cd69f953eb4b187151819acad0edf00582864ed3d3f7cbc1c5e33fb96d`; health/readiness pass. Previous rollback digest: `aa6647acc707a887d47b589bd6e3108c5f05d2b00b5040fc446db500fdc36ca3`. Shared task selection is additive; older tasks preserve prior behavior. Actual live selection/reload and planning-to-approval observed; no spending performed.
+Follow [README setup](../README.md#run-locally). `npm start` loads ignored `.env`; `DATA_DIR` holds private application and wallet state. Keep both out of Git and browser assets. For server changes use `npm run dev`; for the offline UI fixture use `npm run dev:client` as documented in README.
