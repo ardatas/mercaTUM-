@@ -4,18 +4,18 @@
 
 These are read-only setup/document checks, not an implementation preflight or qualification result.
 
-| Check | Observed result |
-|---|---|
-| Working tree | `main`, no commits/remotes; project files untracked. Unrelated files retained. No application code created. |
-| Current runtime | `node --version`: v22.15.0; `npm --version`: 11.3.0. |
-| Installed starter packages | `npm ls` confirmed all seven exact BSV sponsor pins. Versions remain authoritative in the pack's AGENTS.md. |
-| Starter lock SHA-256 | `e4313f79014889f81e84ccaf4e64e4eb3c19fedf7a97f1feec97a7fca1465deb` |
-| Source preservation | All 36 developer-pack source files matched the pre-edit SHA-256 snapshot; node_modules/machine files excluded. Root guide also unchanged. |
-| Root guide SHA-256 | `03e9f455b27797fc29a3c7cb46457e1695b45e58f633791a78ef742e681b4c4c` |
-| Wallet installation | `/Applications/BSV-Desktop.app` exists. No wallet connection, balance inspection, native approval or payment performed. |
-| Prior reference-kit checks | Previous setup recorded passing typecheck and 38 tests. Not rerun during documentation-only edits; implementation must run preflight. |
-| Technical source review | Starter BRC-29 helper, guide §§14/20, installed Arcade API/status mapping; official BSV track/ts-stack and model function-calling/continuation references. |
-| Documentation audit | 16 project docs and 65 local Markdown links checked; balanced code fences and no stale undecided scope. Payment, agent and execution-loop reviews completed; corrections rechecked. |
+| Check                      | Observed result                                                                                                                                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Working tree               | `main`, no commits/remotes; project files untracked. Unrelated files retained. No application code created.                                                                         |
+| Current runtime            | `node --version`: v22.15.0; `npm --version`: 11.3.0.                                                                                                                                |
+| Installed starter packages | `npm ls` confirmed all seven exact BSV sponsor pins. Versions remain authoritative in the pack's AGENTS.md.                                                                         |
+| Starter lock SHA-256       | `e4313f79014889f81e84ccaf4e64e4eb3c19fedf7a97f1feec97a7fca1465deb`                                                                                                                  |
+| Source preservation        | All 36 developer-pack source files matched the pre-edit SHA-256 snapshot; node_modules/machine files excluded. Root guide also unchanged.                                           |
+| Root guide SHA-256         | `03e9f455b27797fc29a3c7cb46457e1695b45e58f633791a78ef742e681b4c4c`                                                                                                                  |
+| Wallet installation        | `/Applications/BSV-Desktop.app` exists. No wallet connection, balance inspection, native approval or payment performed.                                                             |
+| Prior reference-kit checks | Previous setup recorded passing typecheck and 38 tests. Not rerun during documentation-only edits; implementation must run preflight.                                               |
+| Technical source review    | Starter BRC-29 helper, guide §§14/20, installed Arcade API/status mapping; official BSV track/ts-stack and model function-calling/continuation references.                          |
+| Documentation audit        | 16 project docs and 65 local Markdown links checked; balanced code fences and no stale undecided scope. Payment, agent and execution-loop reviews completed; corrections rechecked. |
 
 Cleanup replaced stale undecided-product instructions and generic scope notes with the selected brief, contracts and task ledger. Reference code, developer pack and guide were retained. Documentation scope did not include installing application dependencies, building, deploying or sending transactions.
 
@@ -45,13 +45,13 @@ Known live prerequisites to establish: public HTTPS wallet transport, native spe
 
 Gate definitions/evidence criteria live once in [WORKFLOW.md](../.ai/WORKFLOW.md).
 
-| Gate | Status | Project evidence |
-|---|---|---|
-| Q1: BSV stack | PENDING | Pinned reference kit installed; application calls absent |
-| Q2: Standard wallet | PENDING | Installed app found; deployed project wallet flow absent |
-| Q3: Real transaction | PENDING | No project transaction or Arcade broadcast |
+| Gate                    | Status  | Project evidence                                                        |
+| ----------------------- | ------- | ----------------------------------------------------------------------- |
+| Q1: BSV stack           | PENDING | Pinned reference kit installed; application calls absent                |
+| Q2: Standard wallet     | PENDING | Installed app found; deployed project wallet flow absent                |
+| Q3: Real transaction    | PENDING | No project transaction or Arcade broadcast                              |
 | Q4: Non-custodial funds | PENDING | Architecture specified; source/signing path not implemented or observed |
-| Q5: Agent payment | PENDING | Tool/payment/execution contract specified; project agent absent |
+| Q5: Agent payment       | PENDING | Tool/payment/execution contract specified; project agent absent         |
 
 For each PASS, add source paths, observed result and date. Missing evidence stays PENDING/BLOCKED. Documentation completion does not change these gates.
 
@@ -94,13 +94,13 @@ User authorized implementation, preservation/use of seven design prompts and fre
 
 ### Current gate assessment
 
-| Gate | Status | Observed evidence / missing step |
-|---|---|---|
-| Q1 | PASS (local application evidence) | Actual SDK WalletClient/transaction and Toolbox merchant calls in app, exact lock pins, passing real-wallet offline checks |
-| Q2 | BLOCKED | No standard-wallet connection/authorization from a deployed HTTPS origin observed |
-| Q3 | BLOCKED | No real transaction, Arcade POST/network acceptance or WhatsOnChain link |
-| Q4 | PENDING live evidence | Source and offline test keep buyer signing in wallet; live native custody/approval path unobserved |
-| Q5 | BLOCKED | No configured real model + approved real payment + resumed coordinator demonstration |
+| Gate | Status                            | Observed evidence / missing step                                                                                           |
+| ---- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Q1   | PASS (local application evidence) | Actual SDK WalletClient/transaction and Toolbox merchant calls in app, exact lock pins, passing real-wallet offline checks |
+| Q2   | BLOCKED                           | No standard-wallet connection/authorization from a deployed HTTPS origin observed                                          |
+| Q3   | BLOCKED                           | No real transaction, Arcade POST/network acceptance or WhatsOnChain link                                                   |
+| Q4   | PENDING live evidence             | Source and offline test keep buyer signing in wallet; live native custody/approval path unobserved                         |
+| Q5   | BLOCKED                           | No configured real model + approved real payment + resumed coordinator demonstration                                       |
 
 Public qualification is **not claimed**. Public hosting deferred by the user; live secrets, model/network/wallet and human spending remain prerequisites.
 
@@ -261,3 +261,5 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 - Clean starting revision 321c003. Same-session preflight remains valid: unchanged runtime/lock/sponsor dependencies, prior92 tests/typecheck/build PASS. Narrow UI removal only: delete the profile panel and its hover state; retain offer scores and remaining-capacity summary. No payment/backend change.
 
 - Removed profile component, selector, radar SVG, hover state and obsolete CSS. Remaining capacity summary spans the row. Typecheck/build and diff check PASS.
+
+- Deployed code `39e2925`; Vercel `2J5tH3ygUdpYMUkNfMret4tFZc1m` SUCCESS. Canonical assets `index-BcuGlXsy.js` / `index-DxuUY84D.css`. Live browser confirms no Capability profile text or panel, capacity summary retained, and equal document client/scroll widths of1265px. Screenshot: ignored `artifacts/marketplace-no-profile-live.png`.
