@@ -362,3 +362,5 @@ Benchmark snapshot (Artificial Analysis, v5.0,31 October2026; scores are model b
 - Clean starting revision07e3495; same-session preflight valid (unchanged runtime/lock,106 tests/typecheck/build PASS; sponsor pins/38 tests previously confirmed). Coordinator owns T5 presentation only: adapt the existing official BSV wordmark into a blue square badge and place it beside the wallet button label. No wallet/payment logic changes.
 
 - Typecheck/build/diff checks PASS. Local Chrome observes loaded48×48px badge, no monochrome filter, and80px-tall button with fitting label/arrow. Adapted existing BSV path artwork into a blue gradient square; original source SVG retained. No wallet action triggered.
+
+- Deployed `96667c8`; Vercel `92gTehs1o9a4hoSmUarzBAbdVtLn` SUCCESS. Public Chrome confirms loaded48×48px `/brands/bsv-square.svg`, no color filter and80px button. Live screenshot: ignored `artifacts/bsv-square-button-live.png`.

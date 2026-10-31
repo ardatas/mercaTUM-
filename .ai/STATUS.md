@@ -6,7 +6,7 @@ Updated: 31 October 2026. Vercel frontend and persistent backend deployed; nativ
 
 - Top-left mascot increased from40px to56px. Desktop browser verifies the larger image and brand text fit the sidebar; typecheck/build pass. Pushed `b71130d`; subsequent documentation revision `c38b7f8` is now Vercel SUCCESS (`DYHmkjdevpBpd3VVdBa4h98D8kBS`).
 
-- Wallet connection button now has a72px minimum height and a locally hosted BSV Blockchain wordmark. Desktop/mobile browser dimensions and logo loading verified locally; typecheck/build pass. Deployed at `d2d6570`; public assets/logo verified. Live visual recheck unavailable due browser-control timeouts.
+- Wallet connection button now uses a colorful48px square BSV badge beside its label, with80px minimum height. Deployed at `96667c8`; typecheck/build pass and public Chrome verifies logo loading, full color and dimensions.
 
 - Single task history deletion implemented: per-item menus in recent tasks/history, confirmation, persistent owner-scoped removal and selected-chat reset. Receipts and task recovery links retained; active work continues. Typecheck/build and94 tests pass; browser cancellation, selected-chat deletion, reload, other-chat preservation and error handling observed. Deployed at `32be4d2`; live deletion and reload verified using a disposable chat.
 
