@@ -132,4 +132,4 @@ Every handoff returns changed paths, behavior implemented, commands/results, unr
 
 ### Fee-cap recovery — 31 October 2026
 
-Coordinator owns T1/T2/T5 integration: preserve confirmed unsigned aborts, recover legacy pre-sign drafts through a confirmed abort or a saved unsigned draft proven to exceed the original cap, and return to fresh quote approval. Local regression/typecheck/build PASS (87 tests). Deployment and existing Safari task recovery in progress; signed or uncertain attempts remain reconciliation-only.
+Coordinator owns T1/T2/T5 integration: preserve confirmed unsigned aborts, recover legacy pre-sign drafts through a confirmed abort or a saved unsigned draft proven to exceed the original cap, and return to fresh quote approval. Local regression/typecheck/build PASS (87 tests). Deployed at 0bb29ea; original Safari task recovered to fresh quote review and survives reload. Full WalletClient payment regression passes with noSendChange metadata. Human approval/native signing and paid execution remain pending; signed or uncertain attempts remain reconciliation-only.

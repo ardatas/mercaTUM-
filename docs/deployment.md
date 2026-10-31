@@ -110,3 +110,9 @@ Run `npm run build && npm start`, then open `http://localhost:3000`. The command
 ### Current mainnet validation state
 
 Runtime secret version 4 switched APP_NETWORK to mainnet with payments disabled. Version 5 enabled quoting after Safari connected to the funded BSV Desktop mainnet wallet. The existing immutable backend image was redeployed, retaining application storage and separate provider-mainnet/provider-testnet SQLite files. Public readiness returns ready=true,model=true,wallet=true,paymentsEnabled=true. This flag permits quote preparation; it is not purchase authorization or evidence of live draft/signing support. The unsigned-draft and fee/change checks remain mandatory before native signing. No application code changed during the network switch.
+
+### Unsigned fee recovery deployment — 31 October 2026
+
+Frontend code revision `0bb29ea`, Vercel deployment `2fWf879N49vtaQEXyZYEXsCy8Vhr`, observed live assets `/assets/index-BMNDPhle.js` and `/assets/payment-b2vfZv0j.js`. Backend image `europe-west3-docker.pkg.dev/gen-lang-client-0426046080/mercatum/app@sha256:aa6647acc707a887d47b589bd6e3108c5f05d2b00b5040fc446db500fdc36ca3` is healthy; persistent storage retained. Frontend uses standard noSendChange metadata to verify every non-payment output before native signing, with server Arcade broadcast of the same signed transaction.
+
+Safari recovery of task `51f93096-ab0b-4252-b555-2cff0749b2f8` is observed and survives reload. The saved unsigned draft totals 194 sats (100 service + 94 fee), over its original 110-sat approval; the original pre-sign code path proves signing was not requested. A fresh abort acknowledgement was unavailable and is not claimed. Fresh quote review is ready with consent unchecked; paid execution and Q3/Q5 remain pending human approval.
