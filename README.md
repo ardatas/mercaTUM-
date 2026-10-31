@@ -47,7 +47,9 @@ Tests use offline chain/model dependencies only. They cover actual Toolbox walle
 
 Unknown payments reconcile the same attempt; do not pay again. Technical recovery keeps the original entitlement. Known limit exhaustion preserves valid partial progress; additional scope is a separately approved task. There are no automatic refunds or prepaid balances. Browser history belongs to the retained secure session, not a cross-device account.
 
-The seven original design references are preserved under [design prompts](docs/design-inputs.md). Activity displays real server events, never fabricated hidden reasoning or tool activity.
+The nine original design references are preserved under [design prompts](docs/design-inputs.md). Activity displays real server events, never fabricated hidden reasoning or tool activity. The chat uses a question bubble, plain answer and persistent composer. Its expandable thinking trace disappears as answer text arrives. Enter sends; Shift+Enter adds a line. New questions are separate tasks and do not automatically include previous answers as context.
+
+For offline UI checks, run `npm run dev:client` and open `/test/fixtures/chat-preview.html?task=fixture` on the Vite port. The labelled fixture controls exercise progress, streaming, approval, completion and failure without a model or payments; this harness is excluded from the production build.
 
 ## Agent access
 

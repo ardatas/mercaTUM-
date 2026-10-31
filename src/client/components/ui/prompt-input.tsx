@@ -9,6 +9,8 @@ export function PromptInput({
   model,
   hasContext,
   initialValue = "",
+  placeholder,
+  modeLocked = false,
 }: {
   mode: "chat" | "code";
   setMode: (m: "chat" | "code") => void;
@@ -17,15 +19,18 @@ export function PromptInput({
   model: string;
   hasContext: boolean;
   initialValue?: string;
+  placeholder?: string;
+  modeLocked?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [value, setValue] = useState(initialValue);
+  const canSubmit = !!value.trim() && !busy && (mode !== "code" || hasContext);
   useEffect(() => {
     setValue(initialValue);
   }, [initialValue]);
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    if (value.trim() && !busy) onSubmit(value.trim());
+    if (canSubmit) onSubmit(value.trim());
   };
   return (
     <form
@@ -35,9 +40,10 @@ export function PromptInput({
       <textarea
         aria-label="Task prompt"
         placeholder={
-          mode === "chat"
+          placeholder ??
+          (mode === "chat"
             ? "Ask anything…"
-            : "What should change in this repository?"
+            : "What should change in this repository?")
         }
         value={value}
         onChange={(e) => setValue(e.target.value)}
@@ -45,9 +51,9 @@ export function PromptInput({
         rows={2}
         maxLength={12000}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+          if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
             e.preventDefault();
-            if (value.trim() && !busy) onSubmit(value.trim());
+            if (canSubmit) onSubmit(value.trim());
           }
         }}
       />
@@ -55,6 +61,7 @@ export function PromptInput({
         <div className="mode-toggle">
           <button
             type="button"
+            disabled={modeLocked}
             className={mode === "chat" ? "selected" : ""}
             onClick={() => setMode("chat")}
           >
@@ -63,6 +70,7 @@ export function PromptInput({
           </button>
           <button
             type="button"
+            disabled={modeLocked}
             className={mode === "code" ? "selected" : ""}
             onClick={() => setMode("code")}
           >
@@ -83,8 +91,8 @@ export function PromptInput({
         <button
           className="send-button"
           type="submit"
-          disabled={busy || !value.trim() || (mode === "code" && !hasContext)}
-          aria-label="Review task"
+          disabled={!canSubmit}
+          aria-label="Send message"
         >
           <ArrowUp size={20} />
         </button>

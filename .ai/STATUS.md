@@ -2,6 +2,8 @@
 
 Updated: 31 October 2026. Vercel frontend and persistent backend deployed; native-wallet validation pending.
 
+- Local conversational UI updated: question bubble, plain assistant response, bottom composer and reference 8 thinking trace that disappears on answer output. Compact system typography matches the supplied component; prior sidebar readability retained. Typecheck/build and 85 tests pass; offline browser lifecycle checks cover desktop/mobile. Local model/wallet remain unavailable; no live paid answer claimed. This UI revision is not publicly deployed.
+- Reference 9 grid/theme implemented locally: neutral charcoal/white/gray surfaces, pointer-driven spectrum dots in empty chat, and spectrum capacity arcs. Desktop pointer changes, navigation teardown and 390px layout verified. No public deployment.
 - Repository: ardatas/mercaTUM-, main; frequent commits/pushes authorized.
 - User now requests public Vercel deployment and Gemini. API credential is stored in ignored local configuration, backend Secret Manager and the Vercel project as a secret environment variable.
 - Public app and canonical origin: https://mercatum-ai.vercel.app. Vercel proxies API/SSE/MCP to the persistent HTTPS backend.

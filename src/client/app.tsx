@@ -28,7 +28,8 @@ import {
 import ReactMarkdown from "react-markdown";
 import { api, startSession } from "./api";
 import { PromptInput } from "./components/ui/prompt-input";
-import { ActivityChain } from "./components/ui/activity-chain";
+import ThinkingState, { getStreamedAnswer } from "./components/ui/thinking";
+import { InteractiveGrid } from "./components/ui/interactive-grid";
 import { CapacityDial } from "./components/ui/capacity-dial";
 import { ArtifactViewer } from "./components/ui/artifact-viewer";
 import { FileViewer } from "./components/ui/file-viewer";
@@ -87,8 +88,21 @@ export function App() {
     [wallet, setWallet] = useState<{ identityKey: string; network: string }>(),
     [search, setSearch] = useState(""),
     [extension, setExtension] = useState<string>(),
-    [initialPrompt, setInitialPrompt] = useState("");
+    [initialPrompt, setInitialPrompt] = useState(""),
+    [pendingPrompt, setPendingPrompt] = useState("");
   const provider = providers[0];
+  const streamedAnswer =
+    task?.state === "RUNNING" ? getStreamedAnswer(task.events) : "";
+  const taskSettled =
+    !task ||
+    [
+      "SUCCEEDED",
+      "LIMIT_REACHED",
+      "FAILED",
+      "SCOPE_REJECTED",
+      "CANCELLED",
+    ].includes(task.state);
+
   const refresh = useCallback(async () => {
     setHistory(await api("/api/tasks"));
     const data = await api<{ providers: Provider[]; readiness: Readiness }>(
@@ -177,16 +191,24 @@ export function App() {
     });
   const submit = (prompt: string) =>
     perform(async () => {
-      const t = await api<PublicTask>("/api/tasks", {
-        mode,
-        prompt,
-        providerId: "demo-provider",
-        ...(mode === "code" ? { snapshotId: snapshot?.id } : {}),
-        ...(extension ? { extensionOfTaskId: extension } : {}),
-      });
-      setTask(t);
-      window.history.replaceState(null, "", `/?task=${t.id}`);
-      await refresh();
+      setPendingPrompt(prompt);
+      try {
+        const t = await api<PublicTask>("/api/tasks", {
+          mode,
+          prompt,
+          providerId: "demo-provider",
+          ...(mode === "code" ? { snapshotId: snapshot?.id } : {}),
+          ...(extension ? { extensionOfTaskId: extension } : {}),
+        });
+        setTask(t);
+        setInitialPrompt("");
+        setNewChat((n) => n + 1);
+        setExtension(undefined);
+        window.history.replaceState(null, "", `/?task=${t.id}`);
+        await refresh();
+      } finally {
+        setPendingPrompt("");
+      }
     });
   const quote = () =>
     perform(async () => {
@@ -462,9 +484,24 @@ export function App() {
           ) : (
             <>
               {view === "workspace" && (
-                <div className={`workspace ${task ? "has-task" : ""}`}>
+                <div
+                  className={`workspace ${task || pendingPrompt ? "has-task" : ""}`}
+                >
+                  {!task && !pendingPrompt && mode === "chat" && (
+                    <InteractiveGrid />
+                  )}
                   <div className="workspace-main">
-                    {!task ? (
+                    {pendingPrompt ? (
+                      <div className="task-content">
+                        <article
+                          className="user-message"
+                          aria-label="Your message"
+                        >
+                          {pendingPrompt}
+                        </article>
+                        <ThinkingState events={[]} state="CREATED" />
+                      </div>
+                    ) : !task ? (
                       <>
                         {extension && (
                           <div className="notice">
@@ -510,27 +547,25 @@ export function App() {
                             onError={setError}
                           />
                         )}
-                        <PromptInput
-                          key={newChat}
-                          mode={mode}
-                          setMode={setMode}
-                          onSubmit={submit}
-                          busy={busy || !loaded}
-                          model={provider?.modelId ?? ""}
-                          hasContext={!!snapshot?.consentedAt}
-                          initialValue={initialPrompt}
-                        />
                       </>
                     ) : (
                       <div className="task-content">
-                        <div className="task-heading">
-                          <span
-                            className={`state-badge ${task.state === "SUCCEEDED" ? "complete" : ""}`}
-                          >
-                            {stateText(task.state)}
-                          </span>
+                        <article
+                          className="user-message"
+                          aria-label="Your message"
+                        >
+                          {task.prompt}
+                        </article>
+                        <div className="message-tools">
                           <ActionMenu
                             actions={[
+                              {
+                                label: "Copy message",
+                                run: () =>
+                                  void navigator.clipboard.writeText(
+                                    task.prompt,
+                                  ),
+                              },
                               {
                                 label: "Copy task link",
                                 run: () =>
@@ -542,192 +577,234 @@ export function App() {
                             ]}
                           />
                         </div>
-                        <h1>{task.prompt}</h1>
-                        <p className="task-meta">
-                          {task.mode === "code" ? "Code task" : "Chat task"} ·{" "}
-                          {task.modelId} ·{" "}
-                          {new Date(task.createdAt).toLocaleString()}
-                        </p>
-                        <ActivityChain
-                          events={task.events}
-                          state={task.state}
-                        />
-                        {task.error && (
-                          <div className="notice">{task.error.message}</div>
-                        )}
-                        {task.state === "AWAITING_APPROVAL" && !task.quote && (
-                          <div className="approval-intro">
-                            <Wallet size={24} />
-                            <h2>Your task is scoped.</h2>
-                            <p>
-                              Connect your BSV wallet to review a quote.
-                              Connecting does not spend funds.
-                            </p>
-                            <button
-                              className="button primary"
-                              onClick={quote}
-                              disabled={busy}
-                            >
-                              Connect & review quote <ArrowRight size={16} />
-                            </button>
-                          </div>
-                        )}
-                        {task.quote && task.state === "AWAITING_APPROVAL" && (
-                          <QuoteReview
-                            quote={task.quote}
-                            onRefresh={quote}
-                            busy={busy}
-                            onApprove={pay}
-                            onCancel={() =>
-                              void perform(async () => {
-                                await api(`/api/tasks/${task.id}/cancel`, {});
-                                await loadTask(task.id);
-                              })
-                            }
+                        <article
+                          className="assistant-message"
+                          aria-label="Assistant response"
+                        >
+                          <ThinkingState
+                            key={task.id}
+                            events={task.events}
+                            state={task.state}
+                            hasAnswer={!!task.result || !!streamedAnswer}
                           />
-                        )}
-                        {["PAYMENT_PENDING", "PAYMENT_UNKNOWN"].includes(
-                          task.state,
-                        ) && (
-                          <div className="notice">
-                            <strong>Payment is being reconciled.</strong>
-                            <p>
-                              A wallet timeout can still mean funds moved. This
-                              action checks the same payment and never starts
-                              another debit.
-                            </p>
-                            <button
-                              className="button"
-                              onClick={recoverPayment}
-                              disabled={busy}
-                            >
-                              <RefreshCw size={15} />
-                              Reconcile payment
-                            </button>
-                          </div>
-                        )}
-                        {task.state === "RUNNING" && !task.result && (
-                          <div className="stream-output">
-                            <ReactMarkdown>
-                              {task.events
-                                .filter(
-                                  (e) => e.type === "execution.text_delta",
-                                )
-                                .map((e) => e.data.text as string)
-                                .join("")}
-                            </ReactMarkdown>
-                          </div>
-                        )}
-                        {task.result && (
-                          <section className="result-panel">
-                            <div className="result-header">
-                              <span>
-                                <Sparkles size={16} />
-                                {task.result.completion === "partial"
-                                  ? "Partial result"
-                                  : "Your result"}
-                              </span>
+                          {task.state === "CANCELLED" && (
+                            <p className="notice">Request cancelled.</p>
+                          )}
+                          {task.error && (
+                            <div className="notice">{task.error.message}</div>
+                          )}
+                          {task.state === "AWAITING_APPROVAL" &&
+                            !task.quote && (
+                              <div className="approval-intro">
+                                <Wallet size={24} />
+                                <h2>Your task is scoped.</h2>
+                                <p>
+                                  Connect your BSV wallet to review a quote.
+                                  Connecting does not spend funds.
+                                </p>
+                                <button
+                                  className="button primary"
+                                  onClick={quote}
+                                  disabled={busy}
+                                >
+                                  Connect & review quote{" "}
+                                  <ArrowRight size={16} />
+                                </button>
+                              </div>
+                            )}
+                          {task.quote && task.state === "AWAITING_APPROVAL" && (
+                            <QuoteReview
+                              quote={task.quote}
+                              onRefresh={quote}
+                              busy={busy}
+                              onApprove={pay}
+                              onCancel={() =>
+                                void perform(async () => {
+                                  await api(`/api/tasks/${task.id}/cancel`, {});
+                                  await loadTask(task.id);
+                                })
+                              }
+                            />
+                          )}
+                          {["PAYMENT_PENDING", "PAYMENT_UNKNOWN"].includes(
+                            task.state,
+                          ) && (
+                            <div className="notice">
+                              <strong>Payment is being reconciled.</strong>
+                              <p>
+                                A wallet timeout can still mean funds moved.
+                                This action checks the same payment and never
+                                starts another debit.
+                              </p>
                               <button
-                                className="icon-button"
-                                aria-label="Copy answer"
-                                onClick={() =>
-                                  void navigator.clipboard.writeText(
-                                    task.result!.answer,
-                                  )
-                                }
+                                className="button"
+                                onClick={recoverPayment}
+                                disabled={busy}
                               >
-                                <Copy size={16} />
+                                <RefreshCw size={15} />
+                                Reconcile payment
                               </button>
                             </div>
-                            <div className="markdown">
-                              <ReactMarkdown>
-                                {task.result.answer}
-                              </ReactMarkdown>
+                          )}
+                          {task.state === "RUNNING" && !task.result && (
+                            <div className="stream-output">
+                              <ReactMarkdown>{streamedAnswer}</ReactMarkdown>
                             </div>
-                            <ArtifactViewer
-                              taskId={task.id}
-                              artifacts={task.result.artifacts}
-                            />
-                            {task.mode === "code" && (
-                              <p className="subtle">
-                                Checks: not run. Review and test the patch
-                                before applying it.
-                              </p>
-                            )}
-                            {task.result.usage && (
-                              <p className="subtle">
-                                {task.result.usage.inputTokens.toLocaleString()}{" "}
-                                input ·{" "}
-                                {task.result.usage.outputTokens.toLocaleString()}{" "}
-                                output tokens · fixed service price unchanged
-                              </p>
-                            )}
-                          </section>
-                        )}
-                        {task.receipt && (
-                          <section className="receipt">
-                            <ShieldCheck size={18} />
-                            <div>
-                              <strong>
+                          )}
+                          {task.result && (
+                            <section className="result-panel">
+                              {task.result.completion === "partial" && (
+                                <p className="subtle">
+                                  Partial answer · execution limit reached
+                                </p>
+                              )}
+                              <div className="markdown">
+                                <ReactMarkdown>
+                                  {task.result.answer}
+                                </ReactMarkdown>
+                              </div>
+                              <div className="answer-actions">
+                                <button
+                                  className="icon-button"
+                                  aria-label="Copy answer"
+                                  onClick={() =>
+                                    void navigator.clipboard.writeText(
+                                      task.result!.answer,
+                                    )
+                                  }
+                                >
+                                  <Copy size={15} />
+                                </button>
+                                <details className="answer-details">
+                                  <summary>Details</summary>
+                                  <p>
+                                    {task.modelId} · {stateText(task.state)} ·{" "}
+                                    {new Date(task.createdAt).toLocaleString()}
+                                  </p>
+                                  {task.result.usage && (
+                                    <p>
+                                      {task.result.usage.inputTokens.toLocaleString()}{" "}
+                                      input ·{" "}
+                                      {task.result.usage.outputTokens.toLocaleString()}{" "}
+                                      output tokens · fixed service price
+                                      unchanged
+                                    </p>
+                                  )}
+                                </details>
+                              </div>
+                              <ArtifactViewer
+                                taskId={task.id}
+                                artifacts={task.result.artifacts}
+                              />
+                              {task.mode === "code" && (
+                                <p className="subtle">
+                                  Checks: not run. Review and test the patch
+                                  before applying it.
+                                </p>
+                              )}
+                            </section>
+                          )}
+                          {task.receipt && (
+                            <details className="receipt-details">
+                              <summary>
                                 Payment verified · {task.receipt.amountSats}{" "}
                                 sats
-                              </strong>
-                              <span>
-                                {task.receipt.network} ·{" "}
-                                {task.receipt.arcade.status} · provider received
-                                payment
-                              </span>
-                              <a
-                                href={task.receipt.explorerUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                View transaction on WhatsOnChain{" "}
-                                <ExternalLink size={12} />
-                              </a>
-                            </div>
-                          </section>
-                        )}
-                        {["FAILED_PAID", "EXECUTION_UNKNOWN"].includes(
-                          task.state,
-                        ) && (
-                          <button
-                            className="button"
-                            disabled={busy}
-                            onClick={() =>
-                              void perform(async () => {
-                                await api(`/api/tasks/${task.id}/retry`, {});
-                                await loadTask(task.id);
-                              })
-                            }
-                          >
-                            <RefreshCw size={15} />
-                            Retry using this payment
-                          </button>
-                        )}
-                        {["SUCCEEDED", "LIMIT_REACHED"].includes(
-                          task.state,
-                        ) && (
-                          <button
-                            className="button"
-                            onClick={() => {
-                              const id = task.id;
-                              reset();
-                              setExtension(id);
-                            }}
-                          >
-                            Request more work <Plus size={15} />
-                          </button>
-                        )}
-                        {snapshot && task.mode === "code" && (
-                          <FileViewer
-                            snapshot={snapshot}
-                            onConsent={setSnapshot}
-                            onError={setError}
-                          />
-                        )}
+                              </summary>
+                              <section className="receipt">
+                                <ShieldCheck size={18} />
+                                <div>
+                                  <strong>
+                                    Payment verified · {task.receipt.amountSats}{" "}
+                                    sats
+                                  </strong>
+                                  <span>
+                                    {task.receipt.network} ·{" "}
+                                    {task.receipt.arcade.status} · provider
+                                    received payment
+                                  </span>
+                                  <a
+                                    href={task.receipt.explorerUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    View transaction on WhatsOnChain{" "}
+                                    <ExternalLink size={12} />
+                                  </a>
+                                </div>
+                              </section>
+                            </details>
+                          )}
+                          {["FAILED_PAID", "EXECUTION_UNKNOWN"].includes(
+                            task.state,
+                          ) && (
+                            <button
+                              className="button"
+                              disabled={busy}
+                              onClick={() =>
+                                void perform(async () => {
+                                  await api(`/api/tasks/${task.id}/retry`, {});
+                                  await loadTask(task.id);
+                                })
+                              }
+                            >
+                              <RefreshCw size={15} />
+                              Retry using this payment
+                            </button>
+                          )}
+                          {["SUCCEEDED", "LIMIT_REACHED"].includes(
+                            task.state,
+                          ) && (
+                            <button
+                              className="button text-action"
+                              onClick={() => {
+                                const id = task.id;
+                                reset();
+                                setExtension(id);
+                              }}
+                            >
+                              Request more work <Plus size={15} />
+                            </button>
+                          )}
+                          {snapshot && task.mode === "code" && (
+                            <FileViewer
+                              snapshot={snapshot}
+                              onConsent={setSnapshot}
+                              onError={setError}
+                            />
+                          )}
+                        </article>
                       </div>
                     )}
+                    <div className="composer-dock">
+                      <PromptInput
+                        key={newChat}
+                        mode={mode}
+                        setMode={(next) => {
+                          if (task) reset();
+                          setMode(next);
+                        }}
+                        onSubmit={submit}
+                        busy={busy || !loaded || !taskSettled}
+                        modeLocked={!taskSettled || busy}
+                        model={provider?.modelId ?? ""}
+                        hasContext={!!snapshot?.consentedAt}
+                        initialValue={initialPrompt}
+                        placeholder={
+                          task
+                            ? taskSettled
+                              ? "Ask another question…"
+                              : "Write your next message…"
+                            : undefined
+                        }
+                      />
+                      {task && (
+                        <p className="composer-note">
+                          {taskSettled
+                            ? "Each new request has its own quote and approval."
+                            : "Finish this request before sending another."}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}

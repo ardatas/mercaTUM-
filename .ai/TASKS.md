@@ -9,7 +9,7 @@ Implementation began on 31 October 2026. Local work is implemented as recorded b
 | T2 | Provider wallet, quote, verification and Arcade ledger | T0 schemas/storage | BLOCKED | Separate mainnet merchant wallet initialized publicly; real transaction/Arcade evidence pending |
 | T3 | Real coordinator/tool loop and paid chat executor | T0; integrate T2 receipt | BLOCKED | Gemini 3.8 Flash real probe/planning/tool calls pass; paid executor/resume requires real approved receipt |
 | T4 | Repository import, context and actual patch artifacts | T0; integrate T3 executor | DONE | Real GitHub SHA import + validated actual patches; model-generated live patch awaits T3 |
-| T5 | Buyer UI from design slots | T0; integrate T1–T4; design input | REVIEW | Seven supplied references integrated; desktop/mobile local browser checks passed; live paid states pending |
+| T5 | Buyer UI from design slots | T0; integrate T1–T4; design input | REVIEW | Coordinator: reference 9 grid/neutral spectrum theme implemented and desktop/mobile checked; prior chat UI verified; live paid states pending |
 | T6 | Remote MCP adapter | T0; integrate T2/T3 services | REVIEW | Official client reaches real public Gemini planning/approval; token and pending task survive restart; paid result pending |
 | T7 | Deployment and live-origin wallet integration | T0 early probe; final T1–T6 | BLOCKED | Vercel production and persistent backend deployed; browser/MCP/SSE/reload verified. Mainnet selected; funded BSV Desktop connected from live Safari. Exact quote/native approval and live draft validation remain required |
 | T8 | Integration, live demo and gate evidence | T1–T7 | BLOCKED | Local checks + read-only payment/agent review; Q2–Q5 need live external setup |

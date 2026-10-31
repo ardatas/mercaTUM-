@@ -37,3 +37,7 @@ Technical choices: [architecture](architecture.md), [contracts](contracts.md), [
 ## Current delivery phase — 31 October 2026
 
 The user now authorizes Vercel deployment and Gemini with the supplied server credential. The persistent HTTPS backend is deployed in the dedicated mercaTUM Google Cloud project, with Gemini 3.8 Flash and a separate provider mainnet wallet (the user superseded the earlier testnet selection). Vercel serves the verified public frontend at https://mercatum-ai.vercel.app, with API/SSE/MCP proxying to the persistent backend. Live model planning, public MCP entry, SSE replay, restart persistence and Safari WalletClient connection on mainnet are observed; real buyer approval, payment, paid answer/code artifacts and full Q1–Q5 qualification remain incomplete. See verification.md.
+
+Local UI refinement: a message-bubble/chat-answer layout, persistent bottom composer and temporary real-event thinking trace are implemented at localhost:3000. Reference 8 supplies compact progress typography and matching chat text, superseding the earlier bold 18px composer. Public deployment of these UI refinements remains pending.
+
+Local visual theme now follows reference 9: neutral charcoal/white/gray surfaces with spectrum accents, and a decorative interactive grid in empty chat only. Public deployment remains pending.
