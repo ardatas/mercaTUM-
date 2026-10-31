@@ -139,7 +139,8 @@
 .mp-capacity-chart {
   flex: 1;
   min-width: 0;
-  margin-left: 0;
+  max-width: 72%;
+  margin-inline: auto;
 }
 .mp-capacity-chart > svg {
   display: block;
@@ -668,6 +669,8 @@
   }
   .mp-capacity-chart {
     min-width: 0;
+    max-width: none;
+    width: 100%;
     flex: 0 0 auto;
   }
   .mp-capacity-chart > svg {
