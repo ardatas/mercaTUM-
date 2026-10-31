@@ -311,3 +311,9 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 - Typecheck/build/diff check PASS. Browser observed72px button height at desktop (191px button width) and mobile drawer (236px width); BSV SVG loaded in both. No wallet operation triggered. Frontend-only change; backend rollout unnecessary.
 
 - Deployed `d2d6570`; Vercel `ADhFifSsuveF4uh2SSssAEiHBWEV` SUCCESS. Public assets `index-CtznOT1R.js` / `index-CvpVGaz_.css` contain the logo reference and72px button rule; `/brands/bsv.svg` returns200 and exactly matches the source file. Local desktop/mobile visual checks passed. Public visual recheck remains PENDING because Chrome control timed out; two viewport-reset attempts also timed out. No wallet action performed.
+
+## Larger top-left mascot — 31 October 2026
+
+- Clean starting revision `d0e7bf7`; same-session preflight remains valid with unchanged runtime/dependencies. Coordinator owns a narrow T5 presentation change: increase the sidebar/mobile-drawer mascot from40px to56px, preserving the header mark and existing navigation.
+
+- Typecheck/build/diff check PASS. Desktop browser confirms loaded56×56px mascot and brand text contained within the191px-wide brand button.
