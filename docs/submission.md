@@ -25,7 +25,7 @@ A buyer brings a question or a public code repository, reviews a fixed quote, an
 
 The marketplace listing and capacity values are simulated. The implementation uses an operator-owned model API, not consumer subscription sharing. Buyer keys stay in a standard wallet. A separate Toolbox wallet receives provider revenue, and Arcade verifies network acceptance of the same signed transaction. Human approval remains mandatory for each purchase.
 
-**Current demonstrated state:** deployed Vercel frontend and persistent backend; Gemini 3.8 Flash real scope/tool requests; real GitHub import; validated patch generation from offline fixtures; 72 passing application tests. Public browser, MCP, SSE, reload and container-restart checks pass. Native-wallet connection, a real payment, receipt-backed model execution and a model-generated code patch remain pending.
+**Current demonstrated state:** deployed Vercel frontend and persistent backend; Gemini 3.8 Flash real scope/tool requests; real GitHub import; validated patch generation from offline fixtures; 72 passing application tests. Public browser, MCP, SSE, reload and container-restart checks pass. Safari WalletClient connects to BSV Desktop on mainnet. A real payment, native signing evidence, receipt-backed model execution and a model-generated code patch remain pending.
 
 ## Planned video outline (150 seconds maximum; not recorded)
 

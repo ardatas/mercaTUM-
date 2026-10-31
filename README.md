@@ -2,7 +2,7 @@
 
 A buyer-side AI workspace for chat and focused public-repository code tasks. The rental listing and capacity dials are simulated. Model execution uses the configured server-side Gemini API (with the original Responses adapter retained); BSV payments use the buyer's standard wallet and a separate provider wallet.
 
-**Live app: [mercatum-ai.vercel.app](https://mercatum-ai.vercel.app).** Vercel serves the frontend; a persistent HTTPS backend runs Gemini 3.8 Flash and a separate testnet provider wallet. Real chat/code planning and MCP requests reach human approval; sessions and tasks survive a backend restart. Browser submission, reload, SSE and MCP through Vercel are verified. Native-wallet connection, real payment and paid results remain pending. See [observed evidence](docs/verification.md).
+**Live app: [mercatum-ai.vercel.app](https://mercatum-ai.vercel.app).** Vercel serves the frontend; a persistent HTTPS backend runs Gemini 3.8 Flash and a separate mainnet provider wallet. Real chat/code planning and MCP requests reach human approval; sessions and tasks survive a backend restart. Browser submission, reload, SSE and MCP through Vercel are verified. Safari WalletClient connects to BSV Desktop on mainnet. Quoting is enabled; exact purchase/native approval, real payment and paid results remain pending. See [observed evidence](docs/verification.md).
 
 ## Run locally
 

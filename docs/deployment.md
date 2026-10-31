@@ -1,6 +1,6 @@
 # Deployment and operations
 
-Updated 31 October 2026. The Vercel frontend and persistent backend are deployed. The verified public origin is `https://mercatum-ai.vercel.app`. See [verification](verification.md) for observed results. Payments remain disabled until wallet checks and explicit human approval are complete.
+Updated 31 October 2026. The Vercel frontend and persistent backend are deployed. The verified public origin is `https://mercatum-ai.vercel.app`. See [verification](verification.md) for observed results. Mainnet quoting is enabled following the user’s network selection and live Safari wallet connection. Exact quote/native approval and live draft/signing validation remain pending; no transaction has been sent.
 
 ## Infrastructure
 
@@ -22,7 +22,7 @@ Updated 31 October 2026. The Vercel frontend and persistent backend are deployed
 
 Only TCP 80/443 are publicly allowed. SSH uses IAP from `35.235.240.0/20`; a targeted deny rule overrides permissive default network rules. The runtime service account has repository-scoped image read permission and access to its configuration secret. Secret values do not belong in startup metadata, Git, client bundles or logs. Docker logs are capped at three 10 MB files per container.
 
-Vercel serves the frontend and reverse-proxies application API, streaming and MCP routes to the persistent backend. Keep browser requests on the Vercel origin. `PUBLIC_APP_URL` is the canonical public frontend origin used for approval links and origin checks. It is set to `https://mercatum-ai.vercel.app` in runtime secret version 3. Browser mutations and MCP approval links through that alias are verified. Never run SQLite or the provider wallet on ephemeral Vercel function storage, or start a second active backend against the same wallet/ledger.
+Vercel serves the frontend and reverse-proxies application API, streaming and MCP routes to the persistent backend. Keep browser requests on the Vercel origin. `PUBLIC_APP_URL` is the canonical public frontend origin used for approval links and origin checks. It is set to `https://mercatum-ai.vercel.app` in runtime secret version 5 (origin unchanged since version 3). Browser mutations and MCP approval links through that alias are verified. Never run SQLite or the provider wallet on ephemeral Vercel function storage, or start a second active backend against the same wallet/ledger.
 
 ## Deploy, restart and roll back
 
@@ -101,8 +101,12 @@ Keep `PAYMENTS_ENABLED=false` until the human confirms the network, funded buyer
 
 Payment proofs are stored before verification and locally before upload. Reconciliation must reuse the original attempt. If the wallet returns no proof, recover its labelled transaction; do not automatically replace the payment. Interrupted upstream calls become `EXECUTION_UNKNOWN`; recovery retains the original receipt and consumed budget. A paid-task retry cannot create an extension charge.
 
-Qualification still needs observed standard-wallet connection, a human-approved real transaction, Arcade broadcast/status, model purchase request through paid execution and coordinator resume, code artifacts and MCP entry. Record evidence without raw proofs, prompts, checkpoints or secrets. A healthy deployment is not Q1–Q5 completion.
+Safari standard-wallet connection is observed. Qualification still needs the authorized wallet flow, a human-approved real transaction, Arcade broadcast/status, model purchase request through paid execution and coordinator resume, code artifacts and MCP entry. Record evidence without raw proofs, prompts, checkpoints or secrets. A healthy deployment is not Q1–Q5 completion.
 
 ## Local development
 
 Run `npm run build && npm start`, then open `http://localhost:3000`. The command loads ignored `.env`; ignored `data/` holds private persistent state. `.env.example` lists server configuration. Keep local keys and task data out of Git and browser assets.
+
+### Current mainnet validation state
+
+Runtime secret version 4 switched APP_NETWORK to mainnet with payments disabled. Version 5 enabled quoting after Safari connected to the funded BSV Desktop mainnet wallet. The existing immutable backend image was redeployed, retaining application storage and separate provider-mainnet/provider-testnet SQLite files. Public readiness returns ready=true,model=true,wallet=true,paymentsEnabled=true. This flag permits quote preparation; it is not purchase authorization or evidence of live draft/signing support. The unsigned-draft and fee/change checks remain mandatory before native signing. No application code changed during the network switch.
