@@ -2,6 +2,7 @@
 
 Updated: 31 October 2026. Vercel frontend and persistent backend deployed; native-wallet validation pending.
 
+- Capacity graph refined to a slightly narrower72% desktop cap at `41c588c` (live858px, about15% narrower); mobile remains full width.
 - Capacity graph fills available panel space with aligned provider logos; full-width stacked graph on phones. Typecheck/build and desktop/mobile checks PASS; deployed at `b54a93a` and live graph dimensions verified.
 - Wallet module-loading failure fixed at `fee3286`: wallet code loads with the initial page, preventing stale lazy-chunk failures after deployment. Typecheck/build and174 tests PASS; all8 offers/13 models/67 effort combinations exercised in live Chrome. Native Chrome WalletClient connection to BSV Desktop mainnet observed after granting local-app access. `28669db` adds permission/retry guidance. Mainnet test budget is5,000 sats total including fees; first100-sat chat quote prepared with500-sat test cap, awaiting human approval. No test debit yet.
 

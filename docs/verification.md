@@ -412,3 +412,5 @@ Benchmark snapshot (Artificial Analysis, v5.0,31 October2026; scores are model b
 - Clean starting revision `2fe6289`; same-session preflight valid. Presentation-only refinement: cap desktop chart at72% of panel content and center it in the remaining space; retain full-width mobile layout.
 
 - Build/diff check PASS. Local browser observes858px chart versus previous1004px in the same1233px panel (about15% narrower).
+
+- Deployed `41c588c`; Vercel `3ijund3GdP4kwHFocV3X7eKK5oDH` SUCCESS. Public browser confirms858px chart. Screenshot: ignored `artifacts/narrower-capacity-live.png`.
