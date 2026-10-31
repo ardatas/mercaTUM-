@@ -140,4 +140,4 @@ DONE for marketplace scope: implemented, deployed at 568e858 and browser-verifie
 
 ### Dark workspace and compact cards — 31 October 2026
 
-Implemented; deployment pending. Coordinator owns theme/navigation; marketplace agent owns compact readable cards. Five columns at >=1360px; fixed desktop navigation at >=900px; mobile drawer retained. Browser verifies dark chat/approval and 320px navigation.
+DONE: deployed 98c1bee and live-browser verified. Coordinator owns theme/navigation; marketplace agent owns compact readable cards. Five columns at >=1360px; fixed desktop navigation at >=900px; mobile drawer retained. Browser verifies dark chat/approval and 320px navigation.
