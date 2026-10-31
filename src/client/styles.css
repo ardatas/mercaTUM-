@@ -1766,15 +1766,16 @@ h1 {
 .selected-offer-strip > svg,
 .selected-offer-strip > img,
 .selected-offer-strip > .model-logo {
-  width: 36px;
-  height: 36px;
-  flex: 0 0 36px;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
 }
 .selected-offer-strip strong {
   display: block;
   font-size: 15px;
 }
 .selected-offer-strip strong span {
+  display: inline-block;
   font-weight: 500;
   color: var(--muted);
   margin-left: 4px;
@@ -1985,8 +1986,16 @@ h1 {
 .composer-note {
   font-size: 12px;
 }
+.selected-offer-strip > .model-logo > img {
+  width: 38px;
+  height: 38px;
+}
+.selected-offer-strip > div {
+  min-width: 0;
+}
 .selected-offer-strip strong {
-  font-size: 18px;
+  font-size: 24px;
+  line-height: 1.25;
 }
 .selected-offer-strip small,
 .selected-offer-strip > button {
@@ -2029,8 +2038,8 @@ input::placeholder {
     display: none;
   }
   .sidebar .brand {
-    gap: 8px;
-    padding-left: 4px;
+    gap: 4px;
+    padding-left: 0;
     padding-right: 0;
   }
   .sidebar .brand > span:nth-child(2) {

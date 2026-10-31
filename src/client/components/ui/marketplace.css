@@ -345,13 +345,13 @@
   min-width: 0;
 }
 .mp-offer-top .model-logo {
-  width: 31px;
-  height: 31px;
+  width: 40px;
+  height: 40px;
   border-radius: 9px;
 }
 .mp-offer-top .model-logo > img {
-  width: 22px;
-  height: 22px;
+  width: 30px;
+  height: 30px;
 }
 .mp-offer-arrow {
   opacity: 0.65;
@@ -367,7 +367,7 @@
   min-width: 0;
 }
 .mp-offer-title h3 {
-  font-size: 22px;
+  font-size: 24px;
   letter-spacing: -0.9px;
   line-height: 1.12;
   font-weight: 650;
@@ -709,11 +709,11 @@
     padding: 16px 17px 0;
   }
   .mp-offer-top .model-logo {
-    width: 35px;
-    height: 35px;
+    width: 44px;
+    height: 44px;
   }
   .mp-offer-title h3 {
-    font-size: 24px;
+    font-size: 26px;
   }
   .mp-offer-title > span,
   .mp-offer-model,

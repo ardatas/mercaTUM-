@@ -429,8 +429,8 @@ export function App() {
             className="brand-logo"
             src="/brands/mercatum.png"
             alt=""
-            width={56}
-            height={56}
+            width={68}
+            height={68}
           />
           <span>mercaTUM</span>
           <ChevronDown size={14} />
@@ -625,8 +625,8 @@ export function App() {
               className="brand-logo"
               src="/brands/mercatum.png"
               alt=""
-              width={28}
-              height={28}
+              width={44}
+              height={44}
             />
             <span>mercaTUM</span>
           </button>

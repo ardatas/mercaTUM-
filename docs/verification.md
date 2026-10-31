@@ -372,3 +372,9 @@ Benchmark snapshot (Artificial Analysis, v5.0,31 October2026; scores are model b
 - Typecheck/build/diff check PASS. Local Chrome measures both response and composer at868px wide with matching430px left edge, before and after entering text. Screenshot: ignored `artifacts/chat-width-preview.png`.
 
 - Deployed `c9bae2e`; Vercel `9Cim7TQFDkvvMxYX7cwPu8tZKgYY` SUCCESS. Live Chrome confirms composer and workspace content both868px with430px left edge. Completed-response alignment verified locally; no new paid task initiated. Screenshots: ignored `artifacts/chat-width-live.png` and `artifacts/chat-width-preview.png`.
+
+## Larger brand and model identity — 31 October 2026
+
+- Clean starting revision `a2e4c29`; same-session preflight valid, runtime/dependencies unchanged. Coordinator owns presentation sizing only: enlarge both brand marks, model icons and model headings, preserving five-column cards and mobile layouts.
+
+- Typecheck/build/diff check PASS. Local Chrome: brand marks68px/44px; chat model badge52px with38px artwork and24px heading; marketplace badges40px/44px and headings24px/26px. Five columns at1360px retain zero card-header overflow.320px chat and marketplace have matching client/scroll widths; chat tier wraps cleanly.
