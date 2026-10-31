@@ -15,7 +15,7 @@ Recorded deadline: **31 October 2026, 15:00 Europe/Berlin**, read from the rende
 
 Suggested demonstration: submit a task → agent requests paid execution → approve displayed quote → authorize in BSV Desktop/Browser → show received transaction → inspect actual answer or code diff and receipt. Keep keys, prompts containing secrets and tokens out of the recording.
 
-Repository URL: [ardatas/mercaTUM-](https://github.com/ardatas/mercaTUM-). Live app: PENDING. Video: PENDING. Devfolio project: PENDING. Example transaction: PENDING.
+Repository URL: [ardatas/mercaTUM-](https://github.com/ardatas/mercaTUM-). Live app: [mercatum-ai.vercel.app](https://mercatum-ai.vercel.app). Video: PENDING. Devfolio project: PENDING. Example transaction: PENDING.
 
 ## Prepared description (not submitted)
 
@@ -25,7 +25,7 @@ A buyer brings a question or a public code repository, reviews a fixed quote, an
 
 The marketplace listing and capacity values are simulated. The implementation uses an operator-owned model API, not consumer subscription sharing. Buyer keys stay in a standard wallet. A separate Toolbox wallet receives provider revenue, and Arcade verifies network acceptance of the same signed transaction. Human approval remains mandatory for each purchase.
 
-**Current demonstrated state:** local application, real GitHub import, actual generated patch logic, 56 passing offline application tests, and local browser/container verification. Real model execution, public hosting and a real payment demonstration are still pending. Do not remove this qualification until live evidence is captured.
+**Current demonstrated state:** deployed Vercel frontend and persistent backend; Gemini 3.8 Flash real scope/tool requests; real GitHub import; validated patch generation from offline fixtures; 72 passing application tests. Public browser, MCP, SSE, reload and container-restart checks pass. Native-wallet connection, a real payment, receipt-backed model execution and a model-generated code patch remain pending.
 
 ## Planned video outline (150 seconds maximum; not recorded)
 

@@ -2,7 +2,7 @@
 
 A buyer-side AI workspace for chat and focused public-repository code tasks. The rental listing and capacity dials are simulated. Model execution uses the configured server-side Gemini API (with the original Responses adapter retained); BSV payments use the buyer's standard wallet and a separate provider wallet.
 
-**Current delivery: public persistent backend; Vercel authorization pending.** The [HTTPS preview](https://api.mercatum.35.198.77.207.sslip.io) runs Gemini 3.8 Flash with a separate testnet provider wallet. Real planning and MCP requests reach human approval; sessions and tasks survive a backend restart. The Vercel frontend is prepared as `mercatum-ai`, but creating its deployment requires the owner's email security-code verification. No real payment or paid result is claimed. See [observed evidence](docs/verification.md).
+**Live app: [mercatum-ai.vercel.app](https://mercatum-ai.vercel.app).** Vercel serves the frontend; a persistent HTTPS backend runs Gemini 3.8 Flash and a separate testnet provider wallet. Real chat/code planning and MCP requests reach human approval; sessions and tasks survive a backend restart. Browser submission, reload, SSE and MCP through Vercel are verified. Native-wallet connection, real payment and paid results remain pending. See [observed evidence](docs/verification.md).
 
 ## Run locally
 
@@ -57,6 +57,6 @@ Free planning admission is shared across browser/MCP: 10 tasks per owner/hour, 6
 
 ## Deployment
 
-`Dockerfile` builds one Node service; `compose.yaml` mounts durable `/data` and publishes only a loopback port. `docker compose up --build -d` requires `.env`, a production HTTPS origin and session secret. The deployed VM uses Caddy for HTTPS; the prepared Vercel configuration proxies API/MCP requests to it. Run a single instance; do not use ephemeral serverless storage. The source pack remains untouched.
+`Dockerfile` builds one Node service; `compose.yaml` mounts durable `/data` and publishes only a loopback port. `docker compose up --build -d` requires `.env`, a production HTTPS origin and session secret. The deployed VM uses Caddy for HTTPS; Vercel proxies API/MCP requests to it. Run a single instance; do not use ephemeral serverless storage. The source pack remains untouched.
 
 `/healthz` indicates process liveness; `/readyz` is 503 while paid service is unavailable. Both SQLite application and provider-wallet state must persist. See [deployment runbook](docs/deployment.md), [contracts](docs/contracts.md), [task ledger](.ai/TASKS.md) and [qualification evidence](docs/verification.md).

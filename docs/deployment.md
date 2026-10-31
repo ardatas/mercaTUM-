@@ -1,11 +1,12 @@
 # Deployment and operations
 
-Updated 31 October 2026. The persistent backend is deployed. The chosen Vercel frontend origin is `https://mercatum-ai.vercel.app`; Vercel account authorization and public frontend verification are still pending. See [verification](verification.md) for observed results. Payments remain disabled until wallet checks and explicit human approval are complete.
+Updated 31 October 2026. The Vercel frontend and persistent backend are deployed. The verified public origin is `https://mercatum-ai.vercel.app`. See [verification](verification.md) for observed results. Payments remain disabled until wallet checks and explicit human approval are complete.
 
 ## Infrastructure
 
 | Resource | Configuration |
 |---|---|
+| Vercel project | `mercatum-ai`, team `ardas-projects-cc4a1f2c`; GitHub main deployments |
 | Google Cloud project | `gen-lang-client-0426046080` |
 | Backend VM | `mercatum-api`, `europe-west3-a`, Debian 12, `e2-small` |
 | Persistent disk | `mercatum-api`, 20 GB `pd-balanced`; automatic deletion disabled |
@@ -21,7 +22,7 @@ Updated 31 October 2026. The persistent backend is deployed. The chosen Vercel f
 
 Only TCP 80/443 are publicly allowed. SSH uses IAP from `35.235.240.0/20`; a targeted deny rule overrides permissive default network rules. The runtime service account has repository-scoped image read permission and access to its configuration secret. Secret values do not belong in startup metadata, Git, client bundles or logs. Docker logs are capped at three 10 MB files per container.
 
-Vercel serves the frontend and reverse-proxies application API, streaming and MCP routes to the persistent backend. Keep browser requests on the Vercel origin. `PUBLIC_APP_URL` is the canonical public frontend origin used for approval links and origin checks. It temporarily points to the backend HTTPS preview while Vercel authorization is pending; switch it to the verified Vercel alias before testing Vercel browser mutations. Verify the final Vercel alias matches it before inviting users. Never run SQLite or the provider wallet on ephemeral Vercel function storage, or start a second active backend against the same wallet/ledger.
+Vercel serves the frontend and reverse-proxies application API, streaming and MCP routes to the persistent backend. Keep browser requests on the Vercel origin. `PUBLIC_APP_URL` is the canonical public frontend origin used for approval links and origin checks. It is set to `https://mercatum-ai.vercel.app` in runtime secret version 3. Browser mutations and MCP approval links through that alias are verified. Never run SQLite or the provider wallet on ephemeral Vercel function storage, or start a second active backend against the same wallet/ledger.
 
 ## Deploy, restart and roll back
 
