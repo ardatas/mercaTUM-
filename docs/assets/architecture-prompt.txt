@@ -1,0 +1,31 @@
+Generation method: built-in image_gen tool. Final output: mercatum-architecture.png.
+
+Initial prompt:
+Use case: infographic-diagram
+Asset type: professional software architecture PNG for mercaTUM GitHub README and 16:9 investor/hackathon pitch slide.
+Create one finished ultra-crisp 3840x2160 landscape diagram. Elegant SWE systems-design diagram, not a marketing illustration. Flat precise vector-like rendering, straight orthogonal arrow connectors, consistent minimal line icons, disciplined grid and generous whitespace. Dark charcoal (#101116) canvas, slightly lighter panels (#191B23), thin slate borders, white headings, muted silver secondary text. Restrained violet for application/control, teal for inference/data, amber for payment. Subtle dot-grid background only. No 3D, perspective, fake screenshots, glowing spaghetti, gradients, extraneous logos or invented services. All text perfectly readable and correctly spelled. Large typography suitable for a projected slide. Title upper left "mercaTUM" with subtitle "Human-approved payments. Receipt-gated AI execution." Upper right small "SYSTEM ARCHITECTURE".
+
+Topology: Three well-spaced vertical zones. Left narrower zone labelled "CLIENTS / USER CONTROL"; center wide zone labelled "APPLICATION / TRUSTED BACKEND"; right narrower zone labelled "EXTERNAL SERVICES".
+Left top box "Buyer workspace" then "React + Vite · Vercel" then "Chat · code · demo marketplace".
+Left middle box "External agents" then "MCP / Streamable HTTP" then "Owner-scoped bearer token".
+Left bottom box amber border "Buyer wallet" then "BSV Desktop / Browser" then "WalletClient · native approval" then small "Buyer keys stay here".
+Browser down to wallet arrow labelled "Human approval".
+Browser to central API arrow labelled "HTTPS JSON / SSE".
+External agents to central API arrow labelled "/mcp".
+
+Central zone is a large subtle enclosing boundary with header "Google Cloud VM · Caddy TLS · Node.js / TypeScript" and subheader "Single persistent service".
+At top within boundary a wide horizontal slim box "API + MCP adapters" and smaller text "Session / CSRF · owner checks · idempotency".
+Below a row of two large boxes: left "Task orchestrator" with lines "Plan → request_paid_execution", "Persist call → pause for approval", "Receipt gate → fenced worker → resume". Right "Payment service" with lines "Immutable quote · reserve attempt", "Verify BRC-29 / AtomicBEEF proof", "Arcade acceptance → internalize".
+Connect API down to both boxes with clean thin connectors.
+Between Payment service and Task orchestrator draw a very clear amber arrow pointing FROM Payment service TO Task orchestrator, labelled "Verified receipt". This is the critical authorization gate.
+Buyer wallet to Payment service: amber connector labelled "Signed remittance". Route it clearly around node edges without passing through any box or text.
+Under those middle boxes, aligned side-by-side: left compact box "Repository pipeline" with lines "Public GitHub → pinned snapshot", "Validate changes → changes.patch". Right compact amber-accent box "Provider wallet" with lines "BSV SDK + Wallet Toolbox", "Separate operator revenue". Payment service down to Provider wallet via line labelled "Internalize".
+At bottom of central boundary one wide storage capsule with database icon and heading "Persistent /data" with secondary text "SQLite: tasks, quotes, receipts, events · wallet DB · artifacts". Connect orchestrator and provider wallet to storage with fine lines.
+Task orchestrator connects to repository pipeline.
+Right top box teal accent "Gemini API" then "Coordinator + bounded executor" then "Server-held API credentials". Task orchestrator connects to Gemini API via teal bidirectional arrow labelled "Plan / execute / resume"; route in a dedicated clear corridor, never through payment card. This may be routed from the top edge of orchestrator upward and around.
+Right middle box amber accent "Arcade" then "Broadcast + transaction status". Payment service connects to Arcade labelled "Submit / reconcile".
+Right bottom box amber accent "BSV mainnet" then "Direct buyer → provider payment" then "WhatsOnChain receipt link". Arcade points down to BSV mainnet.
+Use strong visual grouping, correct unambiguous arrowheads and no overlapping connections. Layout can be adjusted to prevent crossings while preserving relationships.
+
+Below all zones place a thin full-width rule, then a clean numbered sequence: "01 PLAN" → "02 APPROVE" → "03 SIGN" → "04 VERIFY" → "05 EXECUTE" → "06 STREAM / DOWNLOAD". Beneath it one small but readable status note: "Demo listings · Real Gemini integration · Live paid execution validation pending".
+Design constraints: Don't portray demo listings as independent real model providers. Don't imply MCP can approve payment. Don't imply Vercel stores durable data. Don't imply model execution is authorized by a client claim. Do not add Kubernetes, Redis, queues, escrow, tokens, or microservices. No claims that a live payment or paid result has been verified. Keep the whole composition professional, sophisticated, engineering-specific, readable and visually impressive.

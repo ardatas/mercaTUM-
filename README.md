@@ -4,6 +4,14 @@ A buyer-side AI workspace for chat and focused public-repository code tasks. The
 
 **Live app: [mercatum-ai.vercel.app](https://mercatum-ai.vercel.app).** Vercel serves the frontend; a persistent HTTPS backend runs Gemini 3.8 Flash and a separate mainnet provider wallet. Real chat/code planning and MCP requests reach human approval; sessions and tasks survive a backend restart. Browser submission, reload, SSE and MCP through Vercel are verified. Safari WalletClient connects to BSV Desktop on mainnet. Quoting is enabled; exact purchase/native approval, real payment and paid results remain pending. See [observed evidence](docs/verification.md).
 
+## System architecture
+
+![mercaTUM architecture: browser and MCP clients, persistent Node backend, receipt-gated Gemini execution, and human-approved BSV payments](docs/assets/mercatum-architecture.png)
+
+[Full-resolution PNG for presentations](docs/assets/mercatum-architecture.png) · [Architecture and trust boundaries](docs/architecture.md)
+
+The server releases paid execution only after payment verification, Arcade network acceptance and provider-wallet internalization. Marketplace listings are simulated; live paid execution validation remains pending.
+
 ## Run locally
 
 Node 22 or newer is required (verified on Node 24).

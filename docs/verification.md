@@ -415,6 +415,12 @@ Benchmark snapshot (Artificial Analysis, v5.0,31 October2026; scores are model b
 
 - Deployed `41c588c`; Vercel `3ijund3GdP4kwHFocV3X7eKK5oDH` SUCCESS. Public browser confirms858px chart. Screenshot: ignored `artifacts/narrower-capacity-live.png`.
 
+## Architecture visual — 31 October 2026
+
+- Created `docs/assets/mercatum-architecture.png` using the built-in image generator and embedded it in README. Original generation and refinement prompts are saved beside it. Confirmed PNG format and 1672×941 dimensions with `sips`.
+- Visually inspected the result against `docs/architecture.md`, `docs/contracts.md`, `src/server/index.ts`, API routes, task receipt/worker gates and merchant verification/broadcast/internalization code. Corrected client approval, MCP and Gemini connector routing before saving the final asset.
+- Documentation/assets only: no application, dependency, wallet or deployment changes. Implementation preflight and runtime tests are not applicable to this artifact. `git diff --check` passes. Live paid execution and existing qualification gaps remain PENDING; the diagram is not new runtime evidence.
+
 ## Browse offers button — 31 October 2026
 
 - Clean starting revision `6227945`; same-session preflight remains valid, runtime/dependencies unchanged. Coordinator owns button presentation and mobile layout only; preserve marketplace navigation and active task.

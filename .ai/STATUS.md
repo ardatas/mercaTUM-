@@ -2,6 +2,8 @@
 
 Updated: 31 October 2026. Vercel frontend and persistent backend deployed; native-wallet validation pending.
 
+- Added a technical architecture PNG for README/pitch use at `docs/assets/mercatum-architecture.png` (1672×941). Reviewed against current source and contracts; the image explicitly retains pending live paid execution validation. Documentation/assets only.
+
 - Browse offers redesigned with violet accent, larger hit target and full-width labelled mobile button. Local navigation/layout and typecheck/build PASS; deployed at `86d3c6a` and live navigation verified.
 - Capacity graph refined to a slightly narrower72% desktop cap at `41c588c` (live858px, about15% narrower); mobile remains full width.
 - Capacity graph fills available panel space with aligned provider logos; full-width stacked graph on phones. Typecheck/build and desktop/mobile checks PASS; deployed at `b54a93a` and live graph dimensions verified.
