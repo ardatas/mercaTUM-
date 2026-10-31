@@ -414,3 +414,9 @@ Benchmark snapshot (Artificial Analysis, v5.0,31 October2026; scores are model b
 - Build/diff check PASS. Local browser observes858px chart versus previous1004px in the same1233px panel (about15% narrower).
 
 - Deployed `41c588c`; Vercel `3ijund3GdP4kwHFocV3X7eKK5oDH` SUCCESS. Public browser confirms858px chart. Screenshot: ignored `artifacts/narrower-capacity-live.png`.
+
+## Browse offers button — 31 October 2026
+
+- Clean starting revision `6227945`; same-session preflight remains valid, runtime/dependencies unchanged. Coordinator owns button presentation and mobile layout only; preserve marketplace navigation and active task.
+
+- Added violet-accent button with marketplace icon, directional arrow,46px minimum height, hover/pressed/focus styling and readable15px label. Mobile uses a full-width row instead of hiding its label.320px browser reports288px button and equal320px client/scroll widths; click opens Marketplace. Typecheck/build/diff check PASS.

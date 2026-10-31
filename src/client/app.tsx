@@ -651,12 +651,15 @@ export function App() {
                         </small>
                       </div>
                       <button
+                        className="browse-offers"
                         onClick={() => {
                           setView("capacity");
                           window.history.replaceState(null, "", "/");
                         }}
                       >
-                        Browse offers <ArrowUpRight size={14} />
+                        <Blocks size={18} aria-hidden="true" />
+                        <span>Browse offers</span>
+                        <ArrowRight size={18} aria-hidden="true" />
                       </button>
                     </div>
                     {pendingPrompt ? (

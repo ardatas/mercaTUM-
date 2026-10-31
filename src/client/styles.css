@@ -1785,13 +1785,34 @@ h1 {
   color: var(--muted);
   font-size: 12px;
 }
-.selected-offer-strip > button {
+.browse-offers {
   margin-left: auto;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  color: var(--muted);
-  font-size: 12px;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 10px;
+  min-height: 46px;
+  padding: 11px 16px;
+  border: 1px solid #bca4ff70;
+  border-radius: 13px;
+  background: #bca4ff1c;
+  color: #e3d7ff;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+.browse-offers:hover {
+  background: #bca4ff30;
+  border-color: #bca4ff;
+}
+.browse-offers:active {
+  background: #bca4ff40;
+}
+.browse-offers:focus-visible {
+  outline: 2px solid #cbb4ff;
+  outline-offset: 4px;
 }
 .model-controls {
   display: flex;
@@ -1906,13 +1927,6 @@ h1 {
     gap: 9px;
     margin-bottom: 20px;
   }
-  .selected-offer-strip > button {
-    font-size: 0;
-  }
-  .selected-offer-strip > button svg {
-    width: 20px;
-    height: 20px;
-  }
   .model-controls {
     order: 3;
     width: 100%;
@@ -1997,15 +2011,8 @@ h1 {
   font-size: 24px;
   line-height: 1.25;
 }
-.selected-offer-strip small,
-.selected-offer-strip > button {
+.selected-offer-strip small {
   font-size: 14px;
-}
-.selected-offer-strip > button {
-  background: var(--surface-soft);
-  border: 1px solid var(--border);
-  padding: 8px 10px;
-  border-radius: 10px;
 }
 .thinking-trigger {
   font-size: 14px;
@@ -2065,9 +2072,18 @@ input::placeholder {
   }
 }
 @media (max-width: 600px) {
-  .selected-offer-strip > button {
-    font-size: 0;
-    padding: 8px;
+  .selected-offer-strip {
+    flex-wrap: wrap;
+  }
+  .selected-offer-strip > div {
+    flex: 1;
+  }
+  .browse-offers {
+    width: 100%;
+    margin: 5px 0 0;
+  }
+  .browse-offers > svg:last-child {
+    margin-left: auto;
   }
   .selected-offer-strip small {
     font-size: 12px;
