@@ -18,6 +18,10 @@ Allowed status: TODO, RUNNING, REVIEW, DONE, BLOCKED. A blocked task records the
 
 ## Dispatch rules
 
+### Quote executor label — 31 October 2026
+
+T5 / coordinator: secondary “Runs on” row removed at user request. Selected model/effort and server execution metadata retained. Typecheck, four purchase-review tests and build PASS; deployment pending.
+
 Use at most two implementation subagents concurrently; keep file ownership disjoint. Each receives its task below plus the current contracts and relevant source sections. Requests to edit shared schemas/dependencies return to the coordinator; do not race edits to package.json, lockfile, migrations or central routes. Agents may propose a contract correction; coordinator records it before affected work continues.
 
 Every handoff returns changed paths, behavior implemented, commands/results, unresolved limits and integration instructions. Integrate and verify each slice before expanding scope. A final read-only reviewer may check payment/agent causality and authorization, but cannot substitute for observed live evidence.

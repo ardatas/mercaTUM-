@@ -45,15 +45,6 @@ export function QuoteReview({
             <span className="quote-model-effort"> · {selection?.effort}</span>
           )}
         </dd>
-        {differs && (
-          <>
-            <dt>Runs on</dt>
-            <dd>
-              {q.modelId}{" "}
-              <span className="quote-model-effort">(demo provider)</span>
-            </dd>
-          </>
-        )}
         <dt>Service price</dt>
         <dd>
           <strong>{q.priceSats} sats</strong>

@@ -22,12 +22,12 @@ function render(
   );
 }
 describe("purchase review", () => {
-  it("shows saved chat selection alongside the actual execution model", () => {
+  it("shows saved chat selection without a secondary executor row", () => {
     const html = render(previewQuote());
     expect(html).toContain("Mistral Large 4");
     expect(html).toContain("medium");
-    expect(html).toContain("<dt>Runs on</dt>");
-    expect(html).toContain("gemini-3.8-flash");
+    expect(html).not.toContain("Runs on");
+    expect(html).not.toContain("gemini-3.8-flash");
     const matching = render(previewQuote(), defaultSelection("gemini-ultra"));
     expect(matching).toContain("Gemini 3.8 Flash");
     expect(matching).not.toContain("Runs on");
