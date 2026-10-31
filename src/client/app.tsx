@@ -555,9 +555,7 @@ export function App() {
                 <div
                   className={`workspace ${task || pendingPrompt ? "has-task" : ""}`}
                 >
-                  {!task && !pendingPrompt && mode === "chat" && (
-                    <InteractiveGrid />
-                  )}
+                  {mode === "chat" && <InteractiveGrid />}
                   <div className="workspace-main">
                     <div className="selected-offer-strip">
                       <ModelLogo brand={selected.offer.brand} />

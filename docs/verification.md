@@ -271,3 +271,9 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 - Original user PNG copied unchanged to `public/brands/mercatum.png`. Sidebar40px/header28px images load with correct dimensions in the local browser. Browser/touch icon links added; obsolete generated mark styles removed. Typecheck/build/diff check PASS.
 
 - Deployed `d460d7d`, Vercel `D8DzSyXLREoRYPYpHhX2G77UbWcW` SUCCESS. Live assets `index-B8XnFQ-a.js` / `index-SnwU1Ea0.css`; browser confirms both logo images loaded at40px/28px and favicon references the supplied PNG. Screenshot: ignored `artifacts/mascot-logo-live.png`.
+
+## Persistent chat background — 31 October 2026
+
+- Clean starting revision `83ac897`; same-session preflight valid with unchanged dependencies/runtime. Coordinator owns a presentation-only change: retain InteractiveGrid for every chat state. Existing payment qualification blockers unchanged.
+
+- Removed task/pending guards from chat InteractiveGrid. Local offline harness confirms canvas during planning and streaming and alongside a completed answer (421px canvas height). Screenshot: ignored `artifacts/chat-background-completed.png`. Typecheck/build/diff check PASS.

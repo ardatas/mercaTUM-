@@ -40,7 +40,7 @@ The user now authorizes Vercel deployment and Gemini with the supplied server cr
 
 Local UI refinement: a message-bubble/chat-answer layout, persistent bottom composer and temporary real-event thinking trace are implemented at localhost:3000. Reference 8 supplies compact progress typography and matching chat text, superseding the earlier bold 18px composer. These UI refinements are deployed and observed in Safari.
 
-Local visual theme now follows reference 9: neutral charcoal/white/gray surfaces with spectrum accents, and a decorative interactive grid in empty chat only. The visual theme is deployed.
+Local visual theme now follows reference 9: neutral charcoal/white/gray surfaces with spectrum accents, and a decorative interactive grid throughout chat, including pending, streaming and completed responses. The visual theme is deployed.
 
 Payment recovery refinement: a confirmed unsigned fee rejection must return to fresh quote review with the observed fee and prior limit. Signing/broadcast uncertainty continues to block replacement payments. Deployed and verified in Safari: the original fee-rejected task returned to fresh quote review and survives reload. The original 194-sat draft exceeded its 110-sat cap. No new spending approved or initiated.
 
