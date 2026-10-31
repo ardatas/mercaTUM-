@@ -6,12 +6,12 @@ Implementation began on 31 October 2026. Local work is implemented as recorded b
 |---|---|---|---|---|
 | T0 | Preflight, shared schemas, app skeleton and durable storage | Implementation request | DONE | Coordinator; typecheck, durable ownership/claim/restart tests |
 | T1 | Buyer wallet and approval adapter | T0 schemas | BLOCKED | Implemented/tested offline; live-origin native wallet behavior pending |
-| T2 | Provider wallet, quote, verification and Arcade ledger | T0 schemas/storage | BLOCKED | Implemented; actual Toolbox mock-chain transfer passed; live credentials/transaction pending |
-| T3 | Real coordinator/tool loop and paid chat executor | T0; integrate T2 receipt | BLOCKED | Adapter/worker tests pass; real model key and model ID pending |
+| T2 | Provider wallet, quote, verification and Arcade ledger | T0 schemas/storage | BLOCKED | Separate testnet merchant wallet initialized publicly; real transaction/Arcade evidence pending |
+| T3 | Real coordinator/tool loop and paid chat executor | T0; integrate T2 receipt | BLOCKED | Gemini 3.8 Flash real probe/planning/tool calls pass; paid executor/resume requires real approved receipt |
 | T4 | Repository import, context and actual patch artifacts | T0; integrate T3 executor | DONE | Real GitHub SHA import + validated actual patches; model-generated live patch awaits T3 |
 | T5 | Buyer UI from design slots | T0; integrate T1–T4; design input | REVIEW | Seven supplied references integrated; desktop/mobile local browser checks passed; live paid states pending |
-| T6 | Remote MCP adapter | T0; integrate T2/T3 services | REVIEW | Official client protocol/auth/ownership tests pass; live paid result pending |
-| T7 | Deployment and live-origin wallet integration | T0 early probe; final T1–T6 | BLOCKED | Local preview chosen by user; container prepared, public deployment deferred |
+| T6 | Remote MCP adapter | T0; integrate T2/T3 services | REVIEW | Official client reaches real public Gemini planning/approval; token and pending task survive restart; paid result pending |
+| T7 | Deployment and live-origin wallet integration | T0 early probe; final T1–T6 | BLOCKED | Persistent HTTPS backend deployed and restart verified; Vercel project import awaits owner email security code |
 | T8 | Integration, live demo and gate evidence | T1–T7 | BLOCKED | Local checks + read-only payment/agent review; Q2–Q5 need live external setup |
 
 Allowed status: TODO, RUNNING, REVIEW, DONE, BLOCKED. A blocked task records the exact prerequisite and next action. Independent tasks continue. Mark DONE only after the coordinator inspects the diff and verifies acceptance evidence.

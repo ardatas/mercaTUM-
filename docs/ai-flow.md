@@ -1,6 +1,6 @@
 # Agent and task execution
 
-Use one real configured model API behind a small adapter. Start with the OpenAI Responses API and strict function calling; do not add an agent framework, training pipeline or multi-provider router for this flow. `MODEL_ID` is an explicit server setting whose account access and tool support are verified before live purchases. Keys stay in the backend.
+Use one real configured model API behind a small adapter. The user selected Gemini on 31 October 2026; deployment uses native GenerateContent with `gemini-3.8-flash`, while the original Responses adapter remains available for saved/configured OpenAI tasks; do not add an agent framework, training pipeline or multi-provider router for this flow. `MODEL_ID` is an explicit server setting whose account access and tool support are verified before live purchases. Keys stay in the backend.
 
 ## Real agent payment loop
 
@@ -49,3 +49,5 @@ Useful demo task: change a small component or add a documented helper in a small
 - After lease expiry/restart, use a durable result for resume-only recovery. If an upstream call was started without a saved result, move to EXECUTION_UNKNOWN; do not automatically reset to READY. An explicit same-entitlement retry starts a new fenced attempt.
 - A provider failure after payment retains the entitlement. Reuse saved artifacts/results for resume-only retries. If an upstream timeout may have executed the request, mark `EXECUTION_UNKNOWN`; do not assert exactly-once remote inference.
 - MCP uses these same services and receipts. It can create a task and observe status/results; approval redirects the same owner to the web UI and wallet. Do not expose a public unlimited API proxy.
+
+Gemini checkpoints preserve full returned content parts, original function-call IDs and opaque thought signatures. Function responses return the same call ID. Structured planning uses responseJsonSchema; execution uses native SSE and counts visible plus thinking tokens. LOW thinking is supported by the verified model; MINIMAL was rejected during the real capability check. No hidden thoughts are rendered.

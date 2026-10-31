@@ -1,6 +1,6 @@
 # Architecture
 
-The local implementation uses one Node >=22 TypeScript service serving a built React/Vite frontend, JSON routes, SSE and remote MCP. Public deployment and live qualification remain pending. One process with persistent SQLite storage is sufficient for this demo and avoids distributed payment claims. Choose exact non-BSV dependencies during preflight and lock them; BSV versions come from the sponsor pack.
+The implementation uses one Node >=22 TypeScript service serving a built React/Vite frontend, JSON routes, SSE and remote MCP. The persistent backend is publicly deployed; Vercel frontend authorization and live paid qualification remain pending. One process with persistent SQLite storage is sufficient for this demo and avoids distributed payment claims. Choose exact non-BSV dependencies during preflight and lock them; BSV versions come from the sponsor pack.
 
 ```mermaid
 flowchart LR
@@ -57,8 +57,8 @@ Optional later: a salted commitment to a result or receipt can anchor a timestam
 
 ## Deployment contract
 
-- One public HTTPS origin, one Node instance, a private persistent volume under `DATA_DIR` for application DB, provider-wallet DB and artifacts. Ephemeral serverless storage is insufficient. No autoscaling until payment replay storage and worker leases are shared correctly.
-- Configuration: `PUBLIC_APP_URL`, `APP_NETWORK` (`mainnet` or `testnet`), `DATA_DIR`, `TASK_PRICE_SATS`, `MODEL_ID`. Secrets: `MODEL_API_KEY`, `PROVIDER_WALLET_ROOT_KEY`, `SESSION_SECRET`. The buyer supplies none of these secrets.
+- Vercel serves static frontend assets and reverse-proxies API/SSE/MCP to one persistent HTTPS Node instance. While Vercel authorization is pending, the backend also serves the frontend at its own canonical HTTPS origin. One Node instance uses a private persistent volume under `DATA_DIR` for application DB, provider-wallet DB and artifacts. Ephemeral serverless storage is insufficient. No autoscaling until payment replay storage and worker leases are shared correctly.
+- Configuration: `PUBLIC_APP_URL`, `APP_NETWORK` (`mainnet` or `testnet`), `DATA_DIR`, `TASK_PRICE_SATS`, `MODEL_PROVIDER`, `MODEL_ID`. Secrets: `MODEL_API_KEY`, `PROVIDER_WALLET_ROOT_KEY`, `SESSION_SECRET`. The buyer supplies none of these secrets.
 - Derive Arcade, chaintracker and explorer settings from the trusted network mapping in bsv-flow.md. Reject wallet network mismatch before payment.
 - `/healthz` reports process liveness; `/readyz` checks migrations, storage, merchant initialization and required configuration without leaking secrets. Verify model account access separately before charging; configuration presence alone is insufficient.
 - Run the provider wallet monitor, graceful worker shutdown and restart reconciliation. Keep backups of wallet data as well as its root secret; verify paid-task recovery after a restart.

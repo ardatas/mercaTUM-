@@ -36,4 +36,4 @@ Technical choices: [architecture](architecture.md), [contracts](contracts.md), [
 
 ## Current delivery phase — 31 October 2026
 
-The user selected local preview while configuring secrets in `.env`. The application and live-service adapters are implemented, but no real model run, native wallet payment or public deployment is claimed. The deployed goal above remains the later acceptance target. See verification.md for observed local results and missing gates.
+The user now authorizes Vercel deployment and Gemini with the supplied server credential. The persistent HTTPS backend is deployed in the dedicated mercaTUM Google Cloud project, with Gemini 3.8 Flash and a separate provider testnet wallet. Vercel project import awaits the owner's email security-code verification. Live model planning, public MCP entry, SSE replay and restart persistence are observed; real buyer approval, payment, paid answer/code artifacts and full Q1–Q5 qualification remain incomplete. See verification.md.

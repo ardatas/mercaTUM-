@@ -1,8 +1,8 @@
 # mercaTUM
 
-A buyer-side AI workspace for chat and focused public-repository code tasks. The rental listing and capacity dials are simulated. Model execution uses a real server-side Responses API; BSV payments use the buyer's standard wallet and a separate provider wallet.
+A buyer-side AI workspace for chat and focused public-repository code tasks. The rental listing and capacity dials are simulated. Model execution uses the configured server-side Gemini API (with the original Responses adapter retained); BSV payments use the buyer's standard wallet and a separate provider wallet.
 
-**Current delivery: local preview.** The user selected local work on 31 October 2026 and will configure secrets in `.env`. No public deployment or real payment has been performed. Purchases fail closed until model access, provider wallet and wallet behavior are verified. See [observed evidence](docs/verification.md).
+**Current delivery: public persistent backend; Vercel authorization pending.** The [HTTPS preview](https://api.mercatum.35.198.77.207.sslip.io) runs Gemini 3.8 Flash with a separate testnet provider wallet. Real planning and MCP requests reach human approval; sessions and tasks survive a backend restart. The Vercel frontend is prepared as `mercatum-ai`, but creating its deployment requires the owner's email security-code verification. No real payment or paid result is claimed. See [observed evidence](docs/verification.md).
 
 ## Run locally
 
@@ -18,7 +18,7 @@ Open [localhost:3000](http://localhost:3000). The app binds to loopback outside 
 
 Copy `.env.example` to `.env` and configure it locally. Never paste keys into chat or commit them. `npm start` and `npm run dev` load `.env` when present; restart after changing it.
 
-- `MODEL_API_KEY`, `MODEL_ID`: operator API credentials and a model with Responses strict tools, structured outputs and streaming. Startup performs a real tool-call/continuation capability probe; presence of a key alone does not enable purchases.
+- `MODEL_PROVIDER`, `MODEL_API_KEY`, `MODEL_ID`: server-only provider selection and credentials. Deployment uses `gemini`, `gemini-3.8-flash`; `openai` retains the Responses adapter. Models must support tools, structured outputs and streaming. Startup performs a real tool-call/continuation capability probe; presence of a key alone does not enable purchases.
 - `PROVIDER_WALLET_ROOT_KEY`: root key of a **separate operator-owned provider wallet**, never a buyer key. Keep its database under `DATA_DIR` backed up with its secret.
 - `APP_NETWORK`: `testnet` by default; must match the buyer wallet.
 - `TASK_PRICE_SATS`: fixed service price, default 100 sats, confirmed in each quote. This default is **not authorization to spend**.
@@ -55,8 +55,8 @@ Create a token in **Connect your agent**, then configure your MCP client with th
 
 Free planning admission is shared across browser/MCP: 10 tasks per owner/hour, 60 globally/hour and two active operations at once, plus HTTP IP limits. Production should add suitable account enrollment and edge controls before broad use.
 
-## Container and later deployment
+## Deployment
 
-`Dockerfile` builds one Node service; `compose.yaml` mounts durable `/data` and publishes only a loopback port. `docker compose up --build -d` requires `.env`, a production HTTPS origin and session secret. Place a TLS reverse proxy in front for later public deployment. Run a single instance; do not use ephemeral serverless storage. The source pack remains untouched.
+`Dockerfile` builds one Node service; `compose.yaml` mounts durable `/data` and publishes only a loopback port. `docker compose up --build -d` requires `.env`, a production HTTPS origin and session secret. The deployed VM uses Caddy for HTTPS; the prepared Vercel configuration proxies API/MCP requests to it. Run a single instance; do not use ephemeral serverless storage. The source pack remains untouched.
 
 `/healthz` indicates process liveness; `/readyz` is 503 while paid service is unavailable. Both SQLite application and provider-wallet state must persist. See [deployment runbook](docs/deployment.md), [contracts](docs/contracts.md), [task ledger](.ai/TASKS.md) and [qualification evidence](docs/verification.md).

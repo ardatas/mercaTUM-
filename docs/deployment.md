@@ -1,35 +1,107 @@
-# Local operation and deployment handoff
+# Deployment and operations
 
-Current choice: **local preview now**, per user on 31 October 2026. Public hosting and real payment demonstration are deferred until external prerequisites are configured.
+Updated 31 October 2026. The persistent backend is deployed. The chosen Vercel frontend origin is `https://mercatum-ai.vercel.app`; Vercel account authorization and public frontend verification are still pending. See [verification](verification.md) for observed results. Payments remain disabled until wallet checks and explicit human approval are complete.
 
-## Local
+## Infrastructure
 
-Use `npm run build && npm start`; open http://localhost:3000. `npm start` loads ignored `.env` if present. Persistent state lives in ignored `data/` with owner-only permissions. Keep this directory private; it contains session/task data, selected repository context, results and private model continuation. The preview works with no secrets and reports unavailable paid service accurately.
+| Resource | Configuration |
+|---|---|
+| Google Cloud project | `gen-lang-client-0426046080` |
+| Backend VM | `mercatum-api`, `europe-west3-a`, Debian 12, `e2-small` |
+| Persistent disk | `mercatum-api`, 20 GB `pd-balanced`; automatic deletion disabled |
+| Backend HTTPS | `https://api.mercatum.35.198.77.207.sslip.io` |
+| Reserved external IP | `35.198.77.207` |
+| Image repository | `europe-west3-docker.pkg.dev/gen-lang-client-0426046080/mercatum` |
+| Runtime identity | `mercatum-runtime@gen-lang-client-0426046080.iam.gserviceaccount.com` |
+| Configuration secret | Secret Manager `mercatum-runtime-env` |
+| Data | `/srv/mercatum/data` mounted at `/data`; owner UID 1000, mode 0700 |
+| Proxy | Caddy container `mercatum-proxy`; configuration `/opt/mercatum/Caddyfile` |
+| Application | Docker container `mercatum-app`; loopback port 3000 |
+| Backups | `mercatum-daily` snapshot schedule, daily at 03:00 UTC, seven-day retention |
 
-`.env.example` lists the server settings. Configure secrets directly in `.env` and restart; they are not accepted from chat, client forms or model prompts. API capability probing is real and consumes a small operator-funded request budget once per process start. No BSV payment occurs during startup or model probing.
+Only TCP 80/443 are publicly allowed. SSH uses IAP from `35.235.240.0/20`; a targeted deny rule overrides permissive default network rules. The runtime service account has repository-scoped image read permission and access to its configuration secret. Secret values do not belong in startup metadata, Git, client bundles or logs. Docker logs are capped at three 10 MB files per container.
 
-## Before enabling real purchases
+Vercel serves the frontend and reverse-proxies application API, streaming and MCP routes to the persistent backend. Keep browser requests on the Vercel origin. `PUBLIC_APP_URL` is the canonical public frontend origin used for approval links and origin checks. It temporarily points to the backend HTTPS preview while Vercel authorization is pending; switch it to the verified Vercel alias before testing Vercel browser mutations. Verify the final Vercel alias matches it before inviting users. Never run SQLite or the provider wallet on ephemeral Vercel function storage, or start a second active backend against the same wallet/ledger.
 
-- Configure an accessible Responses model and run its startup strict-tool/continuation probe. The configured account/model has not been tested in this delivery.
-- Initialize a distinct operator provider wallet with durable SQLite storage; confirm the selected network and buyer funding with the human. No buyer key may be copied to the server.
-- Test standard-wallet connectivity from the final origin. Inspect grants and native spending behavior. Validate that `signAndProcess:false` returns a draft and `listActions` exposes its BRC-153 reference and default-basket change metadata. Unsupported wallets remain blocked.
-- Human reviews the exact quote, provider recipient, network, fixed sats and maximum debit, then personally approves native spending. Neither default price nor deployment authorization authorizes a transaction.
-- Keep `PAYMENTS_ENABLED=false` until the foregoing checks are complete. The transaction script/value and actual fee bound are checked again on the server; any ambiguous result reconciles its original attempt.
+## Deploy, restart and roll back
 
-## Container
+Build and push an `linux/amd64` image to the repository above. Use an immutable image digest for deployment and record the previous digest before replacing it. The helper [deploy-backend.sh](../scripts/deploy-backend.sh) is installed at `/opt/mercatum/deploy.sh` on the VM. It obtains the latest configuration through the VM identity, stores a root-only environment file, pulls the image before stopping the old application, preserves data and checks liveness.
 
-`docker build -t mercatum:local .` builds a multi-stage image. Native SQLite compilation uses Python/make/g++ only in the build stage. The runtime is unprivileged and mounts `/data`. The build context allowlist excludes `.env`, private data, Git and the reference pack.
+```sh
+# Read the current image reference without exposing container environment.
+gcloud compute ssh mercatum-api --project=gen-lang-client-0426046080 \
+  --zone=europe-west3-a --tunnel-through-iap \
+  --command='sudo docker inspect --format "{{.Config.Image}}" mercatum-app'
 
-For hosting, provide one Node instance with a private persistent volume and public TLS reverse proxy. Set `PUBLIC_APP_URL` to the canonical origin and keep secrets in the hosting secret manager. Do not place SQLite on an ephemeral function filesystem, or mount it simultaneously in multiple replicas. Default Node request IP interpretation does not trust arbitrary forwarded headers; configure a trusted edge deliberately before changing it.
+# Replace IMAGE_DIGEST with the complete registry path ending @sha256:...
+gcloud compute ssh mercatum-api --project=gen-lang-client-0426046080 \
+  --zone=europe-west3-a --tunnel-through-iap \
+  --command='sudo /opt/mercatum/deploy.sh IMAGE_DIGEST'
 
-Restart/redeploy requires both application and provider wallet databases to survive. Back up both and the provider secret through private storage. Stop the process before file-copy backups, or use a consistent SQLite backup procedure. Restoring only the provider key does not restore task receipts or merchant wallet history.
+# Restart the existing container without changing its configuration.
+gcloud compute ssh mercatum-api --project=gen-lang-client-0426046080 \
+  --zone=europe-west3-a --tunnel-through-iap \
+  --command='sudo docker restart --time 40 mercatum-app'
 
-## Recovery
+# Start a deliberately stopped container.
+gcloud compute ssh mercatum-api --project=gen-lang-client-0426046080 \
+  --zone=europe-west3-a --tunnel-through-iap \
+  --command='sudo docker start mercatum-app'
 
-Payment proofs are stored in the server ledger before verification and locally before upload. Reload reconciliation never requests another debit. If the wallet returned no proof, recover its labelled transaction manually; no automatic replacement payment exists. If no transaction was created, an operator must establish that before a fresh purchase is offered.
+curl --fail https://api.mercatum.35.198.77.207.sslip.io/healthz
+curl https://api.mercatum.35.198.77.207.sslip.io/readyz
+```
 
-Workers reserve paid request budgets before sending upstream. Expired or interrupted started calls become `EXECUTION_UNKNOWN`; completed executor output permits continuation-only recovery. Explicit retry is limited to one recovery attempt, retains its receipt and cannot bypass consumed budget. Known partial output stays `LIMIT_REACHED`, including after continuation failure/restart. A revoked/invalidated payment cannot be retried into execution.
+For rollback, call the same deployment helper with the previously recorded image digest. It fetches the latest secret version; image rollback does not roll back configuration or database migrations. Check migration compatibility first. If configuration must also be reverted, publish a reviewed prior configuration as a new Secret Manager version without printing it, then redeploy. Do not reset the ledger or retry an ambiguous payment to make a deployment appear healthy.
 
-## Live evidence still required
+`/healthz` proves process liveness only. `/readyz` can correctly report unavailable purchases while payments are disabled. Model capability probing makes a small real operator-funded request at process startup. No BSV spend occurs during startup. Both containers restart automatically after a VM reboot. An application-container restart has preserved the same secure session, CSRF state, provider identity and browser/MCP tasks awaiting approval; no paid result or receipt existed in that check.
 
-The live browser must show standard-wallet connection/approval, an actual transaction to the separate provider, Arcade POST plus acceptable status, real model tool call → receipt → execution → resumed coordinator, code artifacts and MCP entry. Record IDs and public explorer links in verification.md without copying proofs, secrets, private prompts or opaque checkpoints. A container build or mock-chain test is not qualification.
+## Backup and restore
+
+The `mercatum-daily` resource policy in `europe-west3` is attached to the persistent disk. It schedules a daily snapshot in the 03:00–07:00 UTC window and retains snapshots for seven days while the source disk exists. If the source disk is deleted, automatic snapshots are retained until explicitly removed. Snapshot storage is in the EU. This covers application data, provider wallet data and machine configuration, including the private runtime environment file; restrict snapshot access accordingly.
+
+The schedule is configured, but no scheduled snapshot or restore is claimed as tested. Running-disk snapshots are crash-consistent; they do not replace an application-level recovery test. For a deliberate recovery checkpoint, stop the application first or use a validated SQLite backup procedure covering both databases and their associated data. Example manual checkpoint:
+
+```sh
+gcloud compute ssh mercatum-api --project=gen-lang-client-0426046080 \
+  --zone=europe-west3-a --tunnel-through-iap \
+  --command='sudo docker stop --time 40 mercatum-app'
+
+# Use a unique name. Restart the app even if this command fails.
+gcloud compute snapshots create mercatum-manual-YYYYMMDD-HHMM \
+  --project=gen-lang-client-0426046080 --source-disk=mercatum-api \
+  --source-disk-zone=europe-west3-a --storage-location=eu
+
+gcloud compute ssh mercatum-api --project=gen-lang-client-0426046080 \
+  --zone=europe-west3-a --tunnel-through-iap \
+  --command='sudo docker start mercatum-app'
+
+# Inventory only; no secret payloads.
+gcloud compute snapshots list --project=gen-lang-client-0426046080 \
+  --filter='sourceDisk:mercatum-api' \
+  --format='table(name,status,creationTimestamp,diskSizeGb)'
+
+# Create a separate recovery disk; do not overwrite the current disk.
+gcloud compute disks create mercatum-recovery-YYYYMMDD \
+  --project=gen-lang-client-0426046080 --zone=europe-west3-a \
+  --type=pd-balanced --source-snapshot=SNAPSHOT_NAME
+
+# RECOVERY_VM must be a separate diagnostic VM in the same zone.
+gcloud compute instances attach-disk RECOVERY_VM \
+  --project=gen-lang-client-0426046080 --zone=europe-west3-a \
+  --disk=mercatum-recovery-YYYYMMDD --mode=ro
+```
+
+Attach the restored disk read-only to a separate recovery VM for inspection. Verify ledger integrity, wallet state, artifact availability and secret recovery before a controlled cutover. Stop the original application before starting any restored copy with the same provider identity. Reconcile on-chain transactions created after the snapshot before allowing spending or execution; restoring old state must not create a second debit. Never assume that restoring only the provider root key restores payment history or task receipts.
+
+## Payment recovery and qualification
+
+Keep `PAYMENTS_ENABLED=false` until the human confirms the network, funded buyer wallet and distinct provider recipient, and standard-wallet draft/fee-bound behavior is observed from the final origin. Every purchase requires its own quote, maximum debit and native wallet approval. Deployment authorization does not authorize a transaction.
+
+Payment proofs are stored before verification and locally before upload. Reconciliation must reuse the original attempt. If the wallet returns no proof, recover its labelled transaction; do not automatically replace the payment. Interrupted upstream calls become `EXECUTION_UNKNOWN`; recovery retains the original receipt and consumed budget. A paid-task retry cannot create an extension charge.
+
+Qualification still needs observed standard-wallet connection, a human-approved real transaction, Arcade broadcast/status, model purchase request through paid execution and coordinator resume, code artifacts and MCP entry. Record evidence without raw proofs, prompts, checkpoints or secrets. A healthy deployment is not Q1–Q5 completion.
+
+## Local development
+
+Run `npm run build && npm start`, then open `http://localhost:3000`. The command loads ignored `.env`; ignored `data/` holds private persistent state. `.env.example` lists server configuration. Keep local keys and task data out of Git and browser assets.
