@@ -169,6 +169,7 @@ export function createApp({
       taskId: v.attempt.taskId,
       quoteId: v.attempt.quoteId,
       error: v.attempt.error,
+      hasProof: !!v.attempt.proof,
     },
     receipt: v.receipt ? (({ ownerId, ...r }) => r)(v.receipt) : undefined,
   });

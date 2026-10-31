@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import {
+  Beef,
   PrivateKey,
   Transaction,
   UnlockingScript,
@@ -7,6 +8,7 @@ import {
 } from "@bsv/sdk";
 import { Store } from "../src/server/tasks/store";
 import { PaymentService } from "../src/server/payments/service";
+import { hydratePaymentProof } from "../src/server/payments/proof-recovery";
 import {
   verifyRemittance,
   NETWORKS,
@@ -17,6 +19,7 @@ import {
   savedPaymentProof,
   savedUnsignedAbort,
   recoverUnsignedDraft,
+  recoverSignedPayment,
   type PaymentStorage,
 } from "../src/client/wallet/payment";
 import {
@@ -79,6 +82,313 @@ describe("real wallet engine with offline chain; no live spending", () => {
   });
   afterAll(async () => {
     await chain.close();
+  });
+  it("returns an approved but unclaimed attempt to quote review after a connection failure", async () => {
+    const buyer = await chain.makeWallet();
+    const provider = await chain.makeWallet();
+    const store = new Store(":memory:");
+    store.put("task", task("not-started"));
+    const service = new PaymentService(
+      store,
+      { network: "testnet", priceSats: 100, walletStorageDir: "." },
+      () => true,
+      {
+        identityKey: provider.identityKey,
+        verify: vi.fn(),
+        submit: vi.fn(),
+        observe: vi.fn(),
+        internalize: vi.fn(),
+        close: vi.fn(),
+      },
+    );
+    const quote = await service.quote(
+      "owner",
+      "not-started",
+      buyer.identityKey,
+      "unstarted-quote",
+    );
+    const attempt = service.approve(
+      "owner",
+      quote.id,
+      {
+        approved: true,
+        feePolicy: "review-before-sign",
+        maxAuthorizedDebitSats: 1000,
+      },
+      "unstarted-approve",
+    );
+    vi.spyOn(buyer, "waitForAuthentication").mockRejectedValueOnce(
+      new Error("wallet offline"),
+    );
+    const create = vi.spyOn(buyer, "createAction");
+    await expect(
+      payApprovedQuote({
+        quote,
+        attemptId: attempt.id,
+        maxAuthorizedDebitSats: 1000,
+        wallet: buyer,
+        storage: memoryStorage(),
+        claimWallet: async () =>
+          service.claimWallet("owner", attempt.id).invokeWallet,
+      }),
+    ).rejects.toThrow("wallet offline");
+    expect(create).not.toHaveBeenCalled();
+    await service.reconcile("owner", attempt.id);
+    expect(store.get<Task>("task", "not-started")?.state).toBe(
+      "AWAITING_APPROVAL",
+    );
+    expect(service.claimWallet("owner", attempt.id).invokeWallet).toBe(false);
+    expect(store.receipt("not-started")).toBeUndefined();
+    await service.reconcile("owner", attempt.id);
+    expect(store.get<Task>("task", "not-started")?.attemptId).toBeUndefined();
+    const fresh = await service.quote(
+      "owner",
+      "not-started",
+      buyer.identityKey,
+      "fresh-unstarted",
+    );
+    const claimed = service.approve(
+      "owner",
+      fresh.id,
+      {
+        approved: true,
+        feePolicy: "review-before-sign",
+        maxAuthorizedDebitSats: 1000,
+      },
+      "claimed-approval",
+    );
+    expect(service.claimWallet("owner", claimed.id).invokeWallet).toBe(true);
+    await service.reconcile("owner", claimed.id);
+    await service.reconcile("owner", claimed.id);
+    expect(store.get<Task>("task", "not-started")?.state).toBe(
+      "PAYMENT_UNKNOWN",
+    );
+    expect(store.get<Task>("task", "not-started")?.attemptId).toBe(claimed.id);
+    expect(service.claimWallet("owner", claimed.id).invokeWallet).toBe(false);
+    store.close();
+  });
+  it("does not claim a wallet call when authentication fails; a late denied claim cannot create a draft", async () => {
+    const buyer = await chain.makeWallet();
+    const provider = await chain.makeWallet();
+    await chain.fund(buyer);
+    vi.spyOn(buyer, "getNetwork").mockResolvedValue({ network: "testnet" });
+    const quote = {
+      id: "prepare-quote",
+      network: "testnet",
+      payerIdentityKey: buyer.identityKey,
+      recipientIdentityKey: provider.identityKey,
+      derivationPrefix: "prepare-prefix",
+      priceSats: 100,
+    } as Quote;
+    const auth = vi
+      .spyOn(buyer, "waitForAuthentication")
+      .mockRejectedValueOnce(new Error("wallet locked"));
+    const create = vi.spyOn(buyer, "createAction");
+    const sign = vi.spyOn(buyer, "signAction");
+    const claim = vi.fn(async () => false);
+    const storage = memoryStorage();
+    await expect(
+      payApprovedQuote({
+        quote,
+        attemptId: "prepare-attempt",
+        maxAuthorizedDebitSats: 1000,
+        wallet: buyer,
+        storage,
+        claimWallet: claim,
+      }),
+    ).rejects.toThrow("wallet locked");
+    expect(claim).not.toHaveBeenCalled();
+    expect(create).not.toHaveBeenCalled();
+    auth.mockRestore();
+    await expect(
+      payApprovedQuote({
+        quote,
+        attemptId: "prepare-attempt",
+        maxAuthorizedDebitSats: 1000,
+        wallet: buyer,
+        storage,
+        claimWallet: claim,
+      }),
+    ).rejects.toThrow(/claimed or released/);
+    expect(claim).toHaveBeenCalledOnce();
+    expect(create).not.toHaveBeenCalled();
+    expect(sign).not.toHaveBeenCalled();
+    // A late authentication reply cannot continue into createAction after the UI times out.
+    let unlock!: () => void;
+    vi.spyOn(buyer, "waitForAuthentication").mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          unlock = () => resolve({ authenticated: true });
+        }),
+    );
+    vi.useFakeTimers();
+    try {
+      const late = payApprovedQuote({
+        quote,
+        attemptId: "late-unlock",
+        maxAuthorizedDebitSats: 1000,
+        wallet: buyer,
+        storage: memoryStorage(),
+        claimWallet: claim,
+      });
+      const rejected = expect(late).rejects.toThrow(/within 30 seconds/);
+      await vi.advanceTimersByTimeAsync(30001);
+      await rejected;
+      unlock();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(claim).toHaveBeenCalledTimes(1);
+      expect(create).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it("recovers a lost signing response from standard wallet history without another signature", async () => {
+    const buyer = await chain.makeWallet();
+    const provider = await chain.makeWallet();
+    await chain.fund(buyer);
+    vi.spyOn(buyer, "getNetwork").mockResolvedValue({ network: "testnet" });
+    const quote = {
+      id: "lost-sign-quote",
+      network: "testnet",
+      payerIdentityKey: buyer.identityKey,
+      recipientIdentityKey: provider.identityKey,
+      derivationPrefix: Buffer.from("lost-sign-prefix").toString("base64"),
+      priceSats: 100,
+    } as Quote;
+    const signOriginal = buyer.signAction.bind(buyer);
+    let originalTxid = "";
+    let originalBytes: number[] = [];
+    const sign = vi
+      .spyOn(buyer, "signAction")
+      .mockImplementation(async (args) => {
+        const result = await signOriginal(args);
+        originalTxid = result.txid!;
+        originalBytes = Array.from(result.tx!);
+        throw new Error("lost signing response");
+      });
+    const create = vi.spyOn(buyer, "createAction");
+    const abort = vi.spyOn(buyer, "abortAction");
+    const storage = memoryStorage();
+    const options = {
+      quote,
+      attemptId: "lost-sign-attempt",
+      maxAuthorizedDebitSats: 1000,
+      wallet: new WalletClient(buyer),
+      storage,
+    };
+    await expect(payApprovedQuote(options)).rejects.toThrow(
+      /lost signing response/,
+    );
+    expect(savedPaymentProof(options.attemptId, storage)).toBeUndefined();
+    const snapshot = storage.getItem(`mercatum:payment:${options.attemptId}`)!;
+    const recovered = await recoverSignedPayment(options);
+    expect(recovered?.txid).toBe(originalTxid);
+    expect(Transaction.fromAtomicBEEF(recovered!.tx).id("hex")).toBe(
+      originalTxid,
+    );
+    const originalEnvelope = Beef.fromBinary(originalBytes);
+    const loader = vi.fn(async (txid: string) => ({
+      rawTx: originalEnvelope.findTxid(txid)?.rawTx,
+      merklePath: originalEnvelope.findBump(txid),
+    }));
+    await expect(
+      verifyRemittance(provider, chain.chainTracker, recovered!, quote, loader),
+    ).resolves.toBeTruthy();
+    expect(loader).toHaveBeenCalled();
+    const hydrated = await hydratePaymentProof(recovered!, loader);
+    await provider.internalizeAction({
+      tx: hydrated.tx,
+      outputs: [
+        {
+          outputIndex: recovered!.outputIndex,
+          protocol: "wallet payment",
+          paymentRemittance: {
+            derivationPrefix: recovered!.derivationPrefix,
+            derivationSuffix: recovered!.derivationSuffix,
+            senderIdentityKey: recovered!.senderIdentityKey,
+          },
+        },
+      ],
+      description: "Recovered offline payment",
+    });
+    const alreadyComplete = vi.fn(async () => {
+      throw new Error("must not fetch complete ancestry");
+    });
+    expect(await hydratePaymentProof(hydrated, alreadyComplete)).toEqual(
+      hydrated,
+    );
+    expect(alreadyComplete).not.toHaveBeenCalled();
+    await expect(
+      verifyRemittance(
+        provider,
+        chain.chainTracker,
+        recovered!,
+        quote,
+        async () => {
+          throw new Error("chain unavailable");
+        },
+      ),
+    ).rejects.toThrow(/ancestry is unavailable/);
+    await expect(
+      verifyRemittance(
+        provider,
+        chain.chainTracker,
+        recovered!,
+        quote,
+        async () => ({
+          rawTx: Transaction.fromAtomicBEEF(originalBytes).toBinary(),
+        }),
+      ),
+    ).rejects.toThrow(/different ancestor/);
+    expect(savedPaymentProof(options.attemptId, storage)?.txid).toBe(
+      originalTxid,
+    );
+    expect((await recoverSignedPayment(options))?.txid).toBe(originalTxid);
+    expect(sign).toHaveBeenCalledOnce();
+    expect(create).toHaveBeenCalledOnce();
+    expect(abort).not.toHaveBeenCalled();
+    // Empty or inconsistent history cannot release or overwrite the uncertain attempt.
+    storage.setItem(`mercatum:payment:${options.attemptId}`, snapshot);
+    const list = vi.spyOn(buyer, "listActions");
+    const actual = await buyer.listActions({
+      labels: [`mercatum-${options.attemptId}`],
+      includeLabels: true,
+      includeInputs: true,
+      includeInputUnlockingScripts: true,
+      includeOutputs: true,
+      includeOutputLockingScripts: true,
+    });
+    list.mockResolvedValueOnce({ totalActions: 0, actions: [] });
+    await expect(recoverSignedPayment(options)).rejects.toThrow(
+      /No complete signed transaction/,
+    );
+    list.mockResolvedValueOnce({
+      ...actual,
+      actions: actual.actions.map((a) => ({ ...a, txid: "f".repeat(64) })),
+    });
+    await expect(recoverSignedPayment(options)).rejects.toThrow(
+      /No complete signed transaction/,
+    );
+    list.mockResolvedValueOnce({
+      ...actual,
+      actions: actual.actions.map((a) => ({
+        ...a,
+        outputs: a.outputs!.map((o) => ({ ...o, satoshis: o.satoshis + 1 })),
+      })),
+    });
+    await expect(recoverSignedPayment(options)).rejects.toThrow(
+      /No complete signed transaction/,
+    );
+    list.mockRejectedValueOnce(new Error("history permission denied"));
+    await expect(recoverSignedPayment(options)).rejects.toThrow(
+      /allow history access/,
+    );
+    expect(storage.getItem(`mercatum:payment:${options.attemptId}`)).toBe(
+      snapshot,
+    );
+    expect(sign).toHaveBeenCalledOnce();
+    expect(create).toHaveBeenCalledOnce();
+    expect(abort).not.toHaveBeenCalled();
   });
   it("reviews an unsigned real wallet draft, submits the identical EF, verifies and internalizes once; refresh cannot authorize a second spend", async () => {
     const buyer = await chain.makeWallet();
@@ -469,15 +779,19 @@ describe("real wallet engine with offline chain; no live spending", () => {
       ).rejects.toThrow(/already started/);
       expect(create).toHaveBeenCalledOnce();
       // Without a proven over-limit draft, an abort refusal/failure stays unknown.
-      expect(
-        await recoverUnsignedDraft({
+      await expect(
+        recoverUnsignedDraft({
           quote,
           attemptId: "uncertain-attempt",
           maxAuthorizedDebitSats: 100000,
           wallet: new WalletClient(buyer),
           storage: local,
         }),
-      ).toBeUndefined();
+      ).rejects.toThrow(
+        outcome === "refused"
+          ? /refused to cancel/
+          : /did not confirm cancellation/,
+      );
       expect(savedUnsignedAbort("uncertain-attempt", local)).toBeUndefined();
       // Once signing was requested, even an available abort method cannot permit a replacement.
       const record = JSON.parse(

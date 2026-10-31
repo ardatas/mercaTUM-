@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { api, startSession } from "./api";
+import { paymentRecoveryMessage } from "./wallet/recovery-status";
 import { PromptInput } from "./components/ui/prompt-input";
 import ThinkingState, { getStreamedAnswer } from "./components/ui/thinking";
 import { InteractiveGrid } from "./components/ui/interactive-grid";
@@ -53,6 +54,11 @@ const walletAdapter = {
   connectWallet: async () => (await import("./wallet/payment")).connectWallet(),
   savedPaymentProof: async (id: string) =>
     (await import("./wallet/payment")).savedPaymentProof(id),
+  recoverSignedPayment: async (
+    options: Parameters<
+      typeof import("./wallet/payment").recoverSignedPayment
+    >[0],
+  ) => (await import("./wallet/payment")).recoverSignedPayment(options),
   savedUnsignedAbort: async (id: string) =>
     (await import("./wallet/payment")).savedUnsignedAbort(id),
   recoverUnsignedDraft: async (
@@ -314,25 +320,46 @@ export function App() {
   const recoverPayment = () =>
     perform(async () => {
       if (!task?.attempt) return;
-      const proof = await walletAdapter.savedPaymentProof(task.attempt.id);
-      if (proof) await api(`/api/payments/${task.attempt.id}/proof`, proof);
-      else {
-        const rejection = task.quote
-          ? await walletAdapter.recoverUnsignedDraft({
+      try {
+        // Prefer the server's saved proof/receipt over potentially stale browser evidence.
+        const status = await api<{
+          attempt: { state: string; hasProof?: boolean };
+          receipt?: unknown;
+        }>(`/api/payments/${task.attempt.id}/reconcile`, {});
+        if (
+          status.receipt ||
+          status.attempt.hasProof ||
+          ["REJECTED", "VERIFIED"].includes(status.attempt.state)
+        )
+          return;
+        const options = task.quote
+          ? {
               quote: task.quote,
               attemptId: task.attempt.id,
               maxAuthorizedDebitSats:
                 task.attempt.approval.maxAuthorizedDebitSats,
-            })
+            }
           : undefined;
-        if (rejection)
-          await api(
-            `/api/payments/${task.attempt.id}/unsigned-abort`,
-            rejection,
-          );
-        else await api(`/api/payments/${task.attempt.id}/reconcile`, {});
+        const proof =
+          (await walletAdapter.savedPaymentProof(task.attempt.id)) ||
+          (options
+            ? await walletAdapter.recoverSignedPayment(options)
+            : undefined);
+        if (proof) await api(`/api/payments/${task.attempt.id}/proof`, proof);
+        else {
+          const rejection = options
+            ? await walletAdapter.recoverUnsignedDraft(options)
+            : undefined;
+          if (rejection)
+            await api(
+              `/api/payments/${task.attempt.id}/unsigned-abort`,
+              rejection,
+            );
+          else throw new Error(paymentRecoveryMessage(task.attempt));
+        }
+      } finally {
+        await loadTask(task.id);
       }
-      await loadTask(task.id);
     });
   const pay = async (q: Quote, max: number) =>
     perform(async () => {
@@ -341,37 +368,37 @@ export function App() {
         feePolicy: "review-before-sign",
         maxAuthorizedDebitSats: max,
       });
-      const claim = await api<{
-        invokeWallet: boolean;
-        attempt: PaymentAttempt;
-      }>(`/api/payments/${attempt.id}/wallet-requested`, {});
-      if (claim.invokeWallet) {
-        try {
-          await walletAdapter.payApprovedQuote({
-            quote: q,
-            attemptId: attempt.id,
-            maxAuthorizedDebitSats: max,
-            onProof: async (proof) => {
-              await api(`/api/payments/${attempt.id}/proof`, proof);
-            },
-          });
-        } catch (e) {
-          const rejection = await walletAdapter.savedUnsignedAbort(attempt.id);
-          if (rejection) {
-            await api(`/api/payments/${attempt.id}/unsigned-abort`, rejection);
-            await loadTask(q.taskId);
-            return;
-          }
-          await api(`/api/payments/${attempt.id}/reconcile`, {}).catch(
-            () => {},
-          );
-          await loadTask(q.taskId);
-          throw e;
+      try {
+        await walletAdapter.payApprovedQuote({
+          quote: q,
+          attemptId: attempt.id,
+          maxAuthorizedDebitSats: max,
+          // Connection, identity checks, derivation and storage checks happen
+          // before the server grants its one-time permission to create a draft.
+          claimWallet: async () => {
+            const claim = await api<{ invokeWallet: boolean }>(
+              `/api/payments/${attempt.id}/wallet-requested`,
+              {},
+            );
+            return claim.invokeWallet;
+          },
+          onProof: async (proof) => {
+            await api(`/api/payments/${attempt.id}/proof`, proof);
+          },
+        });
+      } catch (e) {
+        const rejection = await walletAdapter.savedUnsignedAbort(attempt.id);
+        if (rejection) {
+          await api(`/api/payments/${attempt.id}/unsigned-abort`, rejection);
+          return;
         }
-      } else {
-        await api(`/api/payments/${attempt.id}/reconcile`, {});
+        // Only an unclaimed APPROVED attempt can be released by the server.
+        // A failed/lost createAction or signAction response remains unresolved.
+        await api(`/api/payments/${attempt.id}/reconcile`, {}).catch(() => {});
+        throw e;
+      } finally {
+        await loadTask(q.taskId);
       }
-      await loadTask(q.taskId);
     });
   return (
     <div
@@ -740,12 +767,14 @@ export function App() {
                           className="assistant-message"
                           aria-label="Assistant response"
                         >
-                          <ThinkingState
-                            key={task.id}
-                            events={task.events}
-                            state={task.state}
-                            hasAnswer={!!task.result || !!streamedAnswer}
-                          />
+                          {task.attempt?.state !== "APPROVED" && (
+                            <ThinkingState
+                              key={task.id}
+                              events={task.events}
+                              state={task.state}
+                              hasAnswer={!!task.result || !!streamedAnswer}
+                            />
+                          )}
                           {task.state === "CANCELLED" && (
                             <p className="notice">Request cancelled.</p>
                           )}
@@ -791,22 +820,24 @@ export function App() {
                           ) && (
                             <div className="notice">
                               <strong>
-                                Check the existing payment attempt.
+                                {task.attempt?.state === "APPROVED"
+                                  ? "The wallet transaction has not started."
+                                  : "Recover your existing payment."}
                               </strong>
                               <p>
-                                Check the saved proof or unsigned draft in your
-                                wallet. A confirmed unsigned cancellation
-                                returns you to quote review. If signing may have
-                                started, this attempt stays in reconciliation.
-                                This check never starts another payment.
+                                {task.attempt &&
+                                  paymentRecoveryMessage(task.attempt)}
                               </p>
+                              {task.attempt?.error && (
+                                <p role="status">{task.attempt.error}</p>
+                              )}
                               <button
                                 className="button"
                                 onClick={recoverPayment}
                                 disabled={busy}
                               >
                                 <RefreshCw size={15} />
-                                Reconcile payment
+                                {busy ? "Checking payment…" : "Check payment"}
                               </button>
                             </div>
                           )}

@@ -105,6 +105,23 @@ window.fetch = async (input, init) => {
   if (path === "/api/tasks")
     return json([task, otherTask].filter((t) => !removed.has(t.id)));
   if (path === "/api/tasks/other-fixture") return json(otherTask);
+
+  if (path === "/api/payments/fixture-attempt/reconcile") {
+    if (task.attempt?.state === "APPROVED") {
+      task = {
+        ...task,
+        state: "AWAITING_APPROVAL",
+        attempt: undefined,
+        error: {
+          code: "PAYMENT_NOT_STARTED",
+          message:
+            "The wallet transaction was never started. Review a fresh quote to try again.",
+        },
+      };
+      return json({ attempt: { state: "REJECTED", hasProof: false } });
+    }
+    return json({ attempt: task.attempt });
+  }
   if (path === "/api/tasks/fixture") return json(task);
   throw new Error(`Offline fixture does not implement ${path}`);
 };
@@ -114,6 +131,7 @@ function setState(state: TaskState, streaming = false) {
     state,
     result: undefined,
     error: undefined,
+    attempt: undefined,
     events: task.events.slice(0, 1),
   };
   if (state === "RUNNING")
@@ -150,6 +168,34 @@ function setState(state: TaskState, streaming = false) {
     };
   streams.forEach((stream) => stream.onmessage?.());
 }
+function paymentRecovery(phase?: "sign_requested" | "APPROVED") {
+  task = {
+    ...task,
+    state: phase === "APPROVED" ? "PAYMENT_PENDING" : "PAYMENT_UNKNOWN",
+    result: undefined,
+    error: undefined,
+    quote: undefined,
+    attempt: {
+      id: "fixture-attempt",
+      taskId: task.id,
+      quoteId: "fixture-quote",
+      state: phase === "APPROVED" ? "APPROVED" : "PAYMENT_UNKNOWN",
+      createdAt: task.createdAt,
+      approval: {
+        approved: true,
+        feePolicy: "review-before-sign",
+        maxAuthorizedDebitSats: 1000,
+      },
+    },
+  };
+  if (phase === "sign_requested")
+    localStorage.setItem(
+      "mercatum:payment:fixture-attempt",
+      JSON.stringify({ phase }),
+    );
+  else localStorage.removeItem("mercatum:payment:fixture-attempt");
+  streams.forEach((stream) => stream.onmessage?.());
+}
 createRoot(document.getElementById("fixture-controls")!).render(
   <div
     style={{
@@ -173,6 +219,13 @@ createRoot(document.getElementById("fixture-controls")!).render(
       <button onClick={() => setState("RUNNING", true)}>Streaming</button>
       <button onClick={() => setState("SUCCEEDED")}>Completed</button>
       <button onClick={() => setState("FAILED")}>Failed</button>
+      <button onClick={() => paymentRecovery("APPROVED")}>
+        Unstarted payment
+      </button>
+      <button onClick={() => paymentRecovery("sign_requested")}>
+        Lost signature
+      </button>
+      <button onClick={() => paymentRecovery()}>Missing evidence</button>
     </div>
   </div>,
 );

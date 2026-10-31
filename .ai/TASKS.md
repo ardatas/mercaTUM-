@@ -145,3 +145,7 @@ DONE: deployed 98c1bee and live-browser verified. Coordinator owns theme/navigat
 ### Single task history deletion — 31 October 2026
 
 DONE — T0/T5 implemented and deployed at `32be4d2`: persistent owner-scoped history removal, sidebar/history controls, confirmation and selected-task reset; payment and execution records retained.94 tests/typecheck/build pass; live disposable-chat deletion/reload verified.
+
+### Payment recovery follow-up — 31 October 2026
+
+Coordinator owns isolated T1/T2/T5 recovery integration: preparation before claim, safe release of unclaimed approvals, signature-history recovery, bounded ancestry restoration and actionable UI. Regression reproduces the former stuck unclaimed state. No live payment or qualification claim.

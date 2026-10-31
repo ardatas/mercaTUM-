@@ -133,3 +133,7 @@ Use the official MCP TypeScript SDK and its current Streamable HTTP/auth guidanc
 ## Marketplace selection
 
 `POST /api/tasks` optionally accepts `selection: { offerId, modelId, effort }`. Validate the complete combination against `src/shared/marketplace.ts`, persist it with the immutable task and expose it through PublicTask. Unknown combinations fail before planning. Existing browser/MCP requests without selection remain supported. The selection participates in idempotency and fingerprinting. Actual execution model, quote terms and result metadata remain server-owned. For Gemini, freeze an optional LOW/MEDIUM/HIGH thinkingLevel in ExecutionConfig before quoting and use it for the paid generation; older tasks retain LOW. Higher settings stay under the existing output and runtime caps.
+
+## Payment recovery progress
+
+Wallet preparation precedes the one-time create-action claim. Reconciliation may atomically reject only an unclaimed `APPROVED` attempt with no proof, receipt, broadcast or internalization evidence, returning the task to fresh quote review. `WALLET_REQUESTED` and later states never regain a wallet claim. Payment command responses include a non-secret `hasProof` flag so browser recovery does not need wallet access when the server already owns the proof. Signed-history recovery resubmits the same signed transaction; server verification and receipt requirements remain unchanged.

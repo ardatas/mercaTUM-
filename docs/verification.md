@@ -319,3 +319,13 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 - Typecheck/build/diff check PASS. Desktop browser confirms loaded56×56px mascot and brand text contained within the191px-wide brand button.
 
 - Pushed `b71130d` to main; remote HEAD verified. Vercel has not attached a status/check after repeated checks; public origin still serves `index-CtznOT1R.js` from the previous revision. Deployment PENDING. Mobile/live browser inspection was unavailable due Chrome-control timeouts; desktop local rendering was observed above.
+
+## Payment recovery follow-up — 31 October 2026
+
+- Isolated checkout at starting revision `1016c8d`; unrelated shared working-tree edits excluded. Node22.15.0/npm11.3.0, unchanged lockfile and installed sponsor pins confirmed. Application typecheck and92 tests PASS; sponsor typecheck and38 tests PASS. Coordinator owns wallet recovery, payment service and UI integration. No native spending or live transaction authorized or initiated for this change.
+
+- RED reproduction: `npx vitest run test/payments.test.ts -t 'approved but unclaimed'` returned PAYMENT_PENDING instead of AWAITING_APPROVAL. Fixed by claiming only after preparation and atomically releasing unclaimed approvals. Claimed attempts still remain PAYMENT_UNKNOWN, and delayed/replayed claims cannot spend.
+- Lost-signing-response test uses real offline wallet engine behind WalletClient: recover via standard history, reconstruct exact signed transaction, hydrate missing parent proof, verify SPV/scripts and internalize into separate receiver. Exactly one original create/sign call; recovery never creates, signs or aborts a signed action. Empty/altered/denied history and wrong/unavailable ancestor evidence fail closed. No privileged wallet basket/history bypass.
+- UI fixtures check unstarted approval returning to quote review and specific lost-signature/missing-evidence guidance. Existing cancellation refusal and timeout tests now assert actionable blocking errors. No live wallet spending performed.
+
+- Wallet authentication and history reads are bounded to30 seconds. A regression confirms a late authentication reply cannot proceed to a wallet claim or draft after timeout. Local browser confirmed unused approval returns to quote review, missing evidence displays an explicit error, and lost signatures show same-transaction recovery guidance. Screenshot: ignored `artifacts/payment-recovery.png`.

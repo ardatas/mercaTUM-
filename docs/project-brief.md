@@ -47,3 +47,5 @@ Payment recovery refinement: a confirmed unsigned fee rejection must return to f
 Marketplace-first revision: fixed desktop navigation links marketplace and chat; mobile navigation uses a drawer. Both views share the dark palette. Compact cards show five columns on wide screens and adapt down to one on phones. Selecting a subscription opens chat; model-specific effort choices are saved with the task and cannot alter an existing quote. Actual execution configuration and payment metadata remain authoritative.
 
 Task history supports deleting individual entries from recent tasks and history with confirmation. Removal persists per owner; it retains task/payment records and direct recovery links, and does not cancel active work.
+
+Payment recovery follow-up: unclaimed approvals return to quote review; lost signing responses can recover the original transaction through standard wallet history and server ancestry verification. Missing evidence, cancellation refusals and ambiguous signatures remain protected with specific guidance.

@@ -1,8 +1,10 @@
 import {
+  Beef,
   P2PKH,
   PublicKey,
   Random,
   Transaction,
+  UnlockingScript,
   Utils,
   WalletClient,
   type WalletInterface,
@@ -28,14 +30,39 @@ export interface WalletConnection {
   identityKey: string;
   network: Network;
 }
+async function walletRead<T>(
+  operation: Promise<T>,
+  message: string,
+): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      operation,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new AppError("WALLET_UNAVAILABLE", message)),
+          30_000,
+        );
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function connectWallet(
   wallet: WalletInterface = new WalletClient("auto"),
 ): Promise<WalletConnection> {
-  await wallet.waitForAuthentication({});
-  const [{ network }, { publicKey: identityKey }] = await Promise.all([
-    wallet.getNetwork({}),
-    wallet.getPublicKey({ identityKey: true }),
-  ]);
+  const [{ network }, { publicKey: identityKey }] = await walletRead(
+    (async () => {
+      await wallet.waitForAuthentication({});
+      return Promise.all([
+        wallet.getNetwork({}),
+        wallet.getPublicKey({ identityKey: true }),
+      ]);
+    })(),
+    "The wallet did not respond within 30 seconds. Unlock the original wallet and try again; no new transaction was started by this connection check.",
+  );
   if (network !== "mainnet" && network !== "testnet")
     throw new AppError(
       "WALLET_NETWORK_MISMATCH",
@@ -249,11 +276,11 @@ export async function recoverUnsignedDraft(options: {
   }
   if (!stillUnsigned() || tx.inputs.length === 0) return;
   let aborted = false;
+  let refused = false;
   try {
     const result = await wallet.abortAction({ reference: saved.reference });
-    // Positive refusal may indicate a network transaction. Never override it.
-    if (result.aborted !== true) return;
-    aborted = true;
+    aborted = result.aborted === true;
+    refused = !aborted;
   } catch {
     // Older clients saved the unsigned draft but not the successful abort.
     // Recover ONLY the mathematically over-limit branch: reviewDraft throws
@@ -263,8 +290,17 @@ export async function recoverUnsignedDraft(options: {
       feeSats === undefined ||
       quote.priceSats + feeSats <= maxAuthorizedDebitSats
     )
-      return;
+      throw new AppError(
+        "PAYMENT_UNKNOWN",
+        "The wallet did not confirm cancellation of this unsigned draft. Unlock the original wallet and check again; no replacement payment was started.",
+      );
   }
+  // A positive refusal is never overridden by an over-limit draft calculation.
+  if (refused)
+    throw new AppError(
+      "PAYMENT_UNKNOWN",
+      "The wallet refused to cancel this draft. Inspect the original action in your wallet; this attempt must remain unresolved.",
+    );
   if (!stillUnsigned()) return;
   const rejection: UnsignedAbort = {
     quoteId: quote.id,
@@ -284,13 +320,202 @@ export async function recoverUnsignedDraft(options: {
   return rejection;
 }
 
+/** Recover an existing signature via standard wallet history. Never sign, create,
+ * abort signed actions, query privileged baskets, or accept history as a receipt. */
+export async function recoverSignedPayment(options: {
+  quote: Omit<Quote, "ownerId" | "fingerprint" | "configurationDigest">;
+  attemptId: string;
+  maxAuthorizedDebitSats: number;
+  wallet?: WalletInterface;
+  storage?: PaymentStorage;
+}): Promise<PaymentProof | undefined> {
+  const { quote, attemptId, maxAuthorizedDebitSats } = options;
+  const storage = options.storage || localStorage;
+  const existing = savedPaymentProof(attemptId, storage);
+  if (existing) return existing;
+  let saved;
+  try {
+    saved = JSON.parse(storage.getItem(storageKey(attemptId)) || "null");
+  } catch {
+    return;
+  }
+  if (saved?.phase !== "sign_requested") return;
+  if (
+    saved.quoteId !== quote.id ||
+    !Array.isArray(saved.draft) ||
+    typeof saved.derivationSuffix !== "string" ||
+    !saved.derivationSuffix
+  )
+    throw new AppError(
+      "PAYMENT_UNKNOWN",
+      "The signing record is incomplete. Recover the original payment in the original browser and wallet; it cannot be reset.",
+    );
+  const wallet = options.wallet || new WalletClient("auto");
+  const connected = await connectWallet(wallet);
+  if (
+    connected.network !== quote.network ||
+    connected.identityKey !== quote.payerIdentityKey
+  )
+    throw new AppError(
+      "PAYMENT_MISMATCH",
+      "Reconnect the original buyer wallet and network to recover this payment.",
+    );
+  const { publicKey } = await wallet.getPublicKey({
+    protocolID,
+    keyID: `${quote.derivationPrefix} ${saved.derivationSuffix}`,
+    counterparty: quote.recipientIdentityKey,
+    forSelf: false,
+  });
+  const script = new P2PKH()
+    .lock(PublicKey.fromString(publicKey).toAddress())
+    .toHex();
+  const unsigned = Transaction.fromAtomicBEEF(saved.draft);
+  const reviewed = reviewDraft(
+    unsigned,
+    script,
+    quote.priceSats,
+    maxAuthorizedDebitSats,
+  );
+  const label = `mercatum-${attemptId}`;
+  let history;
+  try {
+    history = await walletRead(
+      wallet.listActions({
+        labels: [label],
+        labelQueryMode: "all",
+        includeLabels: true,
+        includeInputs: true,
+        includeInputUnlockingScripts: true,
+        includeOutputs: true,
+        includeOutputLockingScripts: true,
+        limit: 100,
+      }),
+      "Wallet history did not respond within 30 seconds.",
+    );
+  } catch {
+    throw new AppError(
+      "PAYMENT_UNKNOWN",
+      "The wallet could not return transaction history. Unlock the original wallet and allow history access, then check again. No new payment was started.",
+    );
+  }
+  if (history.totalActions > history.actions.length)
+    throw new AppError(
+      "PAYMENT_UNKNOWN",
+      "The wallet returned incomplete history for this attempt. Manual recovery of the original transaction is required.",
+    );
+  const matches = new Map<string, PaymentProof>();
+  for (const action of history.actions) {
+    if (
+      !action.labels?.includes(label) ||
+      !action.isOutgoing ||
+      !["nosend", "completed", "unproven", "sending", "unprocessed"].includes(
+        action.status,
+      ) ||
+      action.version !== unsigned.version ||
+      action.lockTime !== unsigned.lockTime ||
+      action.inputs?.length !== unsigned.inputs.length ||
+      action.outputs?.length !== unsigned.outputs.length
+    )
+      continue;
+    const inputs = action.inputs;
+    const outputs = action.outputs;
+    if (
+      !inputs ||
+      !outputs ||
+      inputs.some((input, i) => {
+        const expected = unsigned.inputs[i];
+        return (
+          input.sourceOutpoint !==
+            `${expected.sourceTXID || expected.sourceTransaction?.id("hex")}.${expected.sourceOutputIndex}` ||
+          input.sequenceNumber !== expected.sequence ||
+          !input.unlockingScript
+        );
+      })
+    )
+      continue;
+    if (
+      new Set(outputs.map((o) => o.outputIndex)).size !==
+        unsigned.outputs.length ||
+      outputs.some((output) => {
+        const expected = unsigned.outputs[output.outputIndex];
+        return (
+          !expected ||
+          expected.satoshis !== output.satoshis ||
+          expected.lockingScript.toHex() !== output.lockingScript
+        );
+      })
+    )
+      continue;
+    try {
+      // Retain the complete, previously reviewed ancestry; use only signatures
+      // from history. Recompute the ID, never trust a history status or label alone.
+      const signed = Transaction.fromAtomicBEEF(saved.draft);
+      signed.inputs.forEach((input, i) => {
+        input.unlockingScript = UnlockingScript.fromHex(
+          inputs[i].unlockingScript!,
+        );
+      });
+      if (signed.id("hex") !== action.txid) continue;
+      const envelope = Beef.fromBinary(saved.draft);
+      envelope.removeExistingTxid(unsigned.id("hex"));
+      envelope.mergeRawTx(signed.toBinary());
+      const proof = proofSchema.parse({
+        tx: envelope.toBinaryAtomic(action.txid),
+        txid: action.txid,
+        outputIndex: reviewed.outputIndex,
+        satoshis: quote.priceSats,
+        derivationPrefix: quote.derivationPrefix,
+        derivationSuffix: saved.derivationSuffix,
+        senderIdentityKey: connected.identityKey,
+      });
+      matches.set(action.txid, proof);
+    } catch {
+      /* An incomplete or inconsistent action is not usable evidence. */
+    }
+  }
+  if (matches.size !== 1)
+    throw new AppError(
+      "PAYMENT_UNKNOWN",
+      matches.size > 1
+        ? "More than one signed transaction matches this attempt. Manual reconciliation is required; no replacement payment is allowed."
+        : "No complete signed transaction matching this attempt was found in wallet history. If a wallet prompt is still open, finish or dismiss it and check again. Otherwise recover the original transaction manually; this is not confirmation of cancellation.",
+    );
+  const proof = [...matches.values()][0];
+  // A concurrently returned original response must never be overwritten by a different proof.
+  const current = JSON.parse(storage.getItem(storageKey(attemptId)) || "null");
+  if (current?.proof) {
+    const prior = proofSchema.parse(current.proof);
+    if (prior.txid !== proof.txid)
+      throw new AppError(
+        "PAYMENT_UNKNOWN",
+        "The saved proof changed during recovery. Manual reconciliation is required.",
+      );
+    return prior;
+  }
+  if (
+    current?.phase !== "sign_requested" ||
+    current.reference !== saved.reference ||
+    current.quoteId !== saved.quoteId
+  )
+    throw new AppError(
+      "PAYMENT_UNKNOWN",
+      "The payment record changed during recovery. Check the current attempt again.",
+    );
+  storage.setItem(
+    storageKey(attemptId),
+    JSON.stringify({ phase: "proof_received", proof }),
+  );
+  return proof;
+}
+
 export function clearPaymentProof(
   attemptId: string,
   storage: PaymentStorage = localStorage,
 ) {
   storage.removeItem(storageKey(attemptId));
 }
-/** Caller must have just received invokeWallet:true from the one-time server claim. */
+/** The caller either owns the one-time claim already (legacy integrations), or
+ * supplies claimWallet. Browser callers claim only after non-spending preparation. */
 export async function payApprovedQuote(options: {
   quote: Omit<Quote, "ownerId" | "fingerprint" | "configurationDigest">;
   attemptId: string;
@@ -299,6 +524,7 @@ export async function payApprovedQuote(options: {
   storage?: PaymentStorage;
   onProof?: (proof: PaymentProof) => void | Promise<void>;
   onReview?: (review: { feeSats: number; totalDebitSats: number }) => void;
+  claimWallet?: () => Promise<boolean>;
 }): Promise<PaymentProof> {
   const { quote, attemptId, maxAuthorizedDebitSats } = options;
   const wallet = options.wallet || new WalletClient("auto");
@@ -336,7 +562,22 @@ export async function payApprovedQuote(options: {
   const script = new P2PKH()
     .lock(PublicKey.fromString(publicKey).toAddress())
     .toHex();
-  // Storage failure happens before createAction. A claim is never reusable after an uncertain call.
+  // Test durable browser storage before acquiring the one-time server claim.
+  // A connection, identity, derivation or storage failure here cannot start a debit.
+  storage.setItem(
+    storageKey(attemptId),
+    JSON.stringify({
+      phase: "prepared",
+      derivationSuffix,
+      quoteId: quote.id,
+    }),
+  );
+  if (options.claimWallet && !(await options.claimWallet()))
+    throw new AppError(
+      "PAYMENT_UNKNOWN",
+      "This attempt was already claimed or released. Check its existing status.",
+    );
+  // From this point even a lost createAction response must remain unresolved.
   storage.setItem(
     storageKey(attemptId),
     JSON.stringify({

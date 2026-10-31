@@ -33,6 +33,8 @@ import {
   type ArcadeObservation,
 } from "../../shared/contracts.js";
 
+import { hydratePaymentProof, type AncestorLoader } from "./proof-recovery.js";
+
 export const NETWORKS = {
   mainnet: {
     chain: "main" as const,
@@ -76,6 +78,7 @@ export async function verifyRemittance(
   tracker: ChainTracker,
   proof: PaymentProof,
   quote: Quote,
+  loadAncestor?: AncestorLoader,
 ) {
   if (
     proof.derivationPrefix !== quote.derivationPrefix ||
@@ -120,6 +123,10 @@ export async function verifyRemittance(
       "PAYMENT_MISMATCH",
       "The selected output does not pay the quoted recipient and amount.",
     );
+  if (loadAncestor) {
+    proof = await hydratePaymentProof(proof, loadAncestor);
+    tx = Transaction.fromAtomicBEEF(proof.tx);
+  }
   try {
     if (!(await tx.verify(tracker)))
       throw new AppError(
@@ -230,8 +237,21 @@ export class ToolboxMerchant implements Merchant {
       throw error;
     }
   }
+  private loadAncestor: AncestorLoader = async (txid) => {
+    const [raw, path] = await Promise.all([
+      this.services.getRawTx(txid),
+      this.services.getMerklePath(txid),
+    ]);
+    return { rawTx: raw.rawTx, merklePath: path.merklePath };
+  };
   verify(proof: PaymentProof, quote: Quote) {
-    return verifyRemittance(this.wallet, this.tracker, proof, quote);
+    return verifyRemittance(
+      this.wallet,
+      this.tracker,
+      proof,
+      quote,
+      this.loadAncestor,
+    );
   }
   async submit(txid: string, ef: string): Promise<ArcadeObservation> {
     const result = await this.arcade.postRawTx(ef, [txid]);
@@ -283,6 +303,7 @@ export class ToolboxMerchant implements Merchant {
     return { ...previous, status: data.txStatus, networkKnown };
   }
   async internalize(proof: PaymentProof) {
+    proof = await hydratePaymentProof(proof, this.loadAncestor);
     // The pinned Toolbox merge path is idempotent for an existing managed outpoint;
     // repeating exactly these bytes reconciles a crash after wallet commit, before app commit.
     await this.wallet.internalizeAction({

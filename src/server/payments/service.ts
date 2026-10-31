@@ -385,6 +385,37 @@ export class PaymentService {
     return { attempt, receipt: this.store.receipt(attempt.taskId) };
   }
   async reconcile(ownerId: string, attemptId: string): Promise<PaymentStatus> {
+    // APPROVED means no client has acquired permission to call createAction.
+    // Serialize release with claimWallet so a late browser cannot spend a released quote.
+    this.store.transaction(() => {
+      const a = this.store.owned<PaymentAttempt>("attempt", attemptId, ownerId);
+      if (a.state !== "APPROVED") return;
+      const t = this.store.owned<Task>("task", a.taskId, ownerId);
+      if (
+        t.attemptId !== a.id ||
+        a.proof ||
+        a.proofDigest ||
+        a.receiptId ||
+        a.arcade ||
+        a.internalized ||
+        this.store.receipt(t.id)
+      )
+        return;
+      a.state = "REJECTED";
+      a.error =
+        "The wallet transaction was never started. Review a fresh quote to try again.";
+      this.store.put("attempt", a);
+      t.state = "AWAITING_APPROVAL";
+      t.error = { code: "PAYMENT_NOT_STARTED", message: a.error };
+      delete t.attemptId;
+      delete t.quoteId;
+      t.updatedAt = now();
+      this.store.put("task", t);
+      this.store.event(t.id, "payment.rejected", {
+        attemptId,
+        code: "PAYMENT_NOT_STARTED",
+      });
+    });
     const initial = this.status(ownerId, attemptId);
     if (!initial.attempt.proof || !this.merchant) {
       if (initial.attempt.state === "WALLET_REQUESTED")
