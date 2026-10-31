@@ -48,6 +48,24 @@ export const approveSchema = z
   })
   .strict();
 export type Approval = z.infer<typeof approveSchema>;
+// A browser reports this only after its standard wallet confirms an unsigned abort.
+// It releases an unpaid attempt; it is never payment or execution authority.
+export const unsignedAbortSchema = z
+  .object({
+    quoteId: idSchema,
+    reference: z.string().min(1).max(300),
+    aborted: z.literal(true),
+    code: z.enum(["DEBIT_LIMIT_EXCEEDED", "DRAFT_REJECTED"]),
+    feeSats: z
+      .number()
+      .int()
+      .nonnegative()
+      .max(Number.MAX_SAFE_INTEGER)
+      .optional(),
+  })
+  .strict();
+export type UnsignedAbort = z.infer<typeof unsignedAbortSchema>;
+
 export interface Limits {
   maxInputChars: number;
   maxContextBytes: number;
@@ -180,6 +198,7 @@ export interface PaymentAttempt {
   error?: string;
   arcade?: ArcadeObservation;
   internalized?: boolean;
+  unsignedAbort?: UnsignedAbort;
 }
 export interface ArcadeObservation {
   submittedAt: string;

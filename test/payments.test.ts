@@ -10,6 +10,8 @@ import {
 import {
   payApprovedQuote,
   savedPaymentProof,
+  savedUnsignedAbort,
+  recoverUnsignedDraft,
   type PaymentStorage,
 } from "../src/client/wallet/payment";
 import {
@@ -179,6 +181,14 @@ describe("real wallet engine with offline chain; no live spending", () => {
     const waiting = await service.submitProof("owner", attempt.id, proof);
     expect(waiting.attempt.state).toBe("PAYMENT_UNKNOWN");
     expect(waiting.receipt).toBeUndefined();
+    expect(() =>
+      service.rejectUnsigned("owner", attempt.id, {
+        quoteId: quote.id,
+        reference: "AQID",
+        aborted: true,
+        code: "DRAFT_REJECTED",
+      }),
+    ).toThrow(/requires reconciliation/);
     expect(merchant.internalize).not.toHaveBeenCalled();
     known = true;
     const [first, second] = await Promise.all([
@@ -284,27 +294,178 @@ describe("real wallet engine with offline chain; no live spending", () => {
     await chain.fund(buyer);
     vi.spyOn(buyer, "getNetwork").mockResolvedValue({ network: "testnet" });
     const sign = vi.spyOn(buyer, "signAction");
+    const create = vi.spyOn(buyer, "createAction");
     const abort = vi.spyOn(buyer, "abortAction");
-    const quote = {
-      id: "fee-quote",
-      network: "testnet",
-      payerIdentityKey: buyer.identityKey,
-      recipientIdentityKey: provider.identityKey,
-      derivationPrefix: "fee-bound-prefix",
-      priceSats: 100,
-    } as Quote;
+    const store = new Store(":memory:");
+    store.put("task", task("fee-task"));
+    const service = new PaymentService(
+      store,
+      { network: "testnet", priceSats: 100, walletStorageDir: "." },
+      () => true,
+      {
+        identityKey: provider.identityKey,
+        verify: vi.fn(),
+        submit: vi.fn(),
+        observe: vi.fn(),
+        internalize: vi.fn(),
+        close: vi.fn(),
+      },
+    );
+    const quote = await service.quote(
+      "owner",
+      "fee-task",
+      buyer.identityKey,
+      "fee-quote-key",
+    );
+    const attempt = service.approve(
+      "owner",
+      quote.id,
+      {
+        approved: true,
+        feePolicy: "review-before-sign",
+        maxAuthorizedDebitSats: 100,
+      },
+      "fee-approval-key",
+    );
+    service.claimWallet("owner", attempt.id);
+    const local = memoryStorage();
     await expect(
       payApprovedQuote({
         quote,
-        attemptId: "fee-attempt",
+        attemptId: attempt.id,
         maxAuthorizedDebitSats: 100,
         wallet: buyer,
-        storage: memoryStorage(),
+        storage: local,
       }),
     ).rejects.toThrow(/actual network fee/);
     expect(sign).not.toHaveBeenCalled();
     expect(abort).toHaveBeenCalledOnce();
+    expect(
+      JSON.parse(local.getItem(`mercatum:payment:${attempt.id}`)!),
+    ).toMatchObject({
+      phase: "unsigned_aborted",
+      rejection: { code: "DEBIT_LIMIT_EXCEEDED" },
+    });
+    const rejected = savedUnsignedAbort(attempt.id, local)!;
+    expect(rejected.feeSats).toBeGreaterThan(0);
+    // Reproduce the old browser record: abort succeeded but the record remained draft.
+    const draft = (await create.mock.results[0].value).signableTransaction!;
+    local.setItem(
+      `mercatum:payment:${attempt.id}`,
+      JSON.stringify({
+        phase: "draft",
+        reference: draft.reference,
+        draft: draft.tx,
+        quoteId: quote.id,
+        derivationSuffix: "unavailable-legacy-suffix",
+      }),
+    );
+    const recovered = await recoverUnsignedDraft({
+      quote,
+      attemptId: attempt.id,
+      maxAuthorizedDebitSats: 100,
+      wallet: buyer,
+      storage: local,
+    });
+    expect(recovered?.aborted).toBe(true);
+    expect(sign).not.toHaveBeenCalled();
+    expect(create).toHaveBeenCalledOnce();
+    // Server recovery also covers an attempt already moved to UNKNOWN by the old UI.
+    await service.reconcile("owner", attempt.id);
+    expect(() =>
+      service.rejectUnsigned("stranger", attempt.id, rejected),
+    ).toThrow(/unavailable/);
+    expect(
+      service.rejectUnsigned("owner", attempt.id, rejected).attempt.state,
+    ).toBe("REJECTED");
+    expect(
+      service.rejectUnsigned("owner", attempt.id, rejected).attempt.state,
+    ).toBe("REJECTED");
+    const recoveredTask = store.get<Task>("task", "fee-task")!;
+    expect(recoveredTask.state).toBe("AWAITING_APPROVAL");
+    expect(recoveredTask.attemptId).toBeUndefined();
+    expect(recoveredTask.error?.message).toContain(
+      `Draft network fee: ${rejected.feeSats} sats`,
+    );
+    expect(store.receipt("fee-task")).toBeUndefined();
+    expect(service.claimWallet("owner", attempt.id).invokeWallet).toBe(false);
+    const fresh = await service.quote(
+      "owner",
+      "fee-task",
+      buyer.identityKey,
+      "fresh-quote-key",
+    );
+    expect(fresh.id).not.toBe(quote.id);
+    expect(fresh.derivationPrefix).not.toBe(quote.derivationPrefix);
+    expect(store.get<Task>("task", "fee-task")?.state).toBe(
+      "AWAITING_APPROVAL",
+    );
+    store.close();
   });
+  it.each(["refused", "timeout"])(
+    "keeps an uncertain abort unresolved (%s)",
+    async (outcome) => {
+      const buyer = await chain.makeWallet();
+      const provider = await chain.makeWallet();
+      await chain.fund(buyer);
+      vi.spyOn(buyer, "getNetwork").mockResolvedValue({ network: "testnet" });
+      const sign = vi.spyOn(buyer, "signAction");
+      const create = vi.spyOn(buyer, "createAction");
+      const abort = vi.spyOn(buyer, "abortAction");
+      if (outcome === "refused") abort.mockResolvedValue({ aborted: false });
+      else abort.mockRejectedValue(new Error("offline abort"));
+      const local = memoryStorage();
+      const quote = {
+        id: "uncertain-quote",
+        network: "testnet",
+        payerIdentityKey: buyer.identityKey,
+        recipientIdentityKey: provider.identityKey,
+        derivationPrefix: "uncertain-prefix",
+        priceSats: 100,
+      } as Quote;
+      await expect(
+        payApprovedQuote({
+          quote,
+          attemptId: "uncertain-attempt",
+          maxAuthorizedDebitSats: 100,
+          wallet: buyer,
+          storage: local,
+        }),
+      ).rejects.toThrow(/actual network fee/);
+      expect(savedUnsignedAbort("uncertain-attempt", local)).toBeUndefined();
+      expect(sign).not.toHaveBeenCalled();
+      await expect(
+        payApprovedQuote({
+          quote,
+          attemptId: "uncertain-attempt",
+          maxAuthorizedDebitSats: 1000,
+          wallet: buyer,
+          storage: local,
+        }),
+      ).rejects.toThrow(/already started/);
+      expect(create).toHaveBeenCalledOnce();
+      // Once signing was requested, even an available abort method cannot permit a replacement.
+      const record = JSON.parse(
+        local.getItem("mercatum:payment:uncertain-attempt")!,
+      );
+      local.setItem(
+        "mercatum:payment:uncertain-attempt",
+        JSON.stringify({ ...record, phase: "sign_requested" }),
+      );
+      abort.mockClear();
+      expect(
+        await recoverUnsignedDraft({
+          quote,
+          attemptId: "uncertain-attempt",
+          maxAuthorizedDebitSats: 100,
+          wallet: buyer,
+          storage: local,
+        }),
+      ).toBeUndefined();
+      expect(abort).not.toHaveBeenCalled();
+    },
+  );
+
   it("reconciles the same outpoint after an internalization acknowledgement is lost", async () => {
     const store = new Store(":memory:");
     store.put("task", task("recovery-task"));

@@ -2,6 +2,8 @@ import { randomBytes } from "node:crypto";
 import {
   AppError,
   approveSchema,
+  unsignedAbortSchema,
+  type UnsignedAbort,
   proofSchema,
   publicKeySchema,
   type Approval,
@@ -234,6 +236,7 @@ export class PaymentService {
         this.store.put("attempt", attempt);
         task.attemptId = attempt.id;
         task.state = "PAYMENT_PENDING";
+        delete task.error;
         this.store.put("task", task);
         return attempt.id;
       },
@@ -258,6 +261,72 @@ export class PaymentService {
       return { attempt, invokeWallet: true };
     });
   }
+  rejectUnsigned(
+    ownerId: string,
+    attemptId: string,
+    input: UnsignedAbort,
+  ): PaymentStatus {
+    const rejection = unsignedAbortSchema.parse(input);
+    return this.store.transaction(() => {
+      const attempt = this.store.owned<PaymentAttempt>(
+        "attempt",
+        attemptId,
+        ownerId,
+      );
+      const task = this.store.owned<Task>("task", attempt.taskId, ownerId);
+      if (
+        attempt.state === "REJECTED" &&
+        digest(attempt.unsignedAbort) === digest(rejection)
+      )
+        return this.status(ownerId, attemptId);
+      if (
+        attempt.quoteId !== rejection.quoteId ||
+        task.attemptId !== attemptId ||
+        !["WALLET_REQUESTED", "PAYMENT_UNKNOWN"].includes(attempt.state) ||
+        !["PAYMENT_PENDING", "PAYMENT_UNKNOWN"].includes(task.state) ||
+        attempt.proof ||
+        attempt.proofDigest ||
+        attempt.receiptId ||
+        attempt.arcade ||
+        attempt.internalized ||
+        this.store.receipt(task.id)
+      )
+        throw new AppError(
+          "PAYMENT_UNKNOWN",
+          "This payment requires reconciliation; it cannot be released as an unsigned draft.",
+          409,
+        );
+      const quote = this.store.owned<Quote>("quote", attempt.quoteId, ownerId);
+      const detail =
+        rejection.feeSats === undefined
+          ? ""
+          : ` Service price: ${quote.priceSats} sats. Draft network fee: ${rejection.feeSats} sats. Total: ${quote.priceSats + rejection.feeSats} sats. Approved maximum: ${attempt.approval.maxAuthorizedDebitSats} sats.`;
+      attempt.state = "REJECTED";
+      attempt.unsignedAbort = rejection;
+      attempt.error =
+        "The unsigned payment draft was cancelled before signing." + detail;
+      this.store.put("attempt", attempt);
+      task.state = "AWAITING_APPROVAL";
+      task.error = {
+        code: rejection.code,
+        message:
+          attempt.error +
+          " Review a fresh quote and explicitly approve any new spending limit. Fees can change.",
+      };
+      delete task.attemptId;
+      delete task.quoteId;
+      task.updatedAt = now();
+      this.store.put("task", task);
+      this.store.event(task.id, "payment.rejected", {
+        attemptId,
+        code: rejection.code,
+        ...(rejection.feeSats === undefined
+          ? {}
+          : { feeSats: rejection.feeSats }),
+      });
+      return this.status(ownerId, attemptId);
+    });
+  }
   async submitProof(
     ownerId: string,
     attemptId: string,
@@ -270,7 +339,7 @@ export class PaymentService {
         attemptId,
         ownerId,
       );
-      if (attempt.state === "APPROVED")
+      if (attempt.state === "APPROVED" || attempt.state === "REJECTED")
         throw new AppError(
           "APPROVAL_REQUIRED",
           "Claim the wallet action before submitting proof.",

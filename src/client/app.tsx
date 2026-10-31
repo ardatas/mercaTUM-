@@ -45,6 +45,13 @@ const walletAdapter = {
   connectWallet: async () => (await import("./wallet/payment")).connectWallet(),
   savedPaymentProof: async (id: string) =>
     (await import("./wallet/payment")).savedPaymentProof(id),
+  savedUnsignedAbort: async (id: string) =>
+    (await import("./wallet/payment")).savedUnsignedAbort(id),
+  recoverUnsignedDraft: async (
+    options: Parameters<
+      typeof import("./wallet/payment").recoverUnsignedDraft
+    >[0],
+  ) => (await import("./wallet/payment")).recoverUnsignedDraft(options),
   payApprovedQuote: async (
     options: Parameters<typeof import("./wallet/payment").payApprovedQuote>[0],
   ) => (await import("./wallet/payment")).payApprovedQuote(options),
@@ -245,7 +252,22 @@ export function App() {
       if (!task?.attempt) return;
       const proof = await walletAdapter.savedPaymentProof(task.attempt.id);
       if (proof) await api(`/api/payments/${task.attempt.id}/proof`, proof);
-      else await api(`/api/payments/${task.attempt.id}/reconcile`, {});
+      else {
+        const rejection = task.quote
+          ? await walletAdapter.recoverUnsignedDraft({
+              quote: task.quote,
+              attemptId: task.attempt.id,
+              maxAuthorizedDebitSats:
+                task.attempt.approval.maxAuthorizedDebitSats,
+            })
+          : undefined;
+        if (rejection)
+          await api(
+            `/api/payments/${task.attempt.id}/unsigned-abort`,
+            rejection,
+          );
+        else await api(`/api/payments/${task.attempt.id}/reconcile`, {});
+      }
       await loadTask(task.id);
     });
   const pay = async (q: Quote, max: number) =>
@@ -270,9 +292,16 @@ export function App() {
             },
           });
         } catch (e) {
+          const rejection = await walletAdapter.savedUnsignedAbort(attempt.id);
+          if (rejection) {
+            await api(`/api/payments/${attempt.id}/unsigned-abort`, rejection);
+            await loadTask(q.taskId);
+            return;
+          }
           await api(`/api/payments/${attempt.id}/reconcile`, {}).catch(
             () => {},
           );
+          await loadTask(q.taskId);
           throw e;
         }
       } else {
@@ -614,6 +643,7 @@ export function App() {
                             )}
                           {task.quote && task.state === "AWAITING_APPROVAL" && (
                             <QuoteReview
+                              key={task.quote.id}
                               quote={task.quote}
                               onRefresh={quote}
                               busy={busy}
@@ -630,11 +660,15 @@ export function App() {
                             task.state,
                           ) && (
                             <div className="notice">
-                              <strong>Payment is being reconciled.</strong>
+                              <strong>
+                                Check the existing payment attempt.
+                              </strong>
                               <p>
-                                A wallet timeout can still mean funds moved.
-                                This action checks the same payment and never
-                                starts another debit.
+                                Check the saved proof or unsigned draft in your
+                                wallet. A confirmed unsigned cancellation
+                                returns you to quote review. If signing may have
+                                started, this attempt stays in reconciliation.
+                                This check never starts another payment.
                               </p>
                               <button
                                 className="button"
@@ -942,8 +976,9 @@ function QuoteReview({
         <span>sats</span>
       </label>
       <p className="subtle">
-        The wallet prepares the transaction for review. If its fee exceeds your
-        bound, signing is blocked. You approve native wallet spending yourself.
+        This limit is your spending cap, not a network-fee estimate. The wallet
+        prepares the transaction for review. If its fee exceeds your bound,
+        signing is blocked. You approve native wallet spending yourself.
       </p>
       <label className="consent">
         <input

@@ -5,6 +5,7 @@ import { z, ZodError } from "zod";
 import {
   AppError,
   approveSchema,
+  unsignedAbortSchema,
   proofSchema,
   publicKeySchema,
 } from "../shared/contracts.js";
@@ -166,6 +167,14 @@ export function createApp({
       error: v.attempt.error,
     },
     receipt: v.receipt ? (({ ownerId, ...r }) => r)(v.receipt) : undefined,
+  });
+  app.post("/api/payments/:id/unsigned-abort", (req, res) => {
+    const r = payments.rejectUnsigned(
+      owner(res),
+      id(req),
+      unsignedAbortSchema.parse(req.body),
+    );
+    res.json(paymentResult(r));
   });
   app.post("/api/payments/:id/proof", async (req, res) => {
     const r = await payments.submitProof(

@@ -17,7 +17,7 @@ describe("unsigned fee bounds", () => {
       totalDebitSats: 110,
       outputIndex: 0,
     });
-    expect(() => reviewDraft(fixture(), "52", 100, 109)).toThrow(/exceeds/);
+    expect(() => reviewDraft(fixture(), "52", 100, 109)).toThrow(/exceeding/);
   });
   it("blocks missing and forged source bytes, duplicate inputs and duplicate payment outputs", () => {
     let tx = fixture();

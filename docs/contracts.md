@@ -57,6 +57,8 @@ CREATED -> PLANNING -> AWAITING_APPROVAL -> PAYMENT_PENDING
 | Upstream request outcome uncertain | `EXECUTION_UNKNOWN`; reconcile a saved provider response reference if supported, otherwise require an explicit same-entitlement retry. Never claim globally exactly-once model execution. |
 | Cancel before wallet call | `CANCELLED`; no payment. Cancellation after possible broadcast triggers reconciliation, not an assumed refund. |
 
+Confirmed unsigned cancellation is reported through the owner/CSRF-protected `POST /api/payments/:id/unsigned-abort` endpoint with `{ quoteId, reference, aborted: true, code, feeSats? }`. This is a browser report of the standard wallet outcome, not independently verified chain evidence and never authority to execute. The client requires a pre-sign local record and a successful abort, or a matching failed wallet-history record with no signed txid. The server refuses release once proof, broadcast, internalization or receipt evidence exists. It retains the rejected attempt, clears the active attempt/quote, and returns the task to AWAITING_APPROVAL. Every retry needs a fresh quote and explicit approval. Records that reached `sign_requested` cannot use this recovery.
+
 Payment attempt states: `APPROVED`, `WALLET_REQUESTED`, `PROOF_RECEIVED`, `VERIFYING`, `VERIFIED`, `REJECTED`, `PAYMENT_UNKNOWN`. Persist `WALLET_REQUESTED` before invoking `createAction` and save returned proof before continuing the UI flow.
 
 ## Durable invariants
@@ -119,7 +121,7 @@ The tool is suspended until a receipt exists. The tool result contains receipt r
 
 ## Events and errors
 
-Event types: `task.created`, `agent.tool_requested`, `quote.created`, `payment.approval_required`, `payment.submitted`, `payment.verified`, `execution.started`, `execution.text_delta`, `artifact.created`, `task.completed`, `task.limit_reached`, `task.failed`. A limit event includes the exhausted bound and valid result/artifact references; it never requests another payment automatically. SSE includes durable event ID/sequence; heartbeat messages do not mutate task state. GET task status is the fallback. Streaming token deltas may be batched; a completed result is persisted independently.
+Event types: `task.created`, `agent.tool_requested`, `quote.created`, `payment.approval_required`, `payment.submitted`, `payment.rejected`, `payment.verified`, `execution.started`, `execution.text_delta`, `artifact.created`, `task.completed`, `task.limit_reached`, `task.failed`. A limit event includes the exhausted bound and valid result/artifact references; it never requests another payment automatically. SSE includes durable event ID/sequence; heartbeat messages do not mutate task state. GET task status is the fallback. Streaming token deltas may be batched; a completed result is persisted independently.
 
 Error envelope: `{ error: { code, message, retryable, taskId?, attemptId? } }`. Use stable codes including `UNAUTHORIZED`, `FORBIDDEN`, `INVALID_INPUT`, `PROVIDER_UNAVAILABLE`, `QUOTE_EXPIRED`, `WALLET_UNAVAILABLE`, `WALLET_NETWORK_MISMATCH`, `APPROVAL_REQUIRED`, `PAYMENT_MISMATCH`, `PAYMENT_REPLAY`, `PAYMENT_UNKNOWN`, `EXECUTION_FAILED`, `EXECUTION_UNKNOWN`, `REPO_LIMIT_EXCEEDED`, `INVALID_CHANGESET`. Never put credentials, provider raw responses or wallet secrets in an error. A retryable payment status authorizes reconciliation only.
 

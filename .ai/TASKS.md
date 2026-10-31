@@ -129,3 +129,7 @@ Every handoff returns changed paths, behavior implemented, commands/results, unr
 - Update task ledger and qualification results from observations. Prepare the public repo/video/Devfolio material; do not send messages or submit externally without authorization.
 
 **Accept:** core application checks pass, deployed user flows work and all Q1–Q5 PASS with observed evidence. If an external blocker prevents this, T8 remains BLOCKED/incomplete; do not mark it DONE. Final report distinguishes code/tests, deployment, chain payment and actual AI execution.
+
+### Fee-cap recovery — 31 October 2026
+
+Coordinator owns T1/T2/T5 integration: preserve confirmed unsigned aborts, recover legacy pre-sign drafts through reference-bound wallet history, and return to fresh quote approval. Local regression/typecheck/build PASS (87 tests). Deployment and existing Safari task recovery in progress; signed or uncertain attempts remain reconciliation-only.

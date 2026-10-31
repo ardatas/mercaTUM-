@@ -10,6 +10,8 @@ import {
 import {
   AppError,
   proofSchema,
+  unsignedAbortSchema,
+  type UnsignedAbort,
   type Network,
   type PaymentProof,
   type Quote,
@@ -104,7 +106,7 @@ export function reviewDraft(
   )
     throw new AppError(
       "DEBIT_LIMIT_EXCEEDED",
-      "The service price plus actual network fee exceeds your approved maximum. The draft was not signed.",
+      `The service price (${priceSats} sats) plus actual network fee (${feeSats} sats) totals ${priceSats + feeSats} sats, exceeding your approved maximum of ${maxAuthorizedDebitSats} sats. The draft was not signed.`,
     );
   return {
     feeSats,
@@ -198,6 +200,143 @@ export function savedPaymentProof(
     /* Keep corrupt record for manual recovery, never replace the payment. */
   }
 }
+export function savedUnsignedAbort(
+  attemptId: string,
+  storage: PaymentStorage = localStorage,
+): UnsignedAbort | undefined {
+  try {
+    const saved = JSON.parse(storage.getItem(storageKey(attemptId)) || "null");
+    if (saved?.phase === "unsigned_aborted")
+      return unsignedAbortSchema.parse(saved.rejection);
+  } catch {
+    /* Corrupt evidence must not unlock a retry. */
+  }
+}
+
+/** Recover only a saved pre-sign draft, including drafts aborted by older clients.
+ * Never abort/release a sign_requested record, even if a wallet abort would succeed. */
+export async function recoverUnsignedDraft(options: {
+  quote: Omit<Quote, "ownerId" | "fingerprint" | "configurationDigest">;
+  attemptId: string;
+  maxAuthorizedDebitSats: number;
+  wallet?: WalletInterface;
+  storage?: PaymentStorage;
+}): Promise<UnsignedAbort | undefined> {
+  const { quote, attemptId, maxAuthorizedDebitSats } = options;
+  const storage = options.storage || localStorage;
+  const confirmed = savedUnsignedAbort(attemptId, storage);
+  if (confirmed) return confirmed.quoteId === quote.id ? confirmed : undefined;
+  let saved;
+  try {
+    saved = JSON.parse(storage.getItem(storageKey(attemptId)) || "null");
+  } catch {
+    return;
+  }
+  if (
+    saved?.phase !== "draft" ||
+    saved.quoteId !== quote.id ||
+    typeof saved.reference !== "string" ||
+    !Array.isArray(saved.draft)
+  )
+    return;
+  const wallet = options.wallet || new WalletClient("auto");
+  const connected = await connectWallet(wallet);
+  if (
+    connected.network !== quote.network ||
+    connected.identityKey !== quote.payerIdentityKey
+  )
+    throw new AppError(
+      "PAYMENT_MISMATCH",
+      "Reconnect the original buyer wallet and network to recover this draft.",
+    );
+  const tx = Transaction.fromAtomicBEEF(saved.draft);
+  // Our ordinary payment has no custom signed inputs. Do not classify signed bytes as unsigned.
+  if (tx.inputs.some((input) => input.unlockingScript?.toHex())) return;
+  const label = `mercatum-${attemptId}`;
+  const referenceLabel = `reference ${Utils.toHex(Utils.toArray(saved.reference, "base64"))}`;
+  let history = await wallet.listActions({
+    labels: [label],
+    labelQueryMode: "all",
+    includeLabels: true,
+    limit: 10,
+  });
+  if (history.totalActions === 0) {
+    // Read-only failedActions selector from pinned wallet-toolbox 2.14.9 sdk/types.
+    // No "unfail" label: this query must never revive an aborted transaction.
+    const failedActions =
+      "97d4eb1e49215e3374cc2c1939a7c43a55e95c7427bf2d45ed63e3b4e0c88153";
+    history = await wallet.listActions({
+      labels: [failedActions, label],
+      labelQueryMode: "all",
+      includeLabels: true,
+      limit: 10,
+    });
+  }
+  const matches = history.actions.filter(
+    (action) =>
+      action.labels?.includes(label) && action.labels?.includes(referenceLabel),
+  );
+  if (matches.length !== 1 || history.totalActions !== 1 || matches[0].txid)
+    return;
+  const action = matches[0];
+  const stillUnsigned = () => {
+    try {
+      const current = JSON.parse(
+        storage.getItem(storageKey(attemptId)) || "null",
+      );
+      return (
+        current?.phase === "draft" && current.reference === saved.reference
+      );
+    } catch {
+      return false;
+    }
+  };
+  if (!stillUnsigned()) return;
+  // A previous successful abort appears as failed with no signed txid in the pinned Toolbox.
+  if (action.status !== "failed") {
+    if (action.status !== "unsigned") return;
+    const result = await wallet.abortAction({ reference: saved.reference });
+    if (result.aborted !== true) return;
+  }
+  let feeSats: number | undefined;
+  try {
+    const { publicKey } = await wallet.getPublicKey({
+      protocolID,
+      keyID: `${quote.derivationPrefix} ${saved.derivationSuffix}`,
+      counterparty: quote.recipientIdentityKey,
+      forSelf: false,
+    });
+    const script = new P2PKH()
+      .lock(PublicKey.fromString(publicKey).toAddress())
+      .toHex();
+    feeSats = reviewDraft(
+      tx,
+      script,
+      quote.priceSats,
+      Number.MAX_SAFE_INTEGER,
+    ).feeSats;
+  } catch {
+    /* Cancellation is proven even when the draft cannot be reviewed. */
+  }
+  if (!stillUnsigned()) return;
+  const rejection: UnsignedAbort = {
+    quoteId: quote.id,
+    reference: saved.reference,
+    aborted: true,
+    code:
+      feeSats !== undefined &&
+      quote.priceSats + feeSats > maxAuthorizedDebitSats
+        ? "DEBIT_LIMIT_EXCEEDED"
+        : "DRAFT_REJECTED",
+    ...(feeSats !== undefined ? { feeSats } : {}),
+  };
+  storage.setItem(
+    storageKey(attemptId),
+    JSON.stringify({ ...saved, phase: "unsigned_aborted", rejection }),
+  );
+  return rejection;
+}
+
 export function clearPaymentProof(
   attemptId: string,
   storage: PaymentStorage = localStorage,
@@ -318,7 +457,34 @@ export async function payApprovedQuote(options: {
   } catch (error) {
     // This only releases an unsigned draft. Failure remains uncertain and cannot mint a new claim.
     try {
-      await wallet.abortAction({ reference: draft.reference });
+      const result = await wallet.abortAction({ reference: draft.reference });
+      if (result.aborted === true) {
+        let feeSats: number | undefined;
+        try {
+          feeSats = reviewDraft(
+            Transaction.fromAtomicBEEF(draft.tx),
+            script,
+            quote.priceSats,
+            Number.MAX_SAFE_INTEGER,
+          ).feeSats;
+        } catch {
+          /* Invalid draft: no fee estimate. */
+        }
+        const rejection: UnsignedAbort = {
+          quoteId: quote.id,
+          reference: draft.reference,
+          aborted: true,
+          code:
+            error instanceof AppError && error.code === "DEBIT_LIMIT_EXCEEDED"
+              ? "DEBIT_LIMIT_EXCEEDED"
+              : "DRAFT_REJECTED",
+          ...(feeSats !== undefined ? { feeSats } : {}),
+        };
+        storage.setItem(
+          storageKey(attemptId),
+          JSON.stringify({ phase: "unsigned_aborted", rejection }),
+        );
+      }
     } catch {
       /* reconcile manually */
     }
