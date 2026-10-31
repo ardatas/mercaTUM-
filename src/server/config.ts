@@ -7,6 +7,7 @@ const schema = z.object({
   DATA_DIR: z.string().default("./data"),
   APP_NETWORK: networkSchema.default("testnet"),
   TASK_PRICE_SATS: z.coerce.number().int().min(1).max(100000).default(100),
+  MODEL_PROVIDER: z.enum(["openai", "gemini"]).default("openai"),
   MODEL_ID: z.string().default(""),
   MODEL_API_KEY: z.string().default(""),
   PROVIDER_WALLET_ROOT_KEY: z.string().default(""),

@@ -32,3 +32,7 @@ npm-debug.log*
 .workspaces/
 .uploads/
 artifacts/
+
+# Deployment-local state
+.vercel/
+.deploy/

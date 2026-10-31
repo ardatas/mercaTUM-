@@ -98,6 +98,18 @@ function pay(s: ReturnType<typeof setup>, id: string) {
   });
 }
 describe("durable entitlement and execution", () => {
+  it("pins the selected Gemini adapter and model when creating a task", async () => {
+    const s = setup();
+    s.config.MODEL_PROVIDER = "gemini";
+    s.config.MODEL_ID = "gemini-3.8-flash";
+    const id = await task(s);
+    s.config.MODEL_PROVIDER = "openai";
+    s.config.MODEL_ID = "another-model";
+    const saved = s.store.get<Task>("task", id)!;
+    expect(saved.config.adapterId).toBe("gemini-generate-content");
+    expect(saved.config.modelId).toBe("gemini-3.8-flash");
+    expect(s.ai.execute).not.toHaveBeenCalled();
+  });
   it("never invokes paid execution before server receipt, scopes ownership and hides checkpoints", async () => {
     const s = setup(),
       id = await task(s);

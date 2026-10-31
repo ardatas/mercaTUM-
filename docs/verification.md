@@ -125,3 +125,9 @@ Application lock SHA-256 at local delivery: `e86e9f916dfbcef78e0b3474b5ad9229cbf
 
 - Typecheck and build PASS. Desktop browser measured 720×107px initially and 780×147px after focus, retaining a 24px bottom gap. Blur preserves expansion; New task restores 720×107px. Replaced intrinsic row-count jump with a 360ms eased height/width transition without overshoot.
 - Mobile 390×844 measured 362×146px expanded, 16px bottom spacing and no horizontal overflow. Screenshots updated. Existing reduced-motion override remains in effect.
+
+### Vercel / Gemini deployment preflight — 31 October 2026
+
+User now authorizes public Vercel deployment and Gemini with the supplied server key. Baseline revision 9273702: Node 24.21.0 / npm 11.19.0; app typecheck and all 56 tests pass; sponsor starter typecheck and all 38 tests pass. Installed app pins SDK 3.2.1 / Toolbox 2.14.9. Gemini models.list succeeded with the provided credential; gemini-3.8-flash supports generateContent. Actual tool/stream capability checks still pending. Existing Vercel CLI login expired; browser authorization requested. Dedicated mercaTUM Google Cloud project has billing enabled; persistent backend provisioning is in progress because Vercel function filesystems cannot hold the payment ledger. No BSV payment authorized or performed.
+
+Gemini live capability evidence: gemini-3.8-flash returned an actual capability_probe function call with an original provider call ID; continuation returned successfully (both HTTP200, STOP). Real chat scope assessment and request_paid_execution also succeeded with matching task/provider/answer arguments; reported planning usage624 input/78 output tokens. No paid executor call or receipt was fabricated. Initial MINIMAL thinking setting was rejected; changed to supported LOW and reran successfully.

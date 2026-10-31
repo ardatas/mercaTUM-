@@ -69,7 +69,7 @@ export const DEFAULT_LIMITS: Limits = {
   continuationOutputTokens: 1024,
 };
 export interface ExecutionConfig {
-  adapterId: "openai-responses";
+  adapterId: "openai-responses" | "gemini-generate-content";
   modelId: string;
   version: "v1";
   limits: Limits;

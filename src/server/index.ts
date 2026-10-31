@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { readConfig } from "./config.js";
 import { Store } from "./tasks/store.js";
 import { TaskService } from "./tasks/service.js";
+import { GeminiAdapter } from "./ai/gemini.js";
 import { ResponsesAdapter } from "./ai/adapter.js";
 import { RepositoryService } from "./repos/service.js";
 import { PaymentService } from "./payments/service.js";
@@ -13,7 +14,10 @@ mkdirSync(config.DATA_DIR, { recursive: true, mode: 0o700 });
 chmodSync(config.DATA_DIR, 0o700);
 const store = new Store(join(config.DATA_DIR, "app.sqlite"));
 store.recover();
-const ai = new ResponsesAdapter({ apiKey: config.MODEL_API_KEY });
+const ai =
+  config.MODEL_PROVIDER === "gemini"
+    ? new GeminiAdapter({ apiKey: config.MODEL_API_KEY })
+    : new ResponsesAdapter({ apiKey: config.MODEL_API_KEY });
 let modelReady = false;
 const payments = new PaymentService(
   store,

@@ -94,7 +94,10 @@ export class TaskService {
           throw new AppError("SCOPE_REJECTED", "Select a smaller context.");
         const id = newId();
         const config = {
-          adapterId: "openai-responses" as const,
+          adapterId:
+            this.config.MODEL_PROVIDER === "gemini"
+              ? ("gemini-generate-content" as const)
+              : ("openai-responses" as const),
           modelId: this.config.MODEL_ID,
           version: "v1" as const,
           limits: { ...this.config.limits },
