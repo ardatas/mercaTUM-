@@ -1,5 +1,10 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { PrivateKey, Transaction, UnlockingScript } from "@bsv/sdk";
+import {
+  PrivateKey,
+  Transaction,
+  UnlockingScript,
+  WalletClient,
+} from "@bsv/sdk";
 import { Store } from "../src/server/tasks/store";
 import { PaymentService } from "../src/server/payments/service";
 import {
@@ -360,11 +365,14 @@ describe("real wallet engine with offline chain; no live spending", () => {
         derivationSuffix: "unavailable-legacy-suffix",
       }),
     );
+    // Exercise the actual SDK boundary: failed history has an empty txid and is
+    // rejected by WalletClient, so recovery must use validated released inputs.
+    const browserWallet = new WalletClient(buyer);
     const recovered = await recoverUnsignedDraft({
       quote,
       attemptId: attempt.id,
       maxAuthorizedDebitSats: 100,
-      wallet: buyer,
+      wallet: browserWallet,
       storage: local,
     });
     expect(recovered?.aborted).toBe(true);
@@ -444,6 +452,17 @@ describe("real wallet engine with offline chain; no live spending", () => {
         }),
       ).rejects.toThrow(/already started/);
       expect(create).toHaveBeenCalledOnce();
+      // An abort refusal or failure cannot release inputs still reserved by the draft.
+      expect(
+        await recoverUnsignedDraft({
+          quote,
+          attemptId: "uncertain-attempt",
+          maxAuthorizedDebitSats: 100,
+          wallet: new WalletClient(buyer),
+          storage: local,
+        }),
+      ).toBeUndefined();
+      expect(savedUnsignedAbort("uncertain-attempt", local)).toBeUndefined();
       // Once signing was requested, even an available abort method cannot permit a replacement.
       const record = JSON.parse(
         local.getItem("mercatum:payment:uncertain-attempt")!,

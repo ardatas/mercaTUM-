@@ -252,33 +252,6 @@ export async function recoverUnsignedDraft(options: {
   const tx = Transaction.fromAtomicBEEF(saved.draft);
   // Our ordinary payment has no custom signed inputs. Do not classify signed bytes as unsigned.
   if (tx.inputs.some((input) => input.unlockingScript?.toHex())) return;
-  const label = `mercatum-${attemptId}`;
-  const referenceLabel = `reference ${Utils.toHex(Utils.toArray(saved.reference, "base64"))}`;
-  let history = await wallet.listActions({
-    labels: [label],
-    labelQueryMode: "all",
-    includeLabels: true,
-    limit: 10,
-  });
-  if (history.totalActions === 0) {
-    // Read-only failedActions selector from pinned wallet-toolbox 2.14.9 sdk/types.
-    // No "unfail" label: this query must never revive an aborted transaction.
-    const failedActions =
-      "97d4eb1e49215e3374cc2c1939a7c43a55e95c7427bf2d45ed63e3b4e0c88153";
-    history = await wallet.listActions({
-      labels: [failedActions, label],
-      labelQueryMode: "all",
-      includeLabels: true,
-      limit: 10,
-    });
-  }
-  const matches = history.actions.filter(
-    (action) =>
-      action.labels?.includes(label) && action.labels?.includes(referenceLabel),
-  );
-  if (matches.length !== 1 || history.totalActions !== 1 || matches[0].txid)
-    return;
-  const action = matches[0];
   const stillUnsigned = () => {
     try {
       const current = JSON.parse(
@@ -291,12 +264,43 @@ export async function recoverUnsignedDraft(options: {
       return false;
     }
   };
-  if (!stillUnsigned()) return;
-  // A previous successful abort appears as failed with no signed txid in the pinned Toolbox.
-  if (action.status !== "failed") {
-    if (action.status !== "unsigned") return;
+  if (!stillUnsigned() || tx.inputs.length === 0) return;
+  try {
     const result = await wallet.abortAction({ reference: saved.reference });
     if (result.aborted !== true) return;
+  } catch {
+    // The pinned wallet refuses to abort an already-aborted reference, and the
+    // SDK cannot decode that failed-history row's empty txid. Keep validation
+    // intact: instead prove every original input was released back to this wallet.
+    // This fallback is NEVER allowed for a sign_requested local record.
+    const available = await wallet.listOutputs({
+      basket: "default",
+      limit: 10000,
+    });
+    if (!stillUnsigned()) return;
+    const unique = new Set<string>();
+    for (const input of tx.inputs) {
+      const parent = input.sourceTransaction;
+      if (
+        !parent ||
+        (input.sourceTXID && parent.id("hex") !== input.sourceTXID)
+      )
+        return;
+      const outpoint = `${parent.id("hex")}.${input.sourceOutputIndex}`;
+      if (unique.has(outpoint)) return;
+      unique.add(outpoint);
+      const source = parent.outputs[input.sourceOutputIndex];
+      if (
+        !source ||
+        !available.outputs.some(
+          (output) =>
+            output.outpoint === outpoint &&
+            output.spendable === true &&
+            output.satoshis === source.satoshis,
+        )
+      )
+        return;
+    }
   }
   let feeSats: number | undefined;
   try {
