@@ -3,6 +3,9 @@ import { ArrowDownUp, ArrowUpRight, Search, Zap } from "lucide-react";
 import {
   brandNames,
   offers,
+  offerBenchmark,
+  benchmarkSnapshot,
+  formatTokens,
   type Brand,
   type Offer,
 } from "../../../shared/marketplace";
@@ -51,7 +54,7 @@ function CapacityChart() {
   const totals = brands.map((brand) =>
     offers
       .filter((offer) => offer.brand === brand)
-      .reduce((sum, offer) => sum + offer.remaining, 0),
+      .reduce((sum, offer) => sum + offer.remainingTokens, 0),
   );
   const maximum = Math.max(...totals);
   const points: [number, number][] = totals.map((total, index) => [
@@ -64,7 +67,7 @@ function CapacityChart() {
       <svg
         viewBox="0 0 282 115"
         role="img"
-        aria-label="Remaining message capacity by provider"
+        aria-label="Remaining token capacity by provider"
       >
         <defs>
           <linearGradient id={gradient} x1="0" x2="1">
@@ -104,7 +107,7 @@ function CapacityChart() {
             fill={offers.find((offer) => offer.brand === brands[i])?.color}
           >
             <title>
-              {brandNames[brands[i]]}: {number(totals[i])} messages
+              {brandNames[brands[i]]}: {number(totals[i])} tokens
             </title>
           </circle>
         ))}
@@ -127,14 +130,15 @@ function OfferCard({
   priceSats?: number;
   onSelect: (id: string) => void;
 }) {
-  const percent = Math.round((offer.remaining / offer.total) * 100);
+  const benchmark = offerBenchmark(offer);
+  const percent = Math.round((offer.remainingTokens / offer.totalTokens) * 100);
   return (
     <button
       type="button"
       className="mp-offer"
       style={{ "--offer-color": offer.color } as CSSProperties}
       onClick={() => onSelect(offer.id)}
-      aria-label={`Open ${brandNames[offer.brand]} ${offer.tier} from ${offer.seller}, ${offer.remaining} messages remaining, capability score ${offer.score}`}
+      aria-label={`Open ${brandNames[offer.brand]} ${offer.tier} from ${offer.seller}, ${offer.remainingTokens} tokens remaining, AA Index ${benchmark?.score ?? "unrated"} for ${offer.models[0].label}, ${benchmark?.variant ?? ""}`}
     >
       <div className="mp-offer-top">
         <ModelLogo brand={offer.brand} />
@@ -153,29 +157,30 @@ function OfferCard({
       </div>
       <div className="mp-offer-metrics">
         <div>
-          <span className="mp-metric-label">Messages left</span>
-          <strong>
-            {number(offer.remaining)}
-            <small> / {number(offer.total)}</small>
+          <span className="mp-metric-label">Tokens left</span>
+          <strong
+            title={`${number(offer.remainingTokens)} of ${number(offer.totalTokens)} tokens`}
+          >
+            {formatTokens(offer.remainingTokens)}
           </strong>
         </div>
         <div className="mp-score">
-          <span className="mp-metric-label" title="Capability score">
-            Score<span className="mp-sr-only">: capability</span>
+          <span
+            className="mp-metric-label"
+            title={`${benchmarkSnapshot.name} v${benchmarkSnapshot.version}: ${offer.models[0].label}, ${benchmark?.variant ?? "unrated"}`}
+          >
+            AA Index
           </span>
-          <strong>
-            {offer.score}
-            <small> / 100</small>
-          </strong>
+          <strong>{benchmark?.score ?? "—"}</strong>
         </div>
       </div>
       <div
         className="mp-capacity-bar"
         role="meter"
-        aria-label="Remaining message capacity"
-        aria-valuenow={offer.remaining}
+        aria-label="Remaining token capacity"
+        aria-valuenow={offer.remainingTokens}
         aria-valuemin={0}
-        aria-valuemax={offer.total}
+        aria-valuemax={offer.totalTokens}
       >
         <span style={{ width: `${percent}%` }} />
       </div>
@@ -230,13 +235,16 @@ export function Marketplace({
       )
       .sort((a, b) =>
         sort === "score"
-          ? b.score - a.score
+          ? (offerBenchmark(b)?.score ?? -1) - (offerBenchmark(a)?.score ?? -1)
           : sort === "remaining"
-            ? b.remaining - a.remaining
+            ? b.remainingTokens - a.remainingTokens
             : 0,
       );
   }, [query, brand, sort]);
-  const available = offers.reduce((sum, offer) => sum + offer.remaining, 0);
+  const available = offers.reduce(
+    (sum, offer) => sum + offer.remainingTokens,
+    0,
+  );
   return (
     <section className="marketplace" aria-labelledby="marketplace-heading">
       <header className="mp-header">
@@ -260,10 +268,10 @@ export function Marketplace({
           aria-label="Marketplace capacity"
         >
           <div className="mp-capacity-copy">
-            <span className="mp-panel-label">Ready when you are</span>
+            <span className="mp-panel-label">Demo token capacity</span>
             <div className="mp-big-number">
-              {number(available)}
-              <span>messages available</span>
+              {formatTokens(available)}
+              <span>tokens available</span>
             </div>
             <div className="mp-summary-chips">
               <span>
@@ -324,7 +332,7 @@ export function Marketplace({
           >
             <option value="featured">Featured</option>
             <option value="remaining">Most capacity</option>
-            <option value="score">Highest score</option>
+            <option value="score">Highest AA Index</option>
           </select>
         </label>
       </div>
@@ -354,6 +362,38 @@ export function Marketplace({
           </button>
         </div>
       )}
+      <details className="mp-benchmark-sources">
+        <summary>
+          Benchmark sources · AA Index v{benchmarkSnapshot.version}
+        </summary>
+        <p>
+          Checked {benchmarkSnapshot.checkedAt}. Scores apply to each card’s
+          first model at the variant below, not every model or effort. Higher is
+          better. Capacity is demo data.
+        </p>
+        <ul>
+          {offers
+            .filter(
+              (offer, index) =>
+                offers.findIndex(
+                  (other) => other.models[0].id === offer.models[0].id,
+                ) === index,
+            )
+            .map((offer) => {
+              const benchmark = offerBenchmark(offer);
+              return (
+                benchmark && (
+                  <li key={offer.id}>
+                    <a href={benchmark.source} target="_blank" rel="noreferrer">
+                      {offer.models[0].label} · {benchmark.variant}:{" "}
+                      {benchmark.score}
+                    </a>
+                  </li>
+                )
+              );
+            })}
+        </ul>
+      </details>
       <div className="mp-bottom-note">
         <span>Choose capacity. Start a conversation.</span>
         <span>

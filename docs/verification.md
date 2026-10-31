@@ -331,3 +331,25 @@ Gemini live capability evidence: gemini-3.8-flash returned an actual capability_
 - Wallet authentication and history reads are bounded to30 seconds. A regression confirms a late authentication reply cannot proceed to a wallet claim or draft after timeout. Local browser confirmed unused approval returns to quote review, missing evidence displays an explicit error, and lost signatures show same-transaction recovery guidance. Screenshot: ignored `artifacts/payment-recovery.png`.
 
 - Final integration: rebased onto `b71130d`, preserving task deletion, marketplace navigation and branding changes. Application typecheck,101 tests across10 files, production build, formatting and diff checks PASS. Recovery screenshot is an offline fixture; no live wallet transaction or backend rollout performed.
+
+## Purchase review and marketplace units — 31 October 2026
+
+- Coordinator owns T5 presentation changes: saved chat selection in purchase review, distinct actual execution model, compact approval copy, default total debit cap of5,000 sats, sourced model benchmarks and demo token capacity. Existing immutable quotes, explicit consent and wallet spending boundaries remain authoritative.
+- Preflight: clean revision c38b7f8; unchanged package lock/runtime (Node24.21.0/npm11.19.0). Refreshed application typecheck and94 tests PASS. Same-session sponsor pins/typecheck/38 tests remain valid. Read STATUS, brief, contracts, BSV/AI flows, sponsor instructions and guide section6 before edits. Live signing/payment gates remain pending; this request approves no transaction.
+- Source finding: catalog selection is persisted on tasks; execution still uses the configured Gemini adapter. Display both when different. Marketplace scores were unsourced fixtures; replace them with Artificial Analysis Intelligence Index v5.0 snapshots checked31 October2026. Token capacities remain explicitly demo fixtures, not account balances or purchased entitlements.
+
+Benchmark snapshot (Artificial Analysis, v5.0,31 October2026; scores are model benchmarks, not subscription ratings):
+
+| Model / published variant | Score | Source |
+|---|---:|---|
+| GPT-6.1 Sol / Max |55|https://artificialanalysis.ai/models/releases/gpt-6-1-sol|
+| Claude Opus5.5 / Max, default fallback |58|https://artificialanalysis.ai/models/releases/claude-opus-5-5|
+| Claude Sonnet5.5 / Max, default fallback |54|https://artificialanalysis.ai/models/releases/claude-sonnet-5-5|
+| Gemini3.8 Flash / High |31|https://artificialanalysis.ai/models/releases/gemini-3-8-flash|
+| Mistral Large4 / High |26|https://artificialanalysis.ai/models/releases/mistral-large-4|
+| Kimi K3.1 Pro / Reasoning |46|https://artificialanalysis.ai/models/kimi-k3-1-pro|
+| DeepSeek V4 Pro0813 / Max |23|https://artificialanalysis.ai/models/releases/deepseek-v4-pro|
+
+- Typecheck/build and99 tests PASS. Offline browser observed saved Mistral/Medium in composer and quote, distinct Gemini executor,5,000-sat default, unchecked consent, expandable terms and shortened footer. With consent checked only in the offline fixture,99 and1,000,001 sats disable approval;5,000 enables it. No approve action or real wallet operation invoked. Benchmark sort observed58,55,55,54,46,31,26,23; token units present in cards, overview, meters and chat strip.
+
+- Responsive browser:320px harness reports content305/viewport305 with scrollbar, for both marketplace and approval; no horizontal overflow. Compact footer input/checkbox/actions fit. Desktop sources disclosure exposes seven linked benchmark variants. Local screenshot: `artifacts/purchase-review-5000.png`. Frontend-only rollout; backend model/payment behavior unchanged.

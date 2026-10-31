@@ -747,3 +747,22 @@
     transform: none;
   }
 }
+
+.mp-benchmark-sources {
+  color: #b7b7c0;
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: 20px;
+}
+.mp-benchmark-sources summary {
+  cursor: pointer;
+}
+.mp-benchmark-sources ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  padding-left: 16px;
+}
+.mp-benchmark-sources a {
+  color: inherit;
+}

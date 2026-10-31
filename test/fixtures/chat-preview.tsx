@@ -1,5 +1,6 @@
 // Offline visual regression harness only. Not imported by the application or production build.
 import { createRoot } from "react-dom/client";
+import { previewQuote } from "./quote";
 import { App } from "../../src/client/app";
 import type { PublicTask, TaskState } from "../../src/shared/contracts";
 import "../../src/client/styles.css";
@@ -15,7 +16,12 @@ let task: PublicTask = {
   mode: "chat",
   prompt: "Explain binary search in two short sentences.",
   state: "PLANNING",
-  modelId: "Offline UI fixture",
+  modelId: "gemini-3.8-flash",
+  selection: {
+    offerId: "mistral-pro",
+    modelId: "mistral-large-4-0",
+    effort: "medium",
+  },
   createdAt: "2026-10-31T10:00:00Z",
   updatedAt: "2026-10-31T10:00:00Z",
   events: [
@@ -134,6 +140,7 @@ function setState(state: TaskState, streaming = false) {
     attempt: undefined,
     events: task.events.slice(0, 1),
   };
+  task.quote = state === "AWAITING_APPROVAL" ? previewQuote() : undefined;
   if (state === "RUNNING")
     task.events.push({
       id: 2,

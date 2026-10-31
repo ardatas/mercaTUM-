@@ -149,3 +149,7 @@ DONE — T0/T5 implemented and deployed at `32be4d2`: persistent owner-scoped hi
 ### Payment recovery follow-up — 31 October 2026
 
 Coordinator owns isolated T1/T2/T5 recovery integration: preparation before claim, safe release of unclaimed approvals, signature-history recovery, bounded ancestry restoration and actionable UI. Regression reproduces the former stuck unclaimed state. No live payment or qualification claim.
+
+### Purchase review and token capacity — 31 October 2026
+
+IN PROGRESS — coordinator owns T5: saved model display plus actual executor, compact purchase details,5,000-sat default cap, sourced AA Index benchmarks and token capacity. Payment/execution contracts retained.

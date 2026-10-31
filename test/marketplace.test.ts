@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import { createTaskSchema } from "../src/shared/contracts";
 import {
   offers,
+  offerBenchmark,
+  formatTokens,
   defaultSelection,
   executionThinking,
 } from "../src/shared/marketplace";
@@ -39,4 +41,22 @@ describe("marketplace task selection", () => {
     for (const effort of ["high", "xhigh", "max"])
       expect(executionThinking(effort)).toBe("HIGH");
   });
+});
+
+it("uses explicit token capacities and a sourced model score independent of subscription tier", () => {
+  for (const offer of offers) {
+    expect(Number.isSafeInteger(offer.remainingTokens)).toBe(true);
+    expect(offer.remainingTokens).toBeGreaterThan(0);
+    expect(offer.remainingTokens).toBeLessThanOrEqual(offer.totalTokens);
+    const benchmark = offerBenchmark(offer);
+    expect(benchmark?.source).toMatch(
+      /^https:\/\/artificialanalysis.ai\/models\//,
+    );
+    expect(benchmark?.variant).toBeTruthy();
+  }
+  const pro = offers.find((o) => o.id === "chatgpt-pro")!;
+  const plus = offers.find((o) => o.id === "chatgpt-plus")!;
+  expect(offerBenchmark(pro)).toEqual(offerBenchmark(plus));
+  expect(formatTokens(420_000)).toBe("420K");
+  expect(formatTokens(1_000_000)).toBe("1M");
 });

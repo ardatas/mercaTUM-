@@ -1,3 +1,4 @@
+import { QuoteReview } from "./components/ui/quote-review";
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
   ArrowUpRight,
@@ -37,6 +38,7 @@ import {
   brandNames,
   defaultSelection,
   findSelection,
+  formatTokens,
   type MarketplaceSelection,
 } from "../shared/marketplace";
 import { DeleteHistoryDialog } from "./components/ui/delete-history-dialog";
@@ -665,7 +667,8 @@ export function App() {
                         </strong>
                         <small>
                           From {selected.offer.seller} ·{" "}
-                          {selected.offer.remaining} messages available
+                          {formatTokens(selected.offer.remainingTokens)} demo
+                          tokens available
                         </small>
                       </div>
                       <button
@@ -804,6 +807,7 @@ export function App() {
                             <QuoteReview
                               key={task.quote.id}
                               quote={task.quote}
+                              selection={task.selection}
                               onRefresh={quote}
                               busy={busy}
                               onApprove={pay}
@@ -1082,115 +1086,6 @@ export function App() {
         </main>
       </div>
     </div>
-  );
-}
-function QuoteReview({
-  onRefresh,
-  quote: q,
-  busy,
-  onApprove,
-  onCancel,
-}: {
-  quote: Quote;
-  busy: boolean;
-  onApprove: (q: Quote, max: number) => void;
-  onRefresh: () => void;
-  onCancel: () => void;
-}) {
-  const [max, setMax] = useState(q.priceSats + 10),
-    [confirmed, setConfirmed] = useState(false);
-  const expired = Date.parse(q.expiresAt) < Date.now();
-  return (
-    <section className="quote-review">
-      <div className="quote-heading">
-        <Wallet size={21} />
-        <h2>Review this purchase</h2>
-        <span className="badge">Fixed price</span>
-      </div>
-      <p>{q.scopeSummary}</p>
-      <dl>
-        <dt>Deliverable</dt>
-        <dd>{q.intendedDeliverable}</dd>
-        <dt>Model</dt>
-        <dd>{q.modelId}</dd>
-        <dt>Service price</dt>
-        <dd>
-          <strong>{q.priceSats} sats</strong>
-        </dd>
-        <dt>Network</dt>
-        <dd>{q.network}</dd>
-        <dt>Provider recipient</dt>
-        <dd className="mono break">{q.recipientIdentityKey}</dd>
-        <dt>Execution limits</dt>
-        <dd>
-          {q.limits.maxOutputTokens.toLocaleString()} output tokens / call ·{" "}
-          {q.limits.maxModelCalls} paid calls including recovery ·{" "}
-          {q.limits.maxTotalOutputTokens.toLocaleString()} aggregate output
-          tokens · {q.limits.maxRuntimeSeconds}s per attempt ·{" "}
-          {q.limits.maxRecoveryAttempts} recovery attempt ·{" "}
-          {q.limits.maxContextBytes.toLocaleString()} context bytes
-        </dd>
-        <dt>Expires</dt>
-        <dd>{new Date(q.expiresAt).toLocaleString()}</dd>
-      </dl>
-      <p className="quote-policy">
-        {q.limitPolicy} Technical recovery uses this payment. There are no
-        automatic refunds.
-      </p>
-      <label className="debit-field">
-        Maximum total debit, including network fee{" "}
-        <input
-          type="number"
-          min={q.priceSats}
-          max={1000000}
-          value={max}
-          onChange={(e) => setMax(Number(e.target.value))}
-        />
-        <span>sats</span>
-      </label>
-      <p className="subtle">
-        This limit is your spending cap, not a network-fee estimate. The wallet
-        prepares the transaction for review. If its fee exceeds your bound,
-        signing is blocked. You approve native wallet spending yourself.
-      </p>
-      <label className="consent">
-        <input
-          type="checkbox"
-          checked={confirmed}
-          onChange={(e) => setConfirmed(e.target.checked)}
-        />
-        <span>
-          I approve this scope, provider, network and total debit bound. I will
-          review the native wallet prompt.
-        </span>
-      </label>
-      <div className="quote-actions">
-        {expired && (
-          <button className="button" disabled={busy} onClick={onRefresh}>
-            Refresh quote
-          </button>
-        )}
-        <button className="button" onClick={onCancel} disabled={busy}>
-          Cancel
-        </button>
-        <button
-          className="button primary"
-          disabled={
-            busy ||
-            !confirmed ||
-            expired ||
-            !Number.isSafeInteger(max) ||
-            max < q.priceSats
-          }
-          onClick={() => onApprove(q, max)}
-        >
-          {expired
-            ? "Quote expired"
-            : `Approve ${q.priceSats} sats + bounded fee`}
-          <ArrowRight size={15} />
-        </button>
-      </div>
-    </section>
   );
 }
 function AgentAccess({ onError }: { onError: (s: string) => void }) {
