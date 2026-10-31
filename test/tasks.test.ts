@@ -1,3 +1,4 @@
+import { offers, executionThinking } from "../src/shared/marketplace";
 import { afterEach, describe, it, expect, vi } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -373,3 +374,42 @@ it("persists catalog selection and native effort without changing the configured
   ).toThrow();
   expect(s.svc.get("alice", t.id).receipt).toBeUndefined();
 });
+
+const catalogCases = offers.flatMap((offer) =>
+  offer.models.flatMap((model) =>
+    model.efforts.map((effort) => ({
+      offerId: offer.id,
+      modelId: model.id,
+      effort,
+    })),
+  ),
+);
+it.each(catalogCases)(
+  "plans and preserves $offerId / $modelId / $effort without unpaid execution",
+  async (selection) => {
+    const s = setup();
+    s.config.MODEL_PROVIDER = "gemini";
+    const t = s.svc.create(
+      "alice",
+      {
+        mode: "chat",
+        prompt: "Explain binary search briefly.",
+        providerId: "demo-provider",
+        selection,
+      },
+      "catalog-matrix-task",
+    );
+    await vi.waitFor(() =>
+      expect(s.svc.get("alice", t.id).state).toBe("AWAITING_APPROVAL"),
+    );
+    const saved = s.store.get<Task>("task", t.id)!;
+    expect(s.svc.get("alice", t.id).selection).toEqual(selection);
+    expect(saved.config.modelId).toBe("test-model");
+    expect(saved.config.thinkingLevel).toBe(
+      executionThinking(selection.effort),
+    );
+    await s.svc.tick();
+    expect(s.ai.execute).not.toHaveBeenCalled();
+    expect(s.svc.get("alice", t.id).receipt).toBeUndefined();
+  },
+);

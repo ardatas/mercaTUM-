@@ -51,27 +51,9 @@ import type {
   RepositorySnapshot,
   PaymentAttempt,
 } from "../shared/contracts";
-// Load the wallet SDK only when a wallet action is requested.
-const walletAdapter = {
-  connectWallet: async () => (await import("./wallet/payment")).connectWallet(),
-  savedPaymentProof: async (id: string) =>
-    (await import("./wallet/payment")).savedPaymentProof(id),
-  recoverSignedPayment: async (
-    options: Parameters<
-      typeof import("./wallet/payment").recoverSignedPayment
-    >[0],
-  ) => (await import("./wallet/payment")).recoverSignedPayment(options),
-  savedUnsignedAbort: async (id: string) =>
-    (await import("./wallet/payment")).savedUnsignedAbort(id),
-  recoverUnsignedDraft: async (
-    options: Parameters<
-      typeof import("./wallet/payment").recoverUnsignedDraft
-    >[0],
-  ) => (await import("./wallet/payment")).recoverUnsignedDraft(options),
-  payApprovedQuote: async (
-    options: Parameters<typeof import("./wallet/payment").payApprovedQuote>[0],
-  ) => (await import("./wallet/payment")).payApprovedQuote(options),
-};
+// Load wallet code with the page: an open tab must not fetch a deleted chunk
+// after a deployment, especially after reserving a payment attempt.
+import * as walletAdapter from "./wallet/payment";
 interface Provider {
   id: string;
   name: string;

@@ -153,3 +153,7 @@ Coordinator owns isolated T1/T2/T5 recovery integration: preparation before clai
 ### Purchase review and token capacity — 31 October 2026
 
 DONE — deployed `ef58633`,106 integrated tests/typecheck/build PASS; public marketplace verified. Coordinator owns T5: saved model display plus actual executor, compact purchase details,5,000-sat default cap, sourced AA Index benchmarks and token capacity. Payment/execution contracts retained.
+
+### Mainnet validation and wallet module loading — 31 October 2026
+
+IN PROGRESS — coordinator: reproduce/fix lazy wallet module failure, deploy recovery backend, exercise all catalog selections and dialog/error states, then verify human-approved mainnet chat/code payments with aggregate debit <=5,000 sats. Preserve ambiguous attempts; record actual model and evidence per gate.
