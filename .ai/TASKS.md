@@ -136,4 +136,4 @@ Coordinator owns T1/T2/T5 integration: preserve confirmed unsigned aborts, recov
 
 ### Marketplace and model controls — 31 October 2026
 
-IMPLEMENTED; deployment verification in progress. Coordinator: shared selection contract, immutable task selection, chat/navigation integration and deployment. Marketplace agent: isolated bento UI/assets. Research agent: official model/effort sources. Payment approval and actual execution metadata remain authoritative.
+DONE for marketplace scope: implemented, deployed at 568e858 and browser-verified. Qualification/payment gates remain pending. Coordinator: shared selection contract, immutable task selection, chat/navigation integration and deployment. Marketplace agent: isolated bento UI/assets. Research agent: official model/effort sources. Payment approval and actual execution metadata remain authoritative.
