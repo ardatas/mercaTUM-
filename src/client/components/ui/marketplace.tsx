@@ -66,6 +66,7 @@ function CapacityChart() {
     <div className="mp-capacity-chart">
       <svg
         viewBox="0 0 282 115"
+        preserveAspectRatio="none"
         role="img"
         aria-label="Remaining token capacity by provider"
       >
@@ -97,19 +98,24 @@ function CapacityChart() {
           stroke={`url(#${gradient})`}
           fill="none"
           strokeWidth="3"
+          vectorEffect="non-scaling-stroke"
         />
         {points.map(([x, y], i) => (
-          <circle
+          <line
             key={brands[i]}
-            cx={x}
-            cy={y}
-            r="3.5"
-            fill={offers.find((offer) => offer.brand === brands[i])?.color}
+            x1={x}
+            x2={x + 0.01}
+            y1={y}
+            y2={y}
+            stroke={offers.find((offer) => offer.brand === brands[i])?.color}
+            strokeWidth="7"
+            strokeLinecap="round"
+            vectorEffect="non-scaling-stroke"
           >
             <title>
               {brandNames[brands[i]]}: {number(totals[i])} tokens
             </title>
-          </circle>
+          </line>
         ))}
       </svg>
       <div className="mp-chart-brands">

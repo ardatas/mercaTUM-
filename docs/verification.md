@@ -398,3 +398,9 @@ Benchmark snapshot (Artificial Analysis, v5.0,31 October2026; scores are model b
 - `28669db` Vercel`CMvYUHg3pmLgc1yNoKXk8aB6sXY5` SUCCESS; served assets`index-DHZtFtWx.js`/`index-B7PS_CUQ.css`. Fresh code-test tab connects to the same mainnet wallet without another browser permission prompt.
 - Live code workflow: invalid repository input produces an actionable error; public`octocat/Hello-World` resolves to`7fd1a60b01f91b314f59955a4e4d4e80d8edf11d`. Zero files selected initially; Send/context-consent disabled until selection. README preview and explicit context consent succeed. Real Gemini code task`6f642e3f-07bc-41ee-94f9-9ba3ca4af453` reaches100-sat mainnet purchase review. Task action menu and history deletion dialog open; Cancel preserves the task. No source repository change or paid artifact yet.
 - Q1 remains PASS. Q2 deployed standard-wallet connection observed in Chrome; authorized spending path still pending. Q3/Q4 signing/Q5 and live paid chat/code/recovery evidence remain PENDING human approval. Offline negative/replay/recovery tests pass, but do not establish live on-chain qualification.
+
+## Capacity graph panel fit — 31 October 2026
+
+- Clean starting revision `26ae9e5`; same-session preflight valid, unchanged runtime/dependencies, prior174 tests/typecheck/build PASS. Coordinator owns graph sizing and responsive layout only; no payment actions.
+
+- Removed300/260px chart caps and SVG letterboxing; graph fills remaining row width at120px height. Fixed-size vector strokes/point markers avoid horizontal distortion; six-column logos align beneath points. Phones stack a100px graph below the summary. Local Chrome: chart1004px in1233px panel; at320px viewport chart241px and equal305px document client/scroll widths. Typecheck/build/diff check PASS.
