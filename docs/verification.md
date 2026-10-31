@@ -404,3 +404,5 @@ Benchmark snapshot (Artificial Analysis, v5.0,31 October2026; scores are model b
 - Clean starting revision `26ae9e5`; same-session preflight valid, unchanged runtime/dependencies, prior174 tests/typecheck/build PASS. Coordinator owns graph sizing and responsive layout only; no payment actions.
 
 - Removed300/260px chart caps and SVG letterboxing; graph fills remaining row width at120px height. Fixed-size vector strokes/point markers avoid horizontal distortion; six-column logos align beneath points. Phones stack a100px graph below the summary. Local Chrome: chart1004px in1233px panel; at320px viewport chart241px and equal305px document client/scroll widths. Typecheck/build/diff check PASS.
+
+- Deployed `b54a93a`; Vercel `8pRhtxNn9vcWWTqFcVA4raGKXFMw` SUCCESS. Public Chrome confirms1004px chart in1233px panel with120px graph height. Screenshot: ignored `artifacts/capacity-graph-fit-live.png`.
