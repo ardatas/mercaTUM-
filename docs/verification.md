@@ -356,3 +356,9 @@ Benchmark snapshot (Artificial Analysis, v5.0,31 October2026; scores are model b
 
 - Integrated concurrent upstream payment-recovery commits `953b3c2`/`e5c43b6`; code merged cleanly and appended documentation sections preserved. Reran typecheck,106 tests across11 files and production build: PASS. Existing recovery changes retain their separately documented backend rollout status.
 - Deployed `ef58633`; Vercel `FLNSqeFW2YiLdZh3VvtG3HEuNkNr` SUCCESS. Public bundle `index-ProklveL.js` contains saved-model display, compact spending cap,5,000 default and AA/token metadata. Public Chrome confirms token overview/cards, corrected scores, and selecting Mistral opens Mistral Large4/Medium with264K demo tokens. Screenshot: ignored `artifacts/marketplace-tokens-live.png`. Purchase review interaction was tested offline; no live quote approval or wallet spending initiated.
+
+## Square color BSV branding — 31 October 2026
+
+- Clean starting revision07e3495; same-session preflight valid (unchanged runtime/lock,106 tests/typecheck/build PASS; sponsor pins/38 tests previously confirmed). Coordinator owns T5 presentation only: adapt the existing official BSV wordmark into a blue square badge and place it beside the wallet button label. No wallet/payment logic changes.
+
+- Typecheck/build/diff checks PASS. Local Chrome observes loaded48×48px badge, no monochrome filter, and80px-tall button with fitting label/arrow. Adapted existing BSV path artwork into a blue gradient square; original source SVG retained. No wallet action triggered.

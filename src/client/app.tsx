@@ -576,18 +576,15 @@ export function App() {
             </div>
           </div>
           <button className="wallet-button" onClick={connect} disabled={busy}>
-            <span className="wallet-button-content">
-              <span className="wallet-button-label">
-                <Wallet size={16} />
-                <span>{wallet ? "Reconnect wallet" : "Connect wallet"}</span>
-              </span>
-              <img
-                className="wallet-brand"
-                src="/brands/bsv.svg"
-                alt="BSV Blockchain"
-                width={144}
-                height={10}
-              />
+            <img
+              className="wallet-brand"
+              src="/brands/bsv-square.svg"
+              alt="BSV Blockchain"
+              width={48}
+              height={48}
+            />
+            <span className="wallet-button-label">
+              {wallet ? "Reconnect wallet" : "Connect wallet"}
             </span>
             <ArrowUpRight size={14} />
           </button>
